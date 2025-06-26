@@ -17,7 +17,7 @@ export default function AppLayout({
         <header className="flex h-14 items-center border-b px-4">
           <SidebarTrigger />
         </header>
-        <main className="flex flex-1 flex-col">{children}</main>
+        <main className="flex flex-1 flex-col min-h-0">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   );

@@ -25,7 +25,11 @@ export default function ChatInterface() {
 
   useEffect(() => {
     if (scrollViewportRef.current) {
-        scrollViewportRef.current.scrollTop = scrollViewportRef.current.scrollHeight;
+        const viewport = scrollViewportRef.current;
+        // Use timeout to ensure scrolling happens after the new message is rendered and sized.
+        setTimeout(() => {
+            viewport.scrollTop = viewport.scrollHeight;
+        }, 0);
     }
   }, [messages]);
 
@@ -55,6 +59,11 @@ export default function ChatInterface() {
   
   const handleSuggestionClick = (suggestion: string) => {
     setInput(suggestion);
+    // Focus the input after setting the suggestion
+    const inputElement = document.querySelector('form input');
+    if (inputElement) {
+        (inputElement as HTMLInputElement).focus();
+    }
   };
 
   const ChatInputForm = () => (
@@ -79,8 +88,13 @@ export default function ChatInterface() {
   if (messages.length === 0) {
     return (
       <div className="flex flex-col h-full">
-        <div className="flex-1 flex flex-col items-center justify-center space-y-8">
-            <RevaLogo size="lg" />
+        <div className="flex-1 flex flex-col items-center justify-center space-y-8 p-4">
+            <div className="text-center space-y-2">
+                <div className="inline-block p-4 bg-sidebar rounded-full">
+                    <RevaLogo size="md" />
+                </div>
+                <h2 className="text-2xl font-semibold">How can I help you today?</h2>
+            </div>
         </div>
         <div className="pb-8">
              <div className="flex justify-center gap-2 flex-wrap mb-4 px-4">
@@ -105,8 +119,8 @@ export default function ChatInterface() {
 
   return (
     <div className="flex flex-col h-full">
-      <ScrollArea className="flex-1">
-        <div className="py-6" ref={scrollViewportRef}>
+      <ScrollArea className="flex-1" viewportRef={scrollViewportRef}>
+        <div className="py-6">
           <div className="space-y-6 max-w-2xl mx-auto px-4">
             {messages.map((message) => (
               <div
