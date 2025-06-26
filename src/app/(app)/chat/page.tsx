@@ -11,11 +11,11 @@ const overviewCards = [
 
 export default function ChatPage() {
   return (
-    <div className="flex h-full">
-      <div className="flex-1">
+    <div className="relative h-full">
+      <div className="h-full">
         <ChatInterface />
       </div>
-      <div className="hidden lg:flex flex-col w-[350px] shrink-0 border-l p-6 space-y-4">
+      <div className="hidden lg:flex flex-col w-[350px] space-y-4 absolute top-6 right-6">
         {overviewCards.map((card) => (
           <Card key={card.title}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
