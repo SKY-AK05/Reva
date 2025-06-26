@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { SendHorizonal, Bot } from 'lucide-react';
+import { SendHorizonal, Bot, PencilRuler, CreditCard, CalendarClock, Trophy } from 'lucide-react';
 import { processUserChat } from '@/app/(app)/chat/actions';
+import RevaLogo from '@/components/reva-logo';
 
 type Message = {
   id: string;
@@ -41,7 +42,7 @@ export default function ChatInterface() {
     try {
       const botResponseText = await processUserChat(input);
       const botMessage: Message = { id: (Date.now() + 1).toString(), text: botResponseText, sender: 'bot' };
-      setMessages(prev => prev.filter(m => !m.isTyping)); // remove typing indicator
+      setMessages(prev => prev.filter(m => !m.isTyping));
       setMessages(prev => [...prev, botMessage]);
     } catch (error) {
       const errorMessage: Message = { id: (Date.now() + 1).toString(), text: "Sorry, I encountered an error. Please try again.", sender: 'bot' };
@@ -51,12 +52,62 @@ export default function ChatInterface() {
       setIsLoading(false);
     }
   };
+  
+  const handleSuggestionClick = (suggestion: string) => {
+    setInput(suggestion);
+  };
+
+  const ChatInputForm = () => (
+     <div className="w-full max-w-2xl mx-auto px-4">
+        <form onSubmit={handleSubmit} className="relative">
+          <Input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Tell me what you’d like to do…"
+            className="w-full rounded-full p-4 pr-14 h-14 bg-card border-border"
+            disabled={isLoading}
+            autoComplete="off"
+          />
+          <Button type="submit" size="icon" disabled={isLoading || !input.trim()} className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full h-10 w-10">
+            <SendHorizonal className="h-5 w-5" />
+            <span className="sr-only">Send</span>
+          </Button>
+        </form>
+      </div>
+  );
+
+  if (messages.length === 0) {
+    return (
+      <div className="flex flex-col h-full">
+        <div className="flex-1 flex flex-col items-center justify-center space-y-8">
+            <RevaLogo size="lg" />
+        </div>
+        <div className="pb-8">
+             <div className="flex justify-center gap-2 flex-wrap mb-4 px-4">
+                <Button variant="outline" className="rounded-full" onClick={() => handleSuggestionClick('Create a task to buy groceries')}>
+                    <PencilRuler className="mr-2 h-4 w-4" /> Create Task
+                </Button>
+                 <Button variant="outline" className="rounded-full" onClick={() => handleSuggestionClick('I spent $12 on lunch')}>
+                    <CreditCard className="mr-2 h-4 w-4" /> Track Expense
+                </Button>
+                 <Button variant="outline" className="rounded-full" onClick={() => handleSuggestionClick('What are my upcoming reminders?')}>
+                    <CalendarClock className="mr-2 h-4 w-4" /> Reminders
+                </Button>
+                 <Button variant="outline" className="rounded-full" onClick={() => handleSuggestionClick('Show me my goals')}>
+                    <Trophy className="mr-2 h-4 w-4" /> Goals
+                </Button>
+            </div>
+            <ChatInputForm />
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-1 flex-col h-full rounded-lg border bg-card">
-      <ScrollArea className="flex-1 p-4">
-        <div className="h-full" ref={scrollViewportRef}>
-          <div className="space-y-6">
+    <div className="flex flex-col h-full">
+      <ScrollArea className="flex-1">
+        <div className="py-6" ref={scrollViewportRef}>
+          <div className="space-y-6 max-w-2xl mx-auto px-4">
             {messages.map((message) => (
               <div
                 key={message.id}
@@ -97,21 +148,8 @@ export default function ChatInterface() {
           </div>
         </div>
       </ScrollArea>
-      <div className="border-t bg-card p-4">
-        <form onSubmit={handleSubmit} className="flex items-center gap-2">
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Tell me what you’d like to do…"
-            className="flex-1"
-            disabled={isLoading}
-            autoComplete="off"
-          />
-          <Button type="submit" size="icon" disabled={isLoading || !input.trim()}>
-            <SendHorizonal className="h-5 w-5" />
-            <span className="sr-only">Send</span>
-          </Button>
-        </form>
+      <div className="py-4 border-t border-border">
+        <ChatInputForm />
       </div>
     </div>
   );

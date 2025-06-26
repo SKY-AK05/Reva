@@ -10,7 +10,7 @@ const overviewCards = [
 
 export default function OverviewPage() {
   return (
-    <div className="flex flex-col space-y-6">
+    <div className="flex flex-col space-y-6 p-4 sm:p-6">
       <div className="space-y-1">
         <h1 className="text-3xl font-bold tracking-tight">Overview</h1>
         <p className="text-muted-foreground">A smarter way to manage life</p>
