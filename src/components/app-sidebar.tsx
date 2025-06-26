@@ -25,8 +25,8 @@ export default function AppSidebar() {
   const pathname = usePathname();
 
   const menuItems = [
-    { href: '/overview', label: 'Overview', icon: LayoutDashboard },
     { href: '/chat', label: 'Chat', icon: MessageSquare },
+    { href: '/overview', label: 'Overview', icon: LayoutDashboard },
     { href: '/tasks', label: 'Tasks', icon: CheckSquare },
     { href: '/expenses', label: 'Expenses', icon: DollarSign },
     { href: '/reminders', label: 'Reminders', icon: Bell },
@@ -38,7 +38,7 @@ export default function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarContent className="p-0">
         <SidebarHeader className="p-2">
-            <Link href="/overview" className="flex items-center gap-3 p-2">
+            <Link href="/chat" className="flex items-center gap-3 p-2">
                 <RevaLogo size="sm" />
                 <span className="font-semibold text-lg group-data-[state=collapsed]:hidden">Reva</span>
             </Link>
