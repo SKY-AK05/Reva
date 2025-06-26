@@ -11,7 +11,6 @@ import {
 import { useSidebar } from '@/components/ui/sidebar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
-  Aperture,
   Search,
   History,
   Menu,
@@ -19,6 +18,7 @@ import {
   ArrowLeftToLine,
   ArrowRightToLine,
 } from 'lucide-react';
+import RevaLogo from './reva-logo';
 
 
 export default function AppSidebar() {
@@ -42,7 +42,7 @@ export default function AppSidebar() {
                         className="h-12 w-12"
                         isActive={pathname === '/overview'}
                     >
-                        <Aperture className="h-6 w-6" />
+                        <RevaLogo size="sm" />
                     </SidebarMenuButton>
                 </Link>
             </SidebarMenuItem>
