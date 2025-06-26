@@ -1,8 +1,69 @@
+import { PlusCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+
+const goals = [
+  {
+    id: '1',
+    title: 'Read 3 books this month',
+    description: 'Expand knowledge on product management and design.',
+    progress: 33,
+    status: '1/3 books read',
+  },
+  {
+    id: '2',
+    title: 'Save $1,000 for vacation',
+    description: 'Contribute to the travel fund for the trip to Italy.',
+    progress: 75,
+    status: '$750 saved',
+  },
+  {
+    id: '3',
+    title: 'Go to the gym 12 times',
+    description: 'Focus on strength training and cardio.',
+    progress: 50,
+    status: '6/12 sessions completed',
+  },
+   {
+    id: '4',
+    title: 'Complete the side project',
+    description: 'Launch the MVP of the new app by end of Q4.',
+    progress: 20,
+    status: 'Design phase complete',
+  },
+];
+
 export default function GoalsPage() {
   return (
-    <div className="space-y-1 p-4 sm:p-6">
-      <h1 className="text-3xl font-bold tracking-tight">Goals</h1>
-      <p className="text-muted-foreground">Manage your goals here.</p>
+    <div className="flex flex-col space-y-6 p-4 sm:p-6">
+      <div className="flex items-center justify-between">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold tracking-tight">Goals</h1>
+          <p className="text-muted-foreground">Your ambitions, tracked and realized.</p>
+        </div>
+        <Button>
+          <PlusCircle className="mr-2 h-4 w-4" />
+          Add Goal
+        </Button>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {goals.map((goal) => (
+          <Card key={goal.id}>
+            <CardHeader>
+              <CardTitle>{goal.title}</CardTitle>
+              <CardDescription>{goal.description}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Progress value={goal.progress} className="h-2" />
+            </CardContent>
+            <CardFooter>
+              <p className="text-sm text-muted-foreground">{goal.status}</p>
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }
