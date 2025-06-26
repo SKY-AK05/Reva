@@ -9,10 +9,7 @@ import {
   SidebarMenuButton,
   SidebarContent,
   SidebarHeader,
-  SidebarFooter,
 } from '@/components/ui/sidebar';
-import { useSidebar } from '@/components/ui/sidebar';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   LayoutDashboard,
   MessageSquare,
@@ -21,14 +18,11 @@ import {
   Bell,
   Target,
   BookText,
-  ArrowLeftToLine,
-  ArrowRightToLine,
 } from 'lucide-react';
 import RevaLogo from './reva-logo';
 
 export default function AppSidebar() {
   const pathname = usePathname();
-  const { toggleSidebar, state } = useSidebar();
 
   const menuItems = [
     { href: '/overview', label: 'Overview', icon: LayoutDashboard },
@@ -67,30 +61,6 @@ export default function AppSidebar() {
           ))}
         </SidebarMenu>
       </SidebarContent>
-
-      <SidebarFooter className="p-2">
-        <SidebarMenu className="flex flex-col gap-1">
-          <SidebarMenuItem>
-              <SidebarMenuButton tooltip={{ children: "User", side: 'right' }} className="justify-start">
-                  <Avatar className="h-8 w-8">
-                      <AvatarImage src="https://placehold.co/40x40.png" alt="User" data-ai-hint="user avatar"/>
-                      <AvatarFallback>U</AvatarFallback>
-                  </Avatar>
-                  <span className="group-data-[state=collapsed]:hidden">User Name</span>
-              </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-              <SidebarMenuButton
-                  onClick={toggleSidebar}
-                  tooltip={{ children: state === 'collapsed' ? "Expand" : "Collapse", side: 'right' }}
-                  className="justify-start"
-              >
-                  {state === 'collapsed' ? <ArrowRightToLine className="h-5 w-5" /> : <ArrowLeftToLine className="h-5 w-5" />}
-                  <span className="group-data-[state=collapsed]:hidden">{state === 'collapsed' ? "Expand" : "Collapse"}</span>
-              </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
     </Sidebar>
   );
 }
