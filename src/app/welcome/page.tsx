@@ -13,7 +13,7 @@ export default function WelcomePage() {
         </p>
         <div className="flex w-full max-w-xs flex-col space-y-4 pt-4">
           <Button asChild size="lg" className="w-full">
-            <Link href="/app/chat">
+            <Link href="/chat">
               <Chrome className="mr-2 h-5 w-5" />
               Continue with Google
             </Link>
@@ -24,10 +24,10 @@ export default function WelcomePage() {
             <div className="h-px flex-1 bg-border" />
           </div>
           <Button asChild size="lg" variant="secondary" className="w-full">
-            <Link href="/app/chat">Sign Up</Link>
+            <Link href="/chat">Sign Up</Link>
           </Button>
           <Button asChild size="lg" variant="ghost" className="w-full">
-            <Link href="/app/chat">Log In</Link>
+            <Link href="/chat">Log In</Link>
           </Button>
         </div>
       </div>

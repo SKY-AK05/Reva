@@ -21,12 +21,12 @@ import {
 } from 'lucide-react';
 
 const menuItems = [
-  { href: '/app/chat', label: 'Chat', icon: MessageSquare },
-  { href: '/app/overview', label: 'Overview', icon: LayoutDashboard },
-  { href: '/app/tasks', label: 'Tasks', icon: CheckSquare },
-  { href: '/app/expenses', label: 'Expenses', icon: DollarSign },
-  { href: '/app/reminders', label: 'Reminders', icon: Bell },
-  { href: '/app/goals', label: 'Goals', icon: Target },
+  { href: '/chat', label: 'Chat', icon: MessageSquare },
+  { href: '/overview', label: 'Overview', icon: LayoutDashboard },
+  { href: '/tasks', label: 'Tasks', icon: CheckSquare },
+  { href: '/expenses', label: 'Expenses', icon: DollarSign },
+  { href: '/reminders', label: 'Reminders', icon: Bell },
+  { href: '/goals', label: 'Goals', icon: Target },
 ];
 
 export default function AppSidebar() {
