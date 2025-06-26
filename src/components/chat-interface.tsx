@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, FormEvent } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,11 +17,46 @@ type Message = {
   isTyping?: boolean;
 };
 
+// Moved ChatInputForm outside of the ChatInterface component
+// to prevent it from being redeclared on every render.
+const ChatInputForm = ({
+  input,
+  setInput,
+  handleSubmit,
+  isLoading,
+  inputRef,
+}: {
+  input: string;
+  setInput: (value: string) => void;
+  handleSubmit: (e: FormEvent<HTMLFormElement>) => void;
+  isLoading: boolean;
+  inputRef: React.RefObject<HTMLInputElement>;
+}) => (
+  <div className="w-full max-w-2xl mx-auto px-4">
+    <form onSubmit={handleSubmit} className="relative">
+      <Input
+        ref={inputRef}
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        placeholder="Tell me what you’d like to do…"
+        className="w-full rounded-full p-4 pr-14 h-14 bg-card border-border text-card-foreground"
+        disabled={isLoading}
+        autoComplete="off"
+      />
+      <Button type="submit" size="icon" disabled={isLoading || !input.trim()} className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full h-10 w-10">
+        <SendHorizonal className="h-5 w-5" />
+        <span className="sr-only">Send</span>
+      </Button>
+    </form>
+  </div>
+);
+
 export default function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollViewportRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (scrollViewportRef.current) {
@@ -54,36 +89,15 @@ export default function ChatInterface() {
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
+      inputRef.current?.focus();
     }
   };
   
   const handleSuggestionClick = (suggestion: string) => {
     setInput(suggestion);
     // Focus the input after setting the suggestion
-    const inputElement = document.querySelector('form input');
-    if (inputElement) {
-        (inputElement as HTMLInputElement).focus();
-    }
+    inputRef.current?.focus();
   };
-
-  const ChatInputForm = () => (
-     <div className="w-full max-w-2xl mx-auto px-4">
-        <form onSubmit={handleSubmit} className="relative">
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Tell me what you’d like to do…"
-            className="w-full rounded-full p-4 pr-14 h-14 bg-card border-border text-card-foreground"
-            disabled={isLoading}
-            autoComplete="off"
-          />
-          <Button type="submit" size="icon" disabled={isLoading || !input.trim()} className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full h-10 w-10">
-            <SendHorizonal className="h-5 w-5" />
-            <span className="sr-only">Send</span>
-          </Button>
-        </form>
-      </div>
-  );
 
   if (messages.length === 0) {
     return (
@@ -111,7 +125,13 @@ export default function ChatInterface() {
                     <Trophy className="mr-2 h-4 w-4" /> Goals
                 </Button>
             </div>
-            <ChatInputForm />
+            <ChatInputForm 
+              handleSubmit={handleSubmit}
+              input={input}
+              setInput={setInput}
+              isLoading={isLoading}
+              inputRef={inputRef}
+            />
         </div>
       </div>
     );
@@ -163,7 +183,13 @@ export default function ChatInterface() {
         </div>
       </ScrollArea>
       <div className="py-4 border-t border-border">
-        <ChatInputForm />
+        <ChatInputForm 
+            handleSubmit={handleSubmit}
+            input={input}
+            setInput={setInput}
+            isLoading={isLoading}
+            inputRef={inputRef}
+        />
       </div>
     </div>
   );
