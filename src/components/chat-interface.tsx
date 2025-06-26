@@ -101,7 +101,7 @@ export default function ChatInterface() {
 
   if (messages.length === 0) {
     return (
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col h-full w-full max-w-4xl mx-auto">
         <div className="flex-1 flex flex-col items-center justify-center space-y-8 p-4">
             <div className="text-center space-y-2">
                 <div className="inline-block p-4 bg-sidebar rounded-full">
@@ -138,7 +138,7 @@ export default function ChatInterface() {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full w-full max-w-4xl mx-auto">
       <ScrollArea className="flex-1" viewportRef={scrollViewportRef}>
         <div className="py-6">
           <div className="space-y-6 max-w-2xl mx-auto px-4">
