@@ -32,7 +32,7 @@ export default function AppSidebar() {
   ];
 
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon">
       <div className="flex h-full flex-col items-center justify-between p-2">
         <SidebarMenu className="gap-2">
             <SidebarMenuItem>
