@@ -15,7 +15,7 @@ export default function ChatPage() {
       <div className="h-full">
         <ChatInterface />
       </div>
-      <div className="hidden lg:flex flex-col w-[350px] space-y-4 absolute top-6 right-6">
+      <div className="hidden lg:grid grid-cols-2 gap-4 w-[350px] absolute top-6 right-6">
         {overviewCards.map((card) => (
           <Card key={card.title}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
