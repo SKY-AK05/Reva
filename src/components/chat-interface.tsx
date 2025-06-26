@@ -73,7 +73,7 @@ export default function ChatInterface() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Tell me what you’d like to do…"
-            className="w-full rounded-full p-4 pr-14 h-14 bg-card border-border"
+            className="w-full rounded-full p-4 pr-14 h-14 bg-card border-border text-card-foreground"
             disabled={isLoading}
             autoComplete="off"
           />
