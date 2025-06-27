@@ -58,7 +58,10 @@ export const simpleResponses: { [key: string]: string } = {
   // Assistant Identity
   "yo assistant": "At your service! ⚡",
   "who are you": "I’m your smart life assistant. Here to help you stay on track!",
-  "what can you do": "I can help you manage tasks, track habits, stay organized, and even chat a little. 😊",
+  "what can you do": "I can help with daily planning, goals, habits, and reminders. Let’s get started!",
+  "what you can do": "I can help you manage tasks, track habits, remind you of things, and chat casually! 😊",
+  "what do you do": "I help organize your life with to-dos, reminders, habit tracking, and a little conversation. 😊",
+  "what u can do": "I can manage your day, track goals, and keep you on top of things!",
   "where are you": "Right here, always ready to help! ✨",
   "what time is it": "You can check the clock, but I’m always on time 😉",
   "what day is it": "Time flies, doesn’t it? 📆",
