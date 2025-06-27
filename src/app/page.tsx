@@ -1,4 +1,3 @@
-import ChatInterface from '@/components/chat-interface';
 import PublicHeader from '@/components/public-header';
 import RevaLogo from '@/components/reva-logo';
 import ScrollAnimator from '@/components/scroll-animator';
@@ -74,17 +73,6 @@ export default function HomePage() {
                 >
                   <Link href="/signup">Get Started for Free</Link>
                 </Button>
-              </div>
-            </div>
-          </section>
-        </ScrollAnimator>
-
-        {/* Chat Interface Section */}
-        <ScrollAnimator>
-          <section className="relative pb-20 md:pb-32">
-            <div className="container mx-auto px-4">
-              <div className="relative h-[600px] border rounded-2xl shadow-lg overflow-hidden">
-                <ChatInterface isPublic={true} />
               </div>
             </div>
           </section>
