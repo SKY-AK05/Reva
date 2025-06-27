@@ -77,12 +77,85 @@ const simpleResponses: { [key: string]: string } = {
   "help": "Of course! What do you need help with?",
 };
 
+/**
+ * Calculates the Levenshtein distance between two strings.
+ * This is the number of edits (insertions, deletions, substitutions)
+ * needed to change one word into the other.
+ */
+function levenshtein(a: string, b: string): number {
+  const an = a ? a.length : 0;
+  const bn = b ? b.length : 0;
+  if (an === 0) {
+    return bn;
+  }
+  if (bn === 0) {
+    return an;
+  }
+  const matrix = new Array<number[]>(bn + 1);
+  for (let i = 0; i <= bn; ++i) {
+    let row = (matrix[i] = new Array<number>(an + 1));
+    row[0] = i;
+  }
+  const firstRow = matrix[0];
+  for (let j = 1; j <= an; ++j) {
+    firstRow[j] = j;
+  }
+  for (let i = 1; i <= bn; ++i) {
+    for (let j = 1; j <= an; ++j) {
+      if (b.charAt(i - 1) === a.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1, // substitution
+          Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1) // insertion or deletion
+        );
+      }
+    }
+  }
+  return matrix[bn][an];
+}
+
+/**
+ * Finds the best response from a dictionary of commands using fuzzy matching.
+ * @param input The user's input string.
+ * @param responses A dictionary of command strings and their corresponding responses.
+ * @param threshold The maximum Levenshtein distance to be considered a match.
+ * @returns The matched response string or null if no match is found within the threshold.
+ */
+function findBestMatch(input: string, responses: { [key: string]: string }, threshold: number): string | null {
+    if (!input) return null;
+
+    // First, check for an exact match for performance
+    if (responses[input]) {
+        return responses[input];
+    }
+
+    let bestMatch: string | null = null;
+    let minDistance = Infinity;
+
+    for (const key of Object.keys(responses)) {
+        const distance = levenshtein(input, key);
+        if (distance < minDistance) {
+            minDistance = distance;
+            bestMatch = key;
+        }
+    }
+
+    if (bestMatch && minDistance <= threshold) {
+        return responses[bestMatch];
+    }
+
+    return null;
+}
+
+
 export async function processUserChat(chatInput: string): Promise<string> {
     const lowerCaseInput = chatInput.toLowerCase().trim();
 
-    // Layer 1: Simple Rule-Based Logic (no API calls)
-    if (simpleResponses[lowerCaseInput]) {
-        return simpleResponses[lowerCaseInput];
+    // Layer 1: Fuzzy-matched Rule-Based Logic (no API calls)
+    const simpleResponse = findBestMatch(lowerCaseInput, simpleResponses, 2);
+    if (simpleResponse) {
+        return simpleResponse;
     }
 
     // Layer 2: Genkit-based intent detection (API calls)
