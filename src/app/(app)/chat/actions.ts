@@ -116,7 +116,7 @@ export async function processUserChat(chatInput: string): Promise<string> {
         }
     }
     
-    if (lowerCaseInput.includes('remind me') || lowerCaseInput.includes('reminder') || lowerCasedInput.includes('set an alarm')) {
+    if (lowerCaseInput.includes('remind me') || lowerCaseInput.includes('reminder') || lowerCaseInput.includes('set an alarm')) {
         try {
             const result = await createReminderFromChat({ chatInput });
             const reminderDate = new Date(result.remindAt).toLocaleString(undefined, {
