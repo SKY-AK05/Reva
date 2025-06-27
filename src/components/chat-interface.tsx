@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, FormEvent } from 'react';
+import { useRouter } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -51,12 +52,13 @@ const ChatInputForm = ({
   </div>
 );
 
-export default function ChatInterface() {
+export default function ChatInterface({ isPublic = false }: { isPublic?: boolean }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollViewportRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
     if (scrollViewportRef.current) {
@@ -70,7 +72,14 @@ export default function ChatInterface() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!input.trim() || isLoading) return;
+    if (!input.trim()) return;
+
+    if (isPublic) {
+      router.push('/login');
+      return;
+    }
+
+    if (isLoading) return;
 
     const userMessage: Message = { id: Date.now().toString(), text: input, sender: 'user' };
     setMessages(prev => [...prev, userMessage]);
@@ -99,7 +108,7 @@ export default function ChatInterface() {
     inputRef.current?.focus();
   };
 
-  if (messages.length === 0) {
+  if (isPublic || messages.length === 0) {
     return (
       <div className="flex h-full flex-col items-center justify-center p-4">
         <div className="w-full max-w-2xl space-y-6 text-center">
@@ -111,7 +120,7 @@ export default function ChatInterface() {
             handleSubmit={handleSubmit}
             input={input}
             setInput={setInput}
-            isLoading={isLoading}
+            isLoading={isLoading && !isPublic}
             inputRef={inputRef}
           />
 
