@@ -2,6 +2,7 @@
 
 import { createTaskFromChat } from "@/ai/flows/create-task-from-chat";
 import { trackExpenseFromChat } from "@/ai/flows/track-expense-from-chat";
+import { createReminderFromChat } from "@/ai/flows/create-reminder-from-chat";
 import { generateChatResponse } from "@/ai/flows/generate-chat-response";
 import { simpleResponses } from "@/lib/chat-responses";
 import { saveToTrainingMemory } from "@/services/memory";
@@ -88,7 +89,7 @@ export async function processUserChat(chatInput: string): Promise<string> {
     }
 
     // Layer 2: Genkit-based intent detection (API calls)
-    if (lowerCaseInput.includes('task') || lowerCaseInput.includes('todo') || lowerCaseInput.includes('remind me to')) {
+    if (lowerCaseInput.includes('task') || lowerCaseInput.includes('todo') || lowerCaseInput.includes('add to my list')) {
         try {
             const result = await createTaskFromChat({ chatInput });
             return `Task created!\n\n**Description:** ${result.taskDescription}\n**Due:** ${result.dueDate}\n**Priority:** ${result.priority}`;
@@ -112,6 +113,20 @@ export async function processUserChat(chatInput: string): Promise<string> {
         } catch (e) {
             console.error(e);
             return "I had trouble tracking that expense. Can you try rephrasing?";
+        }
+    }
+    
+    if (lowerCaseInput.includes('remind me') || lowerCaseInput.includes('reminder') || lowerCasedInput.includes('set an alarm')) {
+        try {
+            const result = await createReminderFromChat({ chatInput });
+            const reminderDate = new Date(result.remindAt).toLocaleString(undefined, {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+            });
+            return `Reminder set!\n\n**For:** ${result.reminderDescription}\n**When:** ${reminderDate}`;
+        } catch (e) {
+            console.error(e);
+            return "I had trouble setting that reminder. Can you try rephrasing?";
         }
     }
 
