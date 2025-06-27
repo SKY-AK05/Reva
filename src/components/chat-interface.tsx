@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { SendHorizonal, Bot, PencilRuler, CreditCard, CalendarClock, Trophy } from 'lucide-react';
+import { SendHorizonal, Bot, PencilRuler, CreditCard, CalendarClock, Trophy, BookText } from 'lucide-react';
 import { processUserChat } from '@/app/(app)/chat/actions';
 import RevaLogo from '@/components/reva-logo';
 
@@ -101,37 +101,41 @@ export default function ChatInterface() {
 
   if (messages.length === 0) {
     return (
-      <div className="flex flex-col h-full w-full max-w-4xl mx-auto">
-        <div className="flex-1 flex flex-col items-center justify-center space-y-8 p-4">
-            <div className="text-center space-y-2">
-                <div className="inline-block p-4 bg-sidebar rounded-full">
-                    <RevaLogo size="md" />
-                </div>
-                <h2 className="text-2xl font-semibold">How can I help you today?</h2>
-            </div>
-        </div>
-        <div className="pb-8">
-             <div className="flex justify-center gap-2 flex-wrap mb-4 px-4">
-                <Button variant="outline" className="rounded-full" onClick={() => handleSuggestionClick('Create a task to buy groceries')}>
-                    <PencilRuler className="mr-2 h-4 w-4" /> Create Task
-                </Button>
-                 <Button variant="outline" className="rounded-full" onClick={() => handleSuggestionClick('I spent $12 on lunch')}>
-                    <CreditCard className="mr-2 h-4 w-4" /> Track Expense
-                </Button>
-                 <Button variant="outline" className="rounded-full" onClick={() => handleSuggestionClick('What are my upcoming reminders?')}>
-                    <CalendarClock className="mr-2 h-4 w-4" /> Reminders
-                </Button>
-                 <Button variant="outline" className="rounded-full" onClick={() => handleSuggestionClick('Show me my goals')}>
-                    <Trophy className="mr-2 h-4 w-4" /> Goals
-                </Button>
-            </div>
-            <ChatInputForm 
-              handleSubmit={handleSubmit}
-              input={input}
-              setInput={setInput}
-              isLoading={isLoading}
-              inputRef={inputRef}
-            />
+      <div className="flex h-full flex-col items-center justify-center p-4">
+        <div className="w-full max-w-2xl space-y-6 text-center">
+          <div className="mx-auto inline-block">
+            <RevaLogo size="lg" />
+          </div>
+
+          <ChatInputForm
+            handleSubmit={handleSubmit}
+            input={input}
+            setInput={setInput}
+            isLoading={isLoading}
+            inputRef={inputRef}
+          />
+
+          <div className="flex justify-center gap-2 flex-wrap">
+            <Button variant="outline" className="rounded-full" onClick={() => handleSuggestionClick('Create a task to buy groceries')}>
+                <PencilRuler className="mr-2 h-4 w-4" /> Create Task
+            </Button>
+            <Button variant="outline" className="rounded-full" onClick={() => handleSuggestionClick('I spent $12 on lunch')}>
+                <CreditCard className="mr-2 h-4 w-4" /> Track Expense
+            </Button>
+            <Button variant="outline" className="rounded-full" onClick={() => handleSuggestionClick('Remind me to call mom tomorrow at 10am')}>
+                <CalendarClock className="mr-2 h-4 w-4" /> Set Reminder
+            </Button>
+            <Button variant="outline" className="rounded-full" onClick={() => handleSuggestionClick('What are my current goals?')}>
+                <Trophy className="mr-2 h-4 w-4" /> Check Goals
+            </Button>
+            <Button variant="outline" className="rounded-full" onClick={() => handleSuggestionClick('Write a new journal entry about today.')}>
+                <BookText className="mr-2 h-4 w-4" /> Journal Entry
+            </Button>
+          </div>
+
+          <p className="text-xs text-muted-foreground pt-4">
+            By using Reva, you agree to our <a href="#" className="underline">Terms</a> and <a href="#" className="underline">Privacy Policy</a>.
+          </p>
         </div>
       </div>
     );
