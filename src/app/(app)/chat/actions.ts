@@ -2,6 +2,7 @@
 
 import { createTaskFromChat } from "@/ai/flows/create-task-from-chat";
 import { trackExpenseFromChat } from "@/ai/flows/track-expense-from-chat";
+import { generateChatResponse } from "@/ai/flows/generate-chat-response";
 import { simpleResponses } from "@/lib/chat-responses";
 
 /**
@@ -113,5 +114,17 @@ export async function processUserChat(chatInput: string): Promise<string> {
         }
     }
 
-    return "I can help with tasks and expenses. What would you like to do? For example, say 'create a task to buy milk' or 'I spent $5 on coffee'.";
+    // Layer 3: General AI Fallback
+    try {
+        const response = await generateChatResponse(chatInput);
+        
+        // TODO: Implement "Training Memory"
+        // In the future, we would save the pair (chatInput, response)
+        // to a database to improve the rule-based logic over time.
+
+        return response;
+    } catch (e) {
+        console.error(e);
+        return "Sorry, I had a little trouble thinking of a response. Could you try again?";
+    }
 }
