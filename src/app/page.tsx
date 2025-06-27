@@ -1,6 +1,7 @@
 import ChatInterface from '@/components/chat-interface';
 import PublicHeader from '@/components/public-header';
 import RevaLogo from '@/components/reva-logo';
+import ScrollAnimator from '@/components/scroll-animator';
 import { Button } from '@/components/ui/button';
 import {
   BrainCircuit,
@@ -54,89 +55,97 @@ export default function HomePage() {
       <PublicHeader />
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="py-20 md:py-32">
-          <div className="container mx-auto px-4 text-center">
-            <h1 className="text-4xl md:text-6xl font-headline font-bold tracking-tight">
-              Your Personal AI Assistant <br /> to Streamline Your Life
-            </h1>
-            <p className="mt-6 max-w-2xl mx-auto text-lg text-muted-foreground">
-              Reva helps you manage tasks, track expenses, and stay organized
-              with intelligent chat-based assistance. Focus on what matters, let
-              Reva handle the rest.
-            </p>
-            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button
-                size="lg"
-                asChild
-                className="w-full sm:w-auto bg-black text-white hover:bg-gray-800 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90"
-              >
-                <Link href="/signup">Get Started for Free</Link>
-              </Button>
+        <ScrollAnimator>
+          <section className="py-20 md:py-32">
+            <div className="container mx-auto px-4 text-center">
+              <h1 className="text-4xl md:text-6xl font-headline font-bold tracking-tight">
+                Your Personal AI Assistant <br /> to Streamline Your Life
+              </h1>
+              <p className="mt-6 max-w-2xl mx-auto text-lg text-muted-foreground">
+                Reva helps you manage tasks, track expenses, and stay organized
+                with intelligent chat-based assistance. Focus on what matters, let
+                Reva handle the rest.
+              </p>
+              <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Button
+                  size="lg"
+                  asChild
+                  className="w-full sm:w-auto bg-black text-white hover:bg-gray-800 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90"
+                >
+                  <Link href="/signup">Get Started for Free</Link>
+                </Button>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        </ScrollAnimator>
 
         {/* Chat Interface Section */}
-        <section className="relative pb-20 md:pb-32">
-          <div className="container mx-auto px-4">
-            <div className="relative h-[600px] border rounded-2xl shadow-lg overflow-hidden">
-              <ChatInterface isPublic={true} />
+        <ScrollAnimator>
+          <section className="relative pb-20 md:pb-32">
+            <div className="container mx-auto px-4">
+              <div className="relative h-[600px] border rounded-2xl shadow-lg overflow-hidden">
+                <ChatInterface isPublic={true} />
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        </ScrollAnimator>
 
         {/* Features Section */}
-        <section id="features" className="py-20 md:py-32 bg-secondary">
-          <div className="container mx-auto px-4">
-            <div className="text-center">
-              <h2 className="text-3xl md:text-4xl font-headline font-bold">
-                Everything you need, all in one place.
-              </h2>
-              <p className="mt-4 max-w-2xl mx-auto text-muted-foreground">
-                Reva is designed to be your all-in-one life assistant, helping
-                you stay on top of your day.
-              </p>
-            </div>
-            <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {features.map((feature) => (
-                <div key={feature.title} className="flex gap-4">
-                  <div className="flex-shrink-0">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                      <feature.icon className="h-6 w-6" />
+        <ScrollAnimator>
+          <section id="features" className="py-20 md:py-32 bg-secondary">
+            <div className="container mx-auto px-4">
+              <div className="text-center">
+                <h2 className="text-3xl md:text-4xl font-headline font-bold">
+                  Everything you need, all in one place.
+                </h2>
+                <p className="mt-4 max-w-2xl mx-auto text-muted-foreground">
+                  Reva is designed to be your all-in-one life assistant, helping
+                  you stay on top of your day.
+                </p>
+              </div>
+              <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                {features.map((feature) => (
+                  <div key={feature.title} className="flex gap-4">
+                    <div className="flex-shrink-0">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                        <feature.icon className="h-6 w-6" />
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold">{feature.title}</h3>
+                      <p className="mt-1 text-muted-foreground">
+                        {feature.description}
+                      </p>
                     </div>
                   </div>
-                  <div>
-                    <h3 className="text-lg font-semibold">{feature.title}</h3>
-                    <p className="mt-1 text-muted-foreground">
-                      {feature.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        </ScrollAnimator>
 
         {/* CTA Section */}
-        <section className="py-20 md:py-32">
-          <div className="container mx-auto text-center px-4">
-            <h2 className="text-3xl md:text-4xl font-headline font-bold">
-              Ready to take control?
-            </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
-              Sign up now and start organizing your life in a smarter way.
-            </p>
-            <div className="mt-8">
-              <Button
-                size="lg"
-                asChild
-                className="bg-black text-white hover:bg-gray-800 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90"
-              >
-                <Link href="/signup">Sign Up for Free</Link>
-              </Button>
+        <ScrollAnimator>
+          <section className="py-20 md:py-32">
+            <div className="container mx-auto text-center px-4">
+              <h2 className="text-3xl md:text-4xl font-headline font-bold">
+                Ready to take control?
+              </h2>
+              <p className="mt-4 text-lg text-muted-foreground">
+                Sign up now and start organizing your life in a smarter way.
+              </p>
+              <div className="mt-8">
+                <Button
+                  size="lg"
+                  asChild
+                  className="bg-black text-white hover:bg-gray-800 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90"
+                >
+                  <Link href="/signup">Sign Up for Free</Link>
+                </Button>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        </ScrollAnimator>
       </main>
       <footer className="border-t">
         <div className="container mx-auto py-8 px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
