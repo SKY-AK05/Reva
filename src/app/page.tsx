@@ -1,3 +1,4 @@
+
 import PublicHeader from '@/components/public-header';
 import RevaLogo from '@/components/reva-logo';
 import ScrollAnimator from '@/components/scroll-animator';
@@ -224,40 +225,62 @@ export default function HomePage() {
         <ScrollAnimator>
           <section id="pricing" className="py-20 md:py-32">
             <div className="container mx-auto px-4">
-              <div className="text-center">
-                <h2 className="text-3xl md:text-4xl font-headline font-bold">
-                  Simple, Transparent Pricing
-                </h2>
-                <p className="mt-4 max-w-2xl mx-auto text-muted-foreground">
-                  Get started for free. No credit card required.
-                </p>
-              </div>
-              <div className="mt-12 flex justify-center">
-                <Card className="max-w-md w-full">
-                  <CardHeader className="text-center">
-                    <CardTitle className="text-2xl">Free</CardTitle>
-                    <CardDescription>For individuals getting started.</CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex flex-col items-center">
-                    <p className="text-5xl font-bold mb-4">$0<span className="text-lg font-normal text-muted-foreground">/mo</span></p>
-                    <ul className="space-y-2 text-muted-foreground w-full text-center">
-                      <li className="flex items-center justify-center gap-2"><Check className="h-4 w-4 text-green-500" /> Unlimited Tasks</li>
-                      <li className="flex items-center justify-center gap-2"><Check className="h-4 w-4 text-green-500" /> Unlimited Expenses</li>
-                      <li className="flex items-center justify-center gap-2"><Check className="h-4 w-4 text-green-500" /> Unlimited Reminders</li>
-                      <li className="flex items-center justify-center gap-2"><Check className="h-4 w-4 text-green-500" /> AI-Powered Chat</li>
-                    </ul>
-                  </CardContent>
-                  <CardFooter>
-                     <Button size="lg" asChild className="w-full bg-black text-white hover:bg-gray-800 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90">
-                        <Link href="/signup">Get Started</Link>
-                     </Button>
-                  </CardFooter>
-                </Card>
+              <div className="bg-black text-white rounded-2xl p-8 md:p-12 lg:p-16">
+                <div className="grid md:grid-cols-2 gap-12 items-center">
+                  <div className="space-y-6">
+                    <h2 className="text-4xl md:text-5xl font-headline font-bold leading-tight">
+                      Get Started with Reva
+                      <br />
+                      Today
+                    </h2>
+                    <p className="text-lg text-gray-300 max-w-md">
+                      Simple, transparent pricing. Get started for free, no credit card
+                      required. Unlock a more organized life in minutes.
+                    </p>
+                  </div>
+                  
+                  <div className="w-full">
+                    <Card className="bg-white text-black p-6 md:p-8 rounded-2xl shadow-2xl">
+                      <CardHeader className="p-0 pb-6">
+                        <CardTitle className="text-2xl font-bold">Free Plan</CardTitle>
+                        <CardDescription className="text-gray-600 pt-1">For individuals getting started.</CardDescription>
+                      </CardHeader>
+                      <CardContent className="p-0 pt-6">
+                        <div className="mb-6">
+                          <span className="text-5xl font-bold">$0</span>
+                          <span className="text-xl text-gray-500">/mo</span>
+                        </div>
+                        <ul className="space-y-3 text-sm">
+                          <li className="flex items-center gap-3">
+                            <Check className="h-5 w-5 text-green-500" />
+                            <span>Unlimited Tasks</span>
+                          </li>
+                          <li className="flex items-center gap-3">
+                            <Check className="h-5 w-5 text-green-500" />
+                            <span>Unlimited Expenses</span>
+                          </li>
+                          <li className="flex items-center gap-3">
+                            <Check className="h-5 w-5 text-green-500" />
+                            <span>Unlimited Reminders</span>
+                          </li>
+                          <li className="flex items-center gap-3">
+                            <Check className="h-5 w-5 text-green-500" />
+                            <span>AI-Powered Chat</span>
+                          </li>
+                        </ul>
+                      </CardContent>
+                      <CardFooter className="p-0 pt-8">
+                        <Button size="lg" asChild className="w-full bg-black text-white hover:bg-gray-800 rounded-full py-6 text-base font-semibold">
+                          <Link href="/signup">Sign Up Now</Link>
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  </div>
+                </div>
               </div>
             </div>
           </section>
         </ScrollAnimator>
-
       </main>
       <footer className="border-t">
         <div className="container mx-auto py-8 px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
