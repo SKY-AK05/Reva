@@ -9,7 +9,7 @@ export default function SplashPage() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      router.push('/chat');
+      router.push('/login');
     }, 2000); // 2 second splash screen
 
     return () => clearTimeout(timer);
