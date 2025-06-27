@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import RevaLogo from '@/components/reva-logo';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 export default function PublicHeader() {
   return (
@@ -21,6 +22,7 @@ export default function PublicHeader() {
           </nav>
         </div>
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           <Button variant="ghost" asChild>
             <Link href="/login">Sign in</Link>
           </Button>
