@@ -5,16 +5,22 @@ import { getFirestore, collection, addDoc, serverTimestamp } from "firebase/fire
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  apiKey: "AIzaSyC49VxyC3JueZsAOc6nRpJ3RL5nC-DXD6Y",
+  authDomain: "reva-smart-chat-assistant.firebaseapp.com",
+  projectId: "reva-smart-chat-assistant",
+  storageBucket: "reva-smart-chat-assistant.appspot.com",
+  messagingSenderId: "36858353085",
+  appId: "1:36858353085:web:28e6e8b644a3e44e932ed4"
 };
 
 // Initialize Firebase
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+let app;
+if (getApps().length === 0) {
+    app = initializeApp(firebaseConfig);
+} else {
+    app = getApp();
+}
+
 const db = getFirestore(app);
 
 /**
@@ -46,7 +52,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /{document=**} {
-      allow read, write: if request.time < timestamp.date(2024, 11, 25);
+      allow read, write: if request.time < timestamp.now() + duration.time(30, 'd');
     }
   }
 }

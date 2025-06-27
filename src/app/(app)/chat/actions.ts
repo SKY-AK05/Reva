@@ -138,8 +138,11 @@ export async function processUserChat(chatInput: string): Promise<string> {
         await saveToTrainingMemory(chatInput, response);
 
         return response;
-    } catch (e) {
+    } catch (e: any) {
         console.error(e);
+        if (e.message && (e.message.includes('API key not valid') || e.message.includes('API key is missing'))) {
+            return "It looks like your Google AI API key is invalid or missing. Please go to your project files, open the `.env` file, and make sure `GOOGLE_API_KEY` is set correctly.";
+        }
         return "Sorry, I had a little trouble thinking of a response. Could you try again?";
     }
 }
