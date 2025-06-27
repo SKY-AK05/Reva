@@ -146,10 +146,10 @@ export default function ChatInterface() {
               <div
                 key={message.id}
                 className={cn('flex items-start gap-3', {
-                  'justify-end flex-row-reverse': message.sender === 'user',
+                  'justify-end': message.sender === 'user',
                 })}
               >
-                <Avatar className="h-8 w-8 border">
+                <Avatar className={cn("h-8 w-8 border", {'order-last': message.sender === 'user'})}>
                    {message.sender === 'bot' ? (
                      <AvatarFallback>
                         <Bot className="h-5 w-5 text-primary"/>
