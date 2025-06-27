@@ -4,6 +4,7 @@ import { createTaskFromChat } from "@/ai/flows/create-task-from-chat";
 import { trackExpenseFromChat } from "@/ai/flows/track-expense-from-chat";
 import { generateChatResponse } from "@/ai/flows/generate-chat-response";
 import { simpleResponses } from "@/lib/chat-responses";
+import { saveToTrainingMemory } from "@/services/memory";
 
 /**
  * Calculates the Levenshtein distance between two strings.
@@ -118,9 +119,8 @@ export async function processUserChat(chatInput: string): Promise<string> {
     try {
         const response = await generateChatResponse(chatInput);
         
-        // TODO: Implement "Training Memory"
-        // In the future, we would save the pair (chatInput, response)
-        // to a database to improve the rule-based logic over time.
+        // This is where the training memory will be saved.
+        await saveToTrainingMemory(chatInput, response);
 
         return response;
     } catch (e) {
