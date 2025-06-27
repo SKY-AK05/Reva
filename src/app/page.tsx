@@ -9,8 +9,15 @@ import {
   Bell,
   Target,
   BookText,
+  Type,
+  Bot,
+  Sparkles,
+  Check,
 } from 'lucide-react';
 import Link from 'next/link';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+
 
 const features = [
   {
@@ -46,6 +53,41 @@ const features = [
     description:
       'Leverage the power of AI to understand and act on your requests.',
   },
+];
+
+const howItWorks = [
+  {
+    icon: Type,
+    title: '1. Just Type',
+    description: 'Tell Reva what you need in plain English. No complicated forms or menus.'
+  },
+  {
+    icon: Bot,
+    title: '2. AI Understands',
+    description: 'Our smart AI parses your request to understand what you want to do.'
+  },
+  {
+    icon: Sparkles,
+    title: '3. Life Organized',
+    description: 'Reva creates the task, logs the expense, or sets the reminder for you instantly.'
+  }
+];
+
+const testimonials = [
+  {
+    quote: "Reva has completely changed how I manage my daily tasks. It's so intuitive, I just talk to it like a person!",
+    name: 'Alex Johnson',
+    title: 'Freelance Designer',
+    avatar: 'https://placehold.co/40x40.png',
+    avatarHint: 'smiling person'
+  },
+  {
+    quote: "I've tried every budget app out there. Reva is the first one that has stuck because it's just so easy to log expenses on the fly.",
+    name: 'Samantha Lee',
+    title: 'Product Manager',
+    avatar: 'https://placehold.co/40x40.png',
+    avatarHint: 'happy woman'
+  }
 ];
 
 export default function HomePage() {
@@ -111,29 +153,111 @@ export default function HomePage() {
             </div>
           </section>
         </ScrollAnimator>
-
-        {/* CTA Section */}
+        
+        {/* How It Works Section */}
         <ScrollAnimator>
-          <section className="py-20 md:py-32">
-            <div className="container mx-auto text-center px-4">
-              <h2 className="text-3xl md:text-4xl font-headline font-bold">
-                Ready to take control?
-              </h2>
-              <p className="mt-4 text-lg text-muted-foreground">
-                Sign up now and start organizing your life in a smarter way.
-              </p>
-              <div className="mt-8">
-                <Button
-                  size="lg"
-                  asChild
-                  className="bg-black text-white hover:bg-gray-800 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90"
-                >
-                  <Link href="/signup">Sign Up for Free</Link>
-                </Button>
+          <section id="how-it-works" className="py-20 md:py-32">
+            <div className="container mx-auto px-4">
+              <div className="text-center">
+                <h2 className="text-3xl md:text-4xl font-headline font-bold">
+                  Effortless by Design
+                </h2>
+                <p className="mt-4 max-w-2xl mx-auto text-muted-foreground">
+                  Three simple steps to a more organized life.
+                </p>
+              </div>
+              <div className="mt-12 grid gap-8 md:grid-cols-3">
+                {howItWorks.map((step) => (
+                  <div key={step.title} className="text-center">
+                    <div className="flex justify-center mb-4">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+                        <step.icon className="h-6 w-6" />
+                      </div>
+                    </div>
+                    <h3 className="text-lg font-semibold">{step.title}</h3>
+                    <p className="mt-2 text-muted-foreground">{step.description}</p>
+                  </div>
+                ))}
               </div>
             </div>
           </section>
         </ScrollAnimator>
+
+        {/* Testimonials Section */}
+        <ScrollAnimator>
+          <section className="py-20 md:py-32 bg-secondary">
+             <div className="container mx-auto px-4">
+              <div className="text-center">
+                <h2 className="text-3xl md:text-4xl font-headline font-bold">
+                  Loved by People Like You
+                </h2>
+                <p className="mt-4 max-w-2xl mx-auto text-muted-foreground">
+                  See what our users are saying about their newfound productivity.
+                </p>
+              </div>
+              <div className="mt-12 grid gap-8 md:grid-cols-2">
+                {testimonials.map((testimonial) => (
+                  <Card key={testimonial.name} className="p-6">
+                    <CardContent className="p-0">
+                      <blockquote className="text-lg font-semibold leading-snug">
+                        “{testimonial.quote}”
+                      </blockquote>
+                    </CardContent>
+                    <CardFooter className="p-0 mt-4 flex items-center gap-4">
+                       <Avatar>
+                        <AvatarImage src={testimonial.avatar} alt={testimonial.name} data-ai-hint={testimonial.avatarHint} />
+                        <AvatarFallback>{testimonial.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-semibold">{testimonial.name}</p>
+                        <p className="text-sm text-muted-foreground">{testimonial.title}</p>
+                      </div>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </section>
+        </ScrollAnimator>
+        
+        {/* Pricing Section */}
+        <ScrollAnimator>
+          <section id="pricing" className="py-20 md:py-32">
+            <div className="container mx-auto px-4">
+              <div className="text-center">
+                <h2 className="text-3xl md:text-4xl font-headline font-bold">
+                  Simple, Transparent Pricing
+                </h2>
+                <p className="mt-4 max-w-2xl mx-auto text-muted-foreground">
+                  Get started for free. No credit card required.
+                </p>
+              </div>
+              <div className="mt-12 flex justify-center">
+                <Card className="max-w-md w-full">
+                  <CardHeader className="text-center">
+                    <CardTitle className="text-2xl">Free</CardTitle>
+                    <CardDescription>For individuals getting started.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex flex-col items-center">
+                    <p className="text-5xl font-bold mb-4">$0<span className="text-lg font-normal text-muted-foreground">/mo</span></p>
+                    <ul className="space-y-2 text-muted-foreground w-full text-center">
+                      <li className="flex items-center justify-center gap-2"><Check className="h-4 w-4 text-green-500" /> Unlimited Tasks</li>
+                      <li className="flex items-center justify-center gap-2"><Check className="h-4 w-4 text-green-500" /> Unlimited Expenses</li>
+                      <li className="flex items-center justify-center gap-2"><Check className="h-4 w-4 text-green-500" /> Unlimited Reminders</li>
+                      <li className="flex items-center justify-center gap-2"><Check className="h-4 w-4 text-green-500" /> AI-Powered Chat</li>
+                    </ul>
+                  </CardContent>
+                  <CardFooter>
+                     <Button size="lg" asChild className="w-full bg-black text-white hover:bg-gray-800 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90">
+                        <Link href="/signup">Get Started</Link>
+                     </Button>
+                  </CardFooter>
+                </Card>
+              </div>
+            </div>
+          </section>
+        </ScrollAnimator>
+
       </main>
       <footer className="border-t">
         <div className="container mx-auto py-8 px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
