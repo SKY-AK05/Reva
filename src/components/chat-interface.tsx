@@ -108,7 +108,7 @@ export default function ChatInterface({ isPublic = false }: { isPublic?: boolean
     inputRef.current?.focus();
   };
 
-  if (isPublic || messages.length === 0) {
+  if (messages.length === 0) {
     return (
       <div className="flex h-full flex-col items-center justify-center p-4">
         <div className="w-full max-w-2xl space-y-6 text-center">
@@ -142,9 +142,11 @@ export default function ChatInterface({ isPublic = false }: { isPublic?: boolean
             </Button>
           </div>
 
-          <p className="text-xs text-muted-foreground pt-4">
-            By using Reva, you agree to our <a href="#" className="underline">Terms</a> and <a href="#" className="underline">Privacy Policy</a>.
-          </p>
+          {isPublic && (
+            <p className="text-xs text-muted-foreground pt-4">
+              By using Reva, you agree to our <a href="#" className="underline">Terms</a> and <a href="#" className="underline">Privacy Policy</a>.
+            </p>
+          )}
         </div>
       </div>
     );
