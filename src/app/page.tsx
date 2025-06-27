@@ -1,4 +1,5 @@
 
+import Image from 'next/image';
 import PublicHeader from '@/components/public-header';
 import RevaLogo from '@/components/reva-logo';
 import ScrollAnimator from '@/components/scroll-animator';
@@ -18,43 +19,71 @@ import {
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
-
-const features = [
+const styledFeatures = [
   {
-    icon: CheckSquare,
     title: 'Task Management',
-    description:
-      'Create, organize, and prioritize your to-dos with simple commands.',
+    description: 'Create, organize, and prioritize your to-dos with simple commands.',
+    bgColor: 'bg-chart-4/10 dark:bg-chart-4/20',
+    image: 'https://placehold.co/400x500.png',
+    width: 400,
+    height: 500,
+    imageHint: 'task list',
+    gridClass: 'xl:row-span-2',
   },
   {
-    icon: DollarSign,
     title: 'Expense Tracking',
-    description:
-      'Log your spending on the go and never lose track of your budget.',
+    description: 'Log your spending on the go and never lose track of your budget.',
+    bgColor: 'bg-chart-5/10 dark:bg-chart-5/20',
+    image: 'https://placehold.co/400x250.png',
+    width: 400,
+    height: 250,
+    imageHint: 'money wallet',
+    gridClass: 'md:col-span-1',
   },
   {
-    icon: Bell,
-    title: 'Smart Reminders',
-    description: 'Set reminders for anything and get notified at the right time.',
-  },
-  {
-    icon: Target,
     title: 'Goal Setting',
     description: 'Define your goals and track your progress towards achieving them.',
+    bgColor: 'bg-chart-2/10 dark:bg-chart-2/20',
+    image: 'https://placehold.co/400x250.png',
+    width: 400,
+    height: 250,
+    imageHint: 'target arrow',
+    gridClass: 'md:col-span-1',
   },
   {
-    icon: BookText,
+    title: 'Smart Reminders',
+    description: 'Set reminders for anything and get notified at the right time.',
+    bgColor: 'bg-chart-3/10 dark:bg-chart-3/20',
+    image: 'https://placehold.co/400x250.png',
+    width: 400,
+    height: 250,
+    imageHint: 'notification bell',
+    gridClass: 'md:col-span-1',
+  },
+  {
     title: 'Personal Journal',
     description: 'Capture your thoughts and ideas in a private, secure journal.',
+    bgColor: 'bg-chart-1/10 dark:bg-chart-1/20',
+    image: 'https://placehold.co/600x300.png',
+    width: 600,
+    height: 300,
+    imageHint: 'writing journal',
+    gridClass: 'md:col-span-2 xl:col-span-2',
   },
   {
-    icon: BrainCircuit,
     title: 'AI-Powered',
-    description:
-      'Leverage the power of AI to understand and act on your requests.',
+    description: 'Leverage the power of AI to understand and act on your requests.',
+    bgColor: 'bg-accent/10 dark:bg-accent/20',
+    image: 'https://placehold.co/400x250.png',
+    width: 400,
+    height: 250,
+    imageHint: 'ai brain',
+    gridClass: 'md:col-span-1',
   },
 ];
+
 
 const howItWorks = [
   {
@@ -134,19 +163,24 @@ export default function HomePage() {
                   you stay on top of your day.
                 </p>
               </div>
-              <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                {features.map((feature) => (
-                  <div key={feature.title} className="flex gap-4">
-                    <div className="flex-shrink-0">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                        <feature.icon className="h-6 w-6" />
-                      </div>
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold">{feature.title}</h3>
-                      <p className="mt-1 text-muted-foreground">
-                        {feature.description}
-                      </p>
+              <div className="mt-12 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 grid-flow-row-dense">
+                {styledFeatures.map((feature) => (
+                  <div key={feature.title} className={cn(
+                      "p-8 rounded-2xl flex flex-col group",
+                      feature.bgColor,
+                      feature.gridClass
+                  )}>
+                    <h3 className="text-2xl font-bold font-headline">{feature.title}</h3>
+                    <p className="mt-2 text-muted-foreground flex-grow">{feature.description}</p>
+                    <div className="mt-6 -mx-4 -mb-4 sm:-mx-8 sm:-mb-8 overflow-hidden rounded-b-xl">
+                      <Image
+                        src={feature.image}
+                        alt={feature.title}
+                        width={feature.width}
+                        height={feature.height}
+                        className="rounded-lg object-cover w-full transition-transform duration-300 ease-in-out group-hover:scale-105"
+                        data-ai-hint={feature.imageHint}
+                      />
                     </div>
                   </div>
                 ))}
