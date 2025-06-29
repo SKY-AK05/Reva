@@ -1,6 +1,12 @@
-import { Bell } from 'lucide-react';
 
-const reminders = [
+'use client';
+
+import { useState } from 'react';
+import { Bell } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+
+const initialReminders = [
   {
     id: '1',
     title: 'Follow up with a client',
@@ -21,14 +27,61 @@ const reminders = [
   },
 ];
 
+type Reminder = typeof initialReminders[0];
+
 export default function RemindersPage() {
+  const [reminders, setReminders] = useState(initialReminders);
+  const [editingField, setEditingField] = useState<{ id: string; field: keyof Reminder } | null>(null);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, id: string, field: keyof Reminder) => {
+    setReminders(reminders.map(rem => (rem.id === id ? { ...rem, [field]: e.target.value } : rem)));
+  };
+  
+  const handleInputBlur = () => {
+    setEditingField(null);
+  };
+  
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) { // Allow shift+enter for textarea
+      setEditingField(null);
+    }
+  };
+
+  const renderEditable = (reminder: Reminder, field: keyof Reminder) => {
+    const isEditing = editingField?.id === reminder.id && editingField?.field === field;
+    
+    if (isEditing) {
+      if (field === 'notes') {
+        return (
+          <Textarea
+            value={reminder[field]}
+            onChange={(e) => handleInputChange(e, reminder.id, field)}
+            onBlur={handleInputBlur}
+            autoFocus
+            className="text-base"
+          />
+        );
+      }
+      return (
+        <Input
+          value={reminder[field]}
+          onChange={(e) => handleInputChange(e, reminder.id, field)}
+          onBlur={handleInputBlur}
+          onKeyDown={handleInputKeyDown}
+          autoFocus
+        />
+      );
+    }
+    return reminder[field];
+  };
+
   return (
     <div className="flex flex-1 flex-col space-y-8 p-6 sm:p-8 lg:p-12 notebook-lines-journal">
       <header className="flex items-center gap-4">
         <Bell className="w-8 h-8 text-muted-foreground" />
         <div className="space-y-1">
           <h1 className="text-3xl font-bold tracking-tight">Reminders</h1>
-          <p className="text-muted-foreground">Stay on top of everything important.</p>
+          <p className="text-muted-foreground">Stay on top of everything important. Click text to edit.</p>
         </div>
       </header>
 
@@ -37,9 +90,18 @@ export default function RemindersPage() {
         <ul className="space-y-6">
           {reminders.map((reminder) => (
             <li key={reminder.id} className="flex flex-col gap-1">
-              <span className="font-medium">{reminder.title}</span>
-              <span className="text-muted-foreground text-sm">{reminder.time}</span>
-              <span className="text-muted-foreground/80 pl-4 border-l-2 border-primary ml-2 mt-1 pt-1 pb-1">{reminder.notes}</span>
+              <span className="font-medium cursor-pointer" onClick={() => setEditingField({ id: reminder.id, field: 'title' })}>
+                {renderEditable(reminder, 'title')}
+              </span>
+              <span className="text-muted-foreground text-sm cursor-pointer" onClick={() => setEditingField({ id: reminder.id, field: 'time' })}>
+                {renderEditable(reminder, 'time')}
+              </span>
+              <span 
+                className="text-muted-foreground/80 pl-4 border-l-2 border-primary ml-2 mt-1 pt-1 pb-1 cursor-pointer"
+                onClick={() => setEditingField({ id: reminder.id, field: 'notes' })}
+              >
+                {renderEditable(reminder, 'notes')}
+              </span>
             </li>
           ))}
         </ul>
