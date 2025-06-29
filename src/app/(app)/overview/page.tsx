@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckSquare, DollarSign, Bell, Target } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { CheckSquare, DollarSign, Bell, Target, CalendarDays, Wallet } from 'lucide-react';
 
 const overviewCards = [
   { title: 'Tasks', value: '12', icon: CheckSquare, colorClass: 'text-chart-1' },
@@ -49,15 +50,18 @@ export default function OverviewPage() {
        <div className="grid gap-4 md:grid-cols-2 mt-6">
          <Card className="bg-secondary/50">
             <CardHeader>
-                <CardTitle>Upcoming Tasks</CardTitle>
+                <CardTitle>Upcoming</CardTitle>
             </CardHeader>
             <CardContent>
                 {upcomingTasks.length > 0 ? (
-                    <ul className="space-y-3">
+                    <ul className="space-y-4">
                         {upcomingTasks.map((task) => (
-                            <li key={task.id} className="flex justify-between items-center text-sm">
-                                <span>{task.description}</span>
-                                <span className="text-muted-foreground">{task.dueDate}</span>
+                            <li key={task.id} className="flex items-center gap-3">
+                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+                                    <CalendarDays className="h-4 w-4 text-primary" />
+                                </div>
+                                <p className="flex-1 text-sm font-medium truncate">{task.description}</p>
+                                <Badge variant="outline" className="text-xs">{task.dueDate}</Badge>
                             </li>
                         ))}
                     </ul>
@@ -72,11 +76,14 @@ export default function OverviewPage() {
             </CardHeader>
             <CardContent>
                 {recentExpenses.length > 0 ? (
-                    <ul className="space-y-3">
+                    <ul className="space-y-4">
                         {recentExpenses.map((expense) => (
-                            <li key={expense.id} className="flex justify-between items-center text-sm">
-                                <span>{expense.description}</span>
-                                <span className="font-medium">₹{expense.amount.toFixed(2)}</span>
+                            <li key={expense.id} className="flex items-center gap-3">
+                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-chart-2/10">
+                                    <Wallet className="h-4 w-4 text-chart-2" />
+                                </div>
+                                <p className="flex-1 text-sm font-medium truncate">{expense.description}</p>
+                                <span className="text-sm font-semibold">₹{expense.amount.toFixed(2)}</span>
                             </li>
                         ))}
                     </ul>
