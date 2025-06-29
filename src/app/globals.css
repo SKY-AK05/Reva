@@ -125,16 +125,22 @@
     background-image: linear-gradient(hsl(var(--border)) 1px, transparent 1px);
     background-size: 100% 2.75rem; /* Corresponds to leading-loose on text and consistent row height */
     line-height: 2.75rem;
+    background-origin: content-box;
+    background-clip: content-box;
   }
   .notebook-lines-journal {
     background-image: linear-gradient(hsl(var(--border)) 1px, transparent 1px);
     background-size: 100% 1.75rem; /* Corresponds to leading-relaxed on text */
     background-position-y: 0.5rem;
+    background-origin: content-box;
+    background-clip: content-box;
   }
   .notebook-lines-chat {
     background-image: linear-gradient(hsl(var(--border)) 1px, transparent 1px);
     background-size: 100% 2rem;
      background-position-y: 0.75rem;
+    background-origin: content-box;
+    background-clip: content-box;
   }
   .no-grid-lines .notebook-lines,
   .no-grid-lines .notebook-lines-journal,
