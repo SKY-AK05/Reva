@@ -112,7 +112,7 @@ export async function processUserChat(chatInput: string): Promise<string> {
 
             if (result.expenses.length === 1) {
                 const expense = result.expenses[0];
-                const currencySymbol = result.currency?.toLowerCase().includes('rupee') ? '₹' : '$';
+                const currencySymbol = result.currency?.toLowerCase().includes('dollar') ? '$' : '₹';
                 let response = `Expense tracked!`;
                 response += `\n\n**Item:** ${expense.description}`;
                 response += `\n**Amount:** ${currencySymbol}${expense.amount.toFixed(2)}`;
@@ -121,7 +121,7 @@ export async function processUserChat(chatInput: string): Promise<string> {
                 return response;
             }
             
-            const currencySymbol = result.currency?.toLowerCase().includes('rupee') ? '₹' : '$';
+            const currencySymbol = result.currency?.toLowerCase().includes('dollar') ? '$' : '₹';
             const totalAmount = result.expenses.reduce((sum, item) => sum + item.amount, 0);
 
             let response = "Okay, I've recorded your expenses:\n\n";

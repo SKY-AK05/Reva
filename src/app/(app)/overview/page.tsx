@@ -3,7 +3,7 @@ import { CheckSquare, DollarSign, Bell, Target } from 'lucide-react';
 
 const overviewCards = [
   { title: 'Tasks', value: '12', icon: CheckSquare, colorClass: 'text-chart-1' },
-  { title: 'Expenses', value: '$258.50', icon: DollarSign, colorClass: 'text-chart-2' },
+  { title: 'Expenses', value: '₹6,799.00', icon: DollarSign, colorClass: 'text-chart-2' },
   { title: 'Reminders', value: '3 Upcoming', icon: Bell, colorClass: 'text-chart-3' },
   { title: 'Goals', value: '5 in Progress', icon: Target, colorClass: 'text-chart-4' },
 ];
@@ -17,11 +17,11 @@ const upcomingTasks = [
 ];
 
 const recentExpenses = [
-  { id: '1', description: 'Lunch with team', amount: 25.00 },
-  { id: '2', description: 'Coffee', amount: 5.50 },
-  { id: '3', description: 'Monthly subscription', amount: 12.00 },
-  { id: '4', description: 'Groceries from store', amount: 78.21 },
-  { id: '5', description: 'Movie tickets', amount: 22.00 },
+  { id: '1', description: 'Lunch with team', amount: 1250.00 },
+  { id: '2', description: 'Coffee', amount: 250.00 },
+  { id: '3', description: 'Monthly subscription', amount: 999.00 },
+  { id: '4', description: 'Groceries from store', amount: 3500.00 },
+  { id: '5', description: 'Movie tickets', amount: 800.00 },
 ];
 
 export default function OverviewPage() {
@@ -74,7 +74,7 @@ export default function OverviewPage() {
                         {recentExpenses.map((expense) => (
                             <li key={expense.id} className="flex justify-between items-center text-sm">
                                 <span>{expense.description}</span>
-                                <span className="font-medium">${expense.amount.toFixed(2)}</span>
+                                <span className="font-medium">₹{expense.amount.toFixed(2)}</span>
                             </li>
                         ))}
                     </ul>

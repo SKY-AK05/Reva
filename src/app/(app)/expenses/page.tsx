@@ -19,35 +19,35 @@ const initialExpenses = [
     item: 'Coffee',
     category: 'Food',
     date: '2024-10-24',
-    amount: 5.5,
+    amount: 250.0,
   },
   {
     id: '2',
     item: 'Lunch with team',
     category: 'Food',
     date: '2024-10-23',
-    amount: 25.0,
+    amount: 1250.0,
   },
   {
     id: '3',
     item: 'Monthly subscription',
     category: 'Software',
     date: '2024-10-22',
-    amount: 12.0,
+    amount: 999.0,
   },
   {
     id: '4',
     item: 'Groceries',
     category: 'Home',
     date: '2024-10-21',
-    amount: 85.75,
+    amount: 3500.0,
   },
   {
     id: '5',
     item: 'Movie tickets',
     category: 'Entertainment',
     date: '2024-10-20',
-    amount: 30.0,
+    amount: 800.0,
   },
 ];
 
@@ -93,7 +93,7 @@ export default function ExpensesPage() {
       );
     }
     if (column === 'amount') {
-      return `$${expense.amount.toFixed(2)}`;
+      return `₹${expense.amount.toFixed(2)}`;
     }
     return expense[column];
   };
