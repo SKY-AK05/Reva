@@ -102,7 +102,7 @@ export default function TasksPage() {
           <CheckSquare className="w-8 h-8 text-muted-foreground" />
           <div className="space-y-1">
             <h1 className="text-3xl font-bold tracking-tight">Tasks</h1>
-            <p className="text-muted-foreground">Everything you need to get done. Click a cell to edit.</p>
+            <p className="text-muted-foreground">Everything you need to get done.</p>
           </div>
         </header>
       </div>

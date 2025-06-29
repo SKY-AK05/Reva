@@ -69,7 +69,7 @@ export default function GoalsPage() {
         <Target className="w-8 h-8 text-muted-foreground" />
         <div className="space-y-1">
           <h1 className="text-3xl font-bold tracking-tight">Goals</h1>
-          <p className="text-muted-foreground">Your ambitions, tracked and realized. Click text or progress bars to edit.</p>
+          <p className="text-muted-foreground">Your ambitions, tracked and realized.</p>
         </div>
       </header>
       

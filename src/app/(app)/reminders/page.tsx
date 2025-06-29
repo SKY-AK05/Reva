@@ -81,7 +81,7 @@ export default function RemindersPage() {
         <Bell className="w-8 h-8 text-muted-foreground" />
         <div className="space-y-1">
           <h1 className="text-3xl font-bold tracking-tight">Reminders</h1>
-          <p className="text-muted-foreground">Stay on top of everything important. Click text to edit.</p>
+          <p className="text-muted-foreground">Stay on top of everything important.</p>
         </div>
       </header>
 

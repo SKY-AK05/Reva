@@ -106,7 +106,7 @@ export default function ExpensesPage() {
           <DollarSign className="w-8 h-8 text-muted-foreground" />
           <div className="space-y-1">
             <h1 className="text-3xl font-bold tracking-tight">Expenses</h1>
-            <p className="text-muted-foreground">Track and manage your spending. Click on any cell to edit.</p>
+            <p className="text-muted-foreground">Track and manage your spending.</p>
           </div>
         </header>
       </div>
