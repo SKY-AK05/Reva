@@ -16,43 +16,6 @@ type Message = {
   isTyping?: boolean;
 };
 
-const ChatInputForm = ({
-  input,
-  setInput,
-  handleSubmit,
-  isLoading,
-  inputRef,
-}: {
-  input: string;
-  setInput: (value: string) => void;
-  handleSubmit: (e: FormEvent<HTMLFormElement>) => void;
-  isLoading: boolean;
-  inputRef: React.RefObject<HTMLInputElement>;
-}) => (
-  // This bar is fixed to the bottom of the viewport.
-  // It has a background that matches the app's outer background and a top shadow for depth.
-  <div className="fixed bottom-0 left-0 right-0 z-10 bg-background/95 backdrop-blur-sm shadow-[0_-4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_-4px_12px_rgba(0,0,0,0.2)]">
-    <div className="w-full max-w-5xl mx-auto p-4 pt-2">
-      <form onSubmit={handleSubmit} className="relative">
-          <Input
-              ref={inputRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Start a conversation with Reva..."
-              // The input itself has a slightly different background to stand out from the bar.
-              className="w-full rounded-xl p-4 pr-14 h-14 bg-card text-card-foreground text-base border-border/50 shadow-lg transition-transform focus:scale-[1.01]"
-              disabled={isLoading}
-              autoComplete="off"
-          />
-          <Button type="submit" size="icon" disabled={isLoading || !input.trim()} className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full h-10 w-10">
-              <SendHorizonal className="h-5 w-5" />
-              <span className="sr-only">Send</span>
-          </Button>
-      </form>
-    </div>
-  </div>
-);
-
 export default function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -65,7 +28,7 @@ export default function ChatInterface() {
         const viewport = scrollViewportRef.current;
         setTimeout(() => {
             viewport.scrollTop = viewport.scrollHeight;
-        }, 0);
+        }, 100); // Small delay to allow DOM update
     }
   }, [messages]);
 
@@ -124,8 +87,8 @@ export default function ChatInterface() {
     <div className="flex h-full flex-col items-center justify-center p-4 text-center">
       <div className="space-y-4 max-w-sm">
         <span className="text-6xl" role="img" aria-label="waving hand">👋</span>
-        <h1 className="text-4xl font-bold tracking-tight">Welcome to Reva!</h1>
-        <p className="text-muted-foreground text-lg">
+        <h1 className="text-4xl font-headline font-bold tracking-tight">Welcome to Reva!</h1>
+        <p className="text-muted-foreground">
           Just start typing to create tasks, track expenses, set reminders, and more.
         </p>
       </div>
@@ -133,19 +96,30 @@ export default function ChatInterface() {
   );
 
   return (
-    <div className="h-full w-full notebook-lines-chat">
-      {/* The padding-bottom on the scroll area makes space for the fixed input bar. */}
-      {/* The value (pb-32) should be larger than the height of the fixed input bar. */}
-      <ScrollArea className="h-full p-6 sm:p-8 lg:p-12 pb-32" viewportRef={scrollViewportRef}>
+    <div className="flex h-full flex-col notebook-lines-chat">
+      <ScrollArea className="flex-1 p-6 sm:p-8 lg:p-12" viewportRef={scrollViewportRef}>
         {messages.length > 0 ? content : welcomeScreen}
       </ScrollArea>
-      <ChatInputForm 
-          handleSubmit={handleSubmit}
-          input={input}
-          setInput={setInput}
-          isLoading={isLoading}
-          inputRef={inputRef}
-      />
+      
+      <div className="p-4 bg-card border-t border-border/80">
+        <div className="w-full max-w-3xl mx-auto">
+          <form onSubmit={handleSubmit} className="relative">
+              <Input
+                  ref={inputRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Start a conversation with Reva..."
+                  className="w-full rounded-xl p-4 pr-14 h-14 bg-background text-base border-border/50 focus:border-primary transition-colors"
+                  disabled={isLoading}
+                  autoComplete="off"
+              />
+              <Button type="submit" size="icon" disabled={isLoading || !input.trim()} className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full h-10 w-10 bg-primary hover:bg-primary/90">
+                  <SendHorizonal className="h-5 w-5" />
+                  <span className="sr-only">Send</span>
+              </Button>
+          </form>
+        </div>
+      </div>
     </div>
   );
 }
