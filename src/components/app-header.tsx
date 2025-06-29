@@ -14,9 +14,9 @@ export default function AppHeader() {
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border/80 bg-background/95 px-4 backdrop-blur-sm sm:px-6">
       <Sheet>
         <SheetTrigger asChild>
-          <Button variant="ghost" size="sm" className="flex items-center gap-2">
+          <Button variant="ghost" size="icon">
             <Library className="h-4 w-4" />
-            <span>Library</span>
+            <span className="sr-only">Toggle navigation</span>
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="w-72 p-0 border-r-border/80 bg-background/95 backdrop-blur-sm">
