@@ -1,5 +1,4 @@
-import { PlusCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Bell } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -32,16 +31,13 @@ const reminders = [
 
 export default function RemindersPage() {
   return (
-    <div className="flex flex-col space-y-6 p-4 sm:p-6">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col space-y-6">
+      <div className="flex items-center gap-4">
+        <Bell className="w-8 h-8 text-muted-foreground" />
         <div className="space-y-1">
           <h1 className="text-3xl font-bold tracking-tight">Reminders</h1>
           <p className="text-muted-foreground">Stay on top of everything important.</p>
         </div>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add Reminder
-        </Button>
       </div>
       <Table>
         <TableHeader>

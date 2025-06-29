@@ -18,8 +18,6 @@ type Message = {
   isTyping?: boolean;
 };
 
-// Moved ChatInputForm outside of the ChatInterface component
-// to prevent it from being redeclared on every render.
 const ChatInputForm = ({
   input,
   setInput,
@@ -39,8 +37,8 @@ const ChatInputForm = ({
         ref={inputRef}
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        placeholder="Tell me what you’d like to do…"
-        className="w-full rounded-full p-4 pr-14 h-14 bg-card border-border text-card-foreground"
+        placeholder="Start writing or tell me what to do..."
+        className="w-full rounded-full p-4 pr-14 h-14 bg-card border-border/50 text-card-foreground text-base"
         disabled={isLoading}
         autoComplete="off"
       />
@@ -63,7 +61,6 @@ export default function ChatInterface({ isPublic = false }: { isPublic?: boolean
   useEffect(() => {
     if (scrollViewportRef.current) {
         const viewport = scrollViewportRef.current;
-        // Use timeout to ensure scrolling happens after the new message is rendered and sized.
         setTimeout(() => {
             viewport.scrollTop = viewport.scrollHeight;
         }, 0);
@@ -104,25 +101,15 @@ export default function ChatInterface({ isPublic = false }: { isPublic?: boolean
   
   const handleSuggestionClick = (suggestion: string) => {
     setInput(suggestion);
-    // Focus the input after setting the suggestion
     inputRef.current?.focus();
   };
 
-  if (messages.length === 0) {
-    return (
+  const content = messages.length === 0 ? (
       <div className="flex h-full flex-col items-center justify-center p-4">
         <div className="w-full max-w-2xl space-y-6 text-center">
           <div className="mx-auto inline-block">
             <RevaLogo size="lg" />
           </div>
-
-          <ChatInputForm
-            handleSubmit={handleSubmit}
-            input={input}
-            setInput={setInput}
-            isLoading={isLoading && !isPublic}
-            inputRef={inputRef}
-          />
 
           <div className="flex justify-center gap-2 flex-wrap">
             <Button variant="outline" className="rounded-full" onClick={() => handleSuggestionClick('Create a task to buy groceries')}>
@@ -134,70 +121,52 @@ export default function ChatInterface({ isPublic = false }: { isPublic?: boolean
             <Button variant="outline" className="rounded-full" onClick={() => handleSuggestionClick('Remind me to call mom tomorrow at 10am')}>
                 <CalendarClock className="mr-2 h-4 w-4" /> Set Reminder
             </Button>
-            <Button variant="outline" className="rounded-full" onClick={() => handleSuggestionClick('What are my current goals?')}>
-                <Trophy className="mr-2 h-4 w-4" /> Check Goals
-            </Button>
-            <Button variant="outline" className="rounded-full" onClick={() => handleSuggestionClick('Write a new journal entry about today.')}>
-                <BookText className="mr-2 h-4 w-4" /> Journal Entry
-            </Button>
           </div>
-
-          {isPublic && (
-            <p className="text-xs text-muted-foreground pt-4">
-              By using Reva, you agree to our <a href="#" className="underline">Terms</a> and <a href="#" className="underline">Privacy Policy</a>.
-            </p>
-          )}
         </div>
       </div>
-    );
-  }
+  ) : (
+    <div className="space-y-8 max-w-2xl mx-auto px-4 py-6">
+      {messages.map((message) => (
+        <div
+          key={message.id}
+          className={cn('flex items-start gap-4', {
+            'justify-end': message.sender === 'user',
+          })}
+        >
+          <Avatar className={cn("h-8 w-8 border", {'order-last': message.sender === 'user'})}>
+             {message.sender === 'bot' ? (
+               <AvatarFallback>
+                  <Bot className="h-5 w-5 text-muted-foreground"/>
+              </AvatarFallback>
+             ) : (
+              <>
+                <AvatarImage src="https://placehold.co/40x40.png" alt="User" data-ai-hint="user avatar" />
+                <AvatarFallback>U</AvatarFallback>
+              </>
+             )}
+          </Avatar>
+          <div className="max-w-sm sm:max-w-md">
+            {message.isTyping ? (
+               <div className="flex items-center space-x-1 py-1">
+                    <span className="h-2 w-2 animate-bounce rounded-full bg-foreground [animation-delay:-0.3s]"></span>
+                    <span className="h-2 w-2 animate-bounce rounded-full bg-foreground [animation-delay:-0.15s]"></span>
+                    <span className="h-2 w-2 animate-bounce rounded-full bg-foreground"></span>
+                </div>
+            ) : (
+              <p className="whitespace-pre-wrap leading-9 text-base text-foreground/90">{message.text}</p>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <div className="flex flex-col h-full w-full max-w-4xl mx-auto">
-      <ScrollArea className="flex-1" viewportRef={scrollViewportRef}>
-        <div className="py-6">
-          <div className="space-y-6 max-w-2xl mx-auto px-4">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={cn('flex items-start gap-3', {
-                  'justify-end': message.sender === 'user',
-                })}
-              >
-                <Avatar className={cn("h-8 w-8 border", {'order-last': message.sender === 'user'})}>
-                   {message.sender === 'bot' ? (
-                     <AvatarFallback>
-                        <Bot className="h-5 w-5 text-primary"/>
-                    </AvatarFallback>
-                   ) : (
-                    <>
-                      <AvatarImage src="https://placehold.co/40x40.png" alt="User" data-ai-hint="user avatar" />
-                      <AvatarFallback>U</AvatarFallback>
-                    </>
-                   )}
-                </Avatar>
-                <div
-                  className={cn('max-w-sm sm:max-w-md rounded-lg p-3 text-sm shadow-sm', {
-                    'bg-primary text-primary-foreground': message.sender === 'user',
-                    'bg-muted': message.sender === 'bot',
-                  })}
-                >
-                  {message.isTyping ? (
-                     <div className="flex items-center space-x-1 py-1">
-                          <span className="h-2 w-2 animate-bounce rounded-full bg-foreground [animation-delay:-0.3s]"></span>
-                          <span className="h-2 w-2 animate-bounce rounded-full bg-foreground [animation-delay:-0.15s]"></span>
-                          <span className="h-2 w-2 animate-bounce rounded-full bg-foreground"></span>
-                      </div>
-                  ) : (
-                    <p className="whitespace-pre-wrap">{message.text}</p>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+      <ScrollArea className="flex-1 notebook-lines-chat" viewportRef={scrollViewportRef}>
+        {content}
       </ScrollArea>
-      <div className="py-4 border-t border-border">
+      <div className="py-4 border-t border-border/50">
         <ChatInputForm 
             handleSubmit={handleSubmit}
             input={input}

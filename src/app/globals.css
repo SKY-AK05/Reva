@@ -39,44 +39,35 @@
     --chart-5: 340 75% 55%;
 
     --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 224 71% 4%;
-    --sidebar-primary: 35 91% 65%;
-    --sidebar-primary-foreground: 224 71% 4%;
-    --sidebar-accent: 240 5% 96%;
-    --sidebar-accent-foreground: 224 71% 4%;
-    --sidebar-border: 240 6% 90%;
-    --sidebar-ring: 35 91% 65%;
   }
 
   .dark {
     --background: 240 6% 10%;
-    --foreground: 210 20% 90%;
+    --foreground: 210 20% 98%;
     
-    --card: 240 6% 10%;
-    --card-foreground: 210 20% 90%;
+    --card: 240 5% 15%;
+    --card-foreground: 210 20% 98%;
     
     --popover: 240 6% 10%;
-    --popover-foreground: 210 20% 90%;
+    --popover-foreground: 210 20% 98%;
     
     --primary: 35 91% 65%;
     --primary-foreground: 224 71% 4%;
     
     --secondary: 240 5% 15%;
-    --secondary-foreground: 210 20% 90%;
+    --secondary-foreground: 210 20% 98%;
     
     --muted: 240 5% 15%;
     --muted-foreground: 240 4% 65%;
     
-    --accent: 35 91% 65%;
-    --accent-foreground: 224 71% 4%;
+    --accent: 240 5% 15%;
+    --accent-foreground: 210 20% 98%;
     
     --destructive: 0 63% 31%;
     --destructive-foreground: 210 40% 98%;
     
-    --border: 240 5% 15%;
-    --input: 240 5% 15%;
+    --border: 240 4% 25%;
+    --input: 240 4% 25%;
     --ring: 35 91% 65%;
 
     --chart-1: 35 91% 65%;
@@ -84,15 +75,6 @@
     --chart-3: 160 60% 45%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
-
-    --sidebar-background: 240 6% 10%;
-    --sidebar-foreground: 210 20% 90%;
-    --sidebar-primary: 35 91% 65%;
-    --sidebar-primary-foreground: 224 71% 4%;
-    --sidebar-accent: 240 5% 15%;
-    --sidebar-accent-foreground: 210 20% 90%;
-    --sidebar-border: 240 5% 15%;
-    --sidebar-ring: 35 91% 65%;
   }
 }
 
@@ -107,12 +89,17 @@
 
 @layer utilities {
   .notebook-lines {
-    background-image: linear-gradient(hsl(var(--border)) 1px, transparent 1px);
+    background-image: linear-gradient(hsla(var(--foreground), 0.1) 1px, transparent 1px);
     background-size: 100% 3rem;
   }
   .notebook-lines-journal {
-    background-image: linear-gradient(hsl(var(--border)) 1px, transparent 1px);
+    background-image: linear-gradient(hsla(var(--foreground), 0.1) 1px, transparent 1px);
     background-size: 100% 1.625rem;
     background-position-y: 0.5rem;
+  }
+  .notebook-lines-chat {
+    background-image: linear-gradient(hsla(var(--foreground), 0.1) 1px, transparent 1px);
+    background-size: 100% 2.25rem;
+    background-position-y: 0.75rem;
   }
 }

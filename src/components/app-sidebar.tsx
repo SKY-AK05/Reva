@@ -3,14 +3,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  Sidebar,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarContent,
-  SidebarHeader,
-} from '@/components/ui/sidebar';
-import {
   LayoutDashboard,
   MessageSquare,
   CheckSquare,
@@ -20,6 +12,8 @@ import {
   BookText,
 } from 'lucide-react';
 import RevaLogo from './reva-logo';
+import { Button } from './ui/button';
+import { cn } from '@/lib/utils';
 
 export default function AppSidebar() {
   const pathname = usePathname();
@@ -35,32 +29,28 @@ export default function AppSidebar() {
   ];
 
   return (
-    <Sidebar collapsible="icon">
-      <SidebarContent className="p-0">
-        <SidebarHeader className="p-2">
-            <Link href="/chat" className="flex items-center gap-3 p-2">
-                <RevaLogo size="sm" />
-                <span className="font-semibold text-lg group-data-[state=collapsed]:hidden">Reva</span>
+    <div className="flex h-full flex-col">
+      <div className="p-4">
+        <Link href="/chat" className="flex items-center gap-3">
+            <RevaLogo size="sm" />
+            <span className="font-semibold text-lg">Reva</span>
+        </Link>
+      </div>
+      <nav className="flex-1 flex flex-col gap-1 p-2">
+        {menuItems.map((item) => (
+          <Button
+            key={item.href}
+            variant="ghost"
+            className={cn("justify-start", pathname.startsWith(item.href) && "bg-accent")}
+            asChild
+          >
+            <Link href={item.href}>
+              <item.icon className="mr-2 h-5 w-5" />
+              {item.label}
             </Link>
-        </SidebarHeader>
-
-        <SidebarMenu className="flex-1 flex flex-col gap-1 p-2">
-          {menuItems.map((item) => (
-            <SidebarMenuItem key={item.href}>
-              <Link href={item.href} passHref legacyBehavior>
-                <SidebarMenuButton
-                  isActive={pathname.startsWith(item.href)}
-                  tooltip={{ children: item.label, side: 'right' }}
-                  className="justify-start"
-                >
-                  <item.icon className="h-5 w-5" />
-                  <span className="group-data-[state=collapsed]:hidden">{item.label}</span>
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
-      </SidebarContent>
-    </Sidebar>
+          </Button>
+        ))}
+      </nav>
+    </div>
   );
 }

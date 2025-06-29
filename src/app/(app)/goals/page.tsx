@@ -1,5 +1,4 @@
-import { PlusCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Target } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -43,16 +42,13 @@ const goals = [
 
 export default function GoalsPage() {
   return (
-    <div className="flex flex-col space-y-6 p-4 sm:p-6">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col space-y-6">
+       <div className="flex items-center gap-4">
+        <Target className="w-8 h-8 text-muted-foreground" />
         <div className="space-y-1">
           <h1 className="text-3xl font-bold tracking-tight">Goals</h1>
           <p className="text-muted-foreground">Your ambitions, tracked and realized.</p>
         </div>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add Goal
-        </Button>
       </div>
       <Table>
           <TableHeader>
