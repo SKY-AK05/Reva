@@ -101,7 +101,7 @@ export default function ChatInterface() {
         {messages.length > 0 ? content : welcomeScreen}
       </ScrollArea>
       
-      <div className="p-4 bg-card border-t border-border/80">
+      <div className="p-4 bg-card">
         <div className="w-full max-w-3xl mx-auto">
           <form onSubmit={handleSubmit} className="relative">
               <Input
