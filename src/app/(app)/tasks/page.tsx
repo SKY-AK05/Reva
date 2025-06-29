@@ -1,6 +1,14 @@
 import { CheckSquare } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const tasks = [
   {
@@ -57,22 +65,35 @@ export default function TasksPage() {
         </div>
       </header>
       
-      <div className="space-y-4">
-        {tasks.map((task) => (
-          <div key={task.id} data-state={task.completed ? 'completed' : ''} className="flex items-start gap-4 data-[state=completed]:text-muted-foreground data-[state=completed]:line-through h-11">
-            <Checkbox id={`task-${task.id}`} checked={task.completed} className="mt-1" />
-            <div className="flex-1">
-              <label htmlFor={`task-${task.id}`} className="font-medium cursor-pointer">{task.description}</label>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground/80">
-                <span>{task.dueDate}</span>
-                &middot;
-                <Badge variant={priorityVariant[task.priority as keyof typeof priorityVariant]} className="h-5 text-xs">
-                  {task.priority}
-                </Badge>
-              </div>
-            </div>
-          </div>
-        ))}
+      <div className="border rounded-lg">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[50px]"></TableHead>
+              <TableHead>Task</TableHead>
+              <TableHead className="w-[150px]">Due</TableHead>
+              <TableHead className="w-[120px] text-right">Priority</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {tasks.map((task) => (
+              <TableRow key={task.id} data-state={task.completed ? 'completed' : ''} className="data-[state=completed]:text-muted-foreground data-[state=completed]:line-through">
+                <TableCell>
+                  <Checkbox id={`task-${task.id}`} checked={task.completed} />
+                </TableCell>
+                <TableCell className="font-medium">
+                  {task.description}
+                </TableCell>
+                <TableCell>{task.dueDate}</TableCell>
+                <TableCell className="text-right">
+                  <Badge variant={priorityVariant[task.priority as keyof typeof priorityVariant]} className="capitalize">
+                    {task.priority}
+                  </Badge>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
     </div>
   );
