@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect, FormEvent } from 'react';
@@ -47,13 +48,39 @@ export default function ChatInterface() {
 
     try {
       const botResponseText = await processUserChat(input);
-      const botMessage: Message = { id: (Date.now() + 1).toString(), text: botResponseText, sender: 'bot' };
-      setMessages(prev => [...prev.filter(m => !m.isTyping), botMessage]);
+      
+      // Remove the "..." typing indicator
+      setMessages(prev => prev.filter(m => !m.isTyping));
+
+      // Add an empty message shell for the bot's response
+      const botMessageId = (Date.now() + 1).toString();
+      const newBotMessage: Message = { id: botMessageId, text: '', sender: 'bot' };
+      setMessages(prev => [...prev, newBotMessage]);
+
+      // Start the typing animation
+      let i = 0;
+      const typingInterval = setInterval(() => {
+        if (i < botResponseText.length) {
+          // Update the bot message with the next character
+          setMessages(currentMessages =>
+            currentMessages.map(msg =>
+              msg.id === botMessageId
+                ? { ...msg, text: botResponseText.slice(0, i + 1) }
+                : msg
+            )
+          );
+          i++;
+        } else {
+          // When typing is complete, clear the interval and allow new input
+          clearInterval(typingInterval);
+          setIsLoading(false);
+        }
+      }, 25); // Typing speed in milliseconds per character
+      
     } catch (error) {
       console.error(error);
       const errorMessage: Message = { id: (Date.now() + 1).toString(), text: "Sorry, I encountered an error. Please try again.", sender: 'bot' };
       setMessages(prev => [...prev.filter(m => !m.isTyping), errorMessage]);
-    } finally {
       setIsLoading(false);
     }
   };
