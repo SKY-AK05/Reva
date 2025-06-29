@@ -136,4 +136,9 @@
     background-size: 100% 2rem;
      background-position-y: 0.75rem;
   }
+  .no-grid-lines .notebook-lines,
+  .no-grid-lines .notebook-lines-journal,
+  .no-grid-lines .notebook-lines-chat {
+    background-image: none;
+  }
 }

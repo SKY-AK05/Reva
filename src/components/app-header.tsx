@@ -2,20 +2,47 @@
 
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { PanelLeft, Plus } from 'lucide-react';
+import {
+  PanelLeft,
+  Plus,
+  User,
+  HelpCircle,
+  LogOut,
+  Sun,
+  Moon,
+  Laptop,
+  Grid,
+} from 'lucide-react';
 import AppSidebar from '@/components/app-sidebar';
-import { ThemeToggle } from '@/components/theme-toggle';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Switch } from '@/components/ui/switch';
+import { useTheme } from 'next-themes';
+import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
-export default function AppHeader() {
+interface AppHeaderProps {
+  showGridLines: boolean;
+  onToggleGridLines: () => void;
+}
+
+export default function AppHeader({ showGridLines, onToggleGridLines }: AppHeaderProps) {
+  const { theme, setTheme } = useTheme();
+
   const handleNewChat = () => {
-    // A full page navigation/reload will reset the chat component's state.
     window.location.href = '/chat';
   };
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 bg-background/95 px-4 backdrop-blur-sm sm:px-6">
-      {/* Mobile Toggle */}
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border/80 bg-background/95 px-4 backdrop-blur-sm sm:px-6">
       <Sheet>
         <SheetTrigger asChild>
           <Button variant="ghost" size="icon" className="md:hidden">
@@ -41,15 +68,73 @@ export default function AppHeader() {
         <span>New Chat</span>
       </Button>
       <div className="ml-auto flex items-center gap-2 sm:gap-4">
-        <ThemeToggle />
-        <Avatar className="h-9 w-9">
-          <AvatarImage
-            src="https://placehold.co/40x40.png"
-            alt="User"
-            data-ai-hint="smiling man"
-          />
-          <AvatarFallback>A</AvatarFallback>
-        </Avatar>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+              <Avatar className="h-9 w-9">
+                <AvatarImage
+                  src="https://placehold.co/40x40.png"
+                  alt="User"
+                  data-ai-hint="smiling man"
+                />
+                <AvatarFallback>A</AvatarFallback>
+              </Avatar>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-64" align="end" forceMount>
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-medium leading-none">Alex</p>
+                <p className="text-xs leading-none text-muted-foreground">
+                  alex@example.com
+                </p>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <div className="p-1">
+              <div className="flex items-center justify-around rounded-md bg-muted p-1 text-sm text-muted-foreground">
+                  <button onClick={() => setTheme('light')} className={cn("inline-flex items-center justify-center gap-1 rounded-sm px-3 py-1.5 transition-colors w-full", theme === 'light' && 'bg-background text-foreground shadow-sm')}>
+                      <Sun className="h-4 w-4" /> Light
+                  </button>
+                  <button onClick={() => setTheme('system')} className={cn("inline-flex items-center justify-center gap-1 rounded-sm px-3 py-1.5 transition-colors w-full", theme === 'system' && 'bg-background text-foreground shadow-sm')}>
+                      <Laptop className="h-4 w-4" /> Auto
+                  </button>
+                  <button onClick={() => setTheme('dark')} className={cn("inline-flex items-center justify-center gap-1 rounded-sm px-3 py-1.5 transition-colors w-full", theme === 'dark' && 'bg-background text-foreground shadow-sm')}>
+                      <Moon className="h-4 w-4" /> Dark
+                  </button>
+              </div>
+            </div>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="flex items-center justify-between" onSelect={(e) => e.preventDefault()}>
+              <div className="flex items-center gap-2">
+                <Grid className="h-4 w-4" />
+                <span>Show Grid Lines</span>
+              </div>
+              <Switch
+                id="grid-lines"
+                checked={showGridLines}
+                onCheckedChange={onToggleGridLines}
+              />
+            </DropdownMenuItem>
+             <DropdownMenuSeparator />
+             <DropdownMenuItem>
+                <User className="mr-2 h-4 w-4" />
+                <span>Account Settings</span>
+                <Badge variant="secondary" className="ml-auto bg-yellow-400/20 text-yellow-600 dark:text-yellow-400">BETA</Badge>
+             </DropdownMenuItem>
+             <DropdownMenuItem>
+                <HelpCircle className="mr-2 h-4 w-4" />
+                <span>Help & Support</span>
+             </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+                <Link href="/login">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Sign Out</span>
+                </Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );

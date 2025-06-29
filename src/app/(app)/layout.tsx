@@ -11,10 +11,15 @@ export default function AppLayout({
   children: React.ReactNode;
 }>) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [showGridLines, setShowGridLines] = useState(true);
 
   const toggleSidebar = () => {
     setIsSidebarOpen((prev) => !prev);
   };
+
+  const toggleGridLines = () => {
+    setShowGridLines((prev) => !prev);
+  }
 
   return (
     <div className="bg-background text-foreground min-h-screen flex w-full">
@@ -30,8 +35,14 @@ export default function AppLayout({
         />
       </div>
       <div className="flex flex-col flex-1 min-w-0">
-        <AppHeader />
-        <main className="flex-1 flex flex-col w-full max-w-5xl mx-auto mt-6 bg-card rounded-t-2xl shadow-2xl border-t border-x border-border">
+        <AppHeader 
+          showGridLines={showGridLines}
+          onToggleGridLines={toggleGridLines}
+        />
+        <main className={cn(
+          "flex-1 flex flex-col w-full max-w-5xl mx-auto mt-6 bg-card rounded-t-2xl shadow-2xl border-t border-x border-border",
+          !showGridLines && 'no-grid-lines'
+          )}>
           {children}
         </main>
       </div>
