@@ -23,10 +23,12 @@ export default function ChatInterface() {
   const inputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Focus the input field on initial load
+  // Focus the input field on initial load and when loading completes
   useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
+    if (!isLoading) {
+      inputRef.current?.focus();
+    }
+  }, [isLoading]);
 
   // Automatically scroll to the bottom whenever messages are updated
   useEffect(() => {
@@ -53,7 +55,6 @@ export default function ChatInterface() {
       setMessages(prev => [...prev.filter(m => !m.isTyping), errorMessage]);
     } finally {
       setIsLoading(false);
-      inputRef.current?.focus();
     }
   };
   
@@ -99,8 +100,8 @@ export default function ChatInterface() {
   );
 
   return (
-    <div className="flex h-full flex-col notebook-lines-chat">
-      <ScrollArea className="flex-1 p-6 sm:p-8 lg:p-12" viewportRef={scrollViewportRef}>
+    <div className="flex h-full flex-col">
+       <ScrollArea className="flex-1 p-6 sm:p-8 lg:p-12 notebook-lines-chat" viewportRef={scrollViewportRef}>
         {messages.length > 0 ? content : welcomeScreen}
       </ScrollArea>
       
