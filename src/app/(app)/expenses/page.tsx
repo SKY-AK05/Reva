@@ -111,7 +111,7 @@ export default function ExpensesPage() {
         </header>
       </div>
       
-      <div className="border rounded-lg">
+      <div className="border rounded-lg mt-11">
         <Table>
           <TableHeader>
             <TableRow>
