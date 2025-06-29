@@ -4,6 +4,12 @@ This is a NextJS starter in Firebase Studio.
 
 To get started, take a look at src/app/page.tsx.
 
+## Development Notes
+
+### Authentication
+
+Authentication has been temporarily bypassed for development purposes. All landing page links currently redirect to the main `/chat` interface, simulating a logged-in user experience. This allows for rapid prototyping of the core application features without needing to implement a full authentication flow. The original authentication routes and UI components are still available under `/login` and `/signup`.
+
 ## Database Setup (Manual)
 
 This application is designed to be connected to a database to persist user data for features like tasks, expenses, and reminders. The following guide outlines the necessary tables and security policies for a PostgreSQL-based service like Supabase.

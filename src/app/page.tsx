@@ -143,7 +143,7 @@ export default function HomePage() {
                   asChild
                   className="w-full sm:w-auto bg-black text-white hover:bg-gray-800 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90"
                 >
-                  <Link href="/signup">Get Started for Free</Link>
+                  <Link href="/chat">Get Started for Free</Link>
                 </Button>
               </div>
             </div>
@@ -305,7 +305,7 @@ export default function HomePage() {
                       </CardContent>
                       <CardFooter className="p-0 pt-8">
                         <Button size="lg" asChild className="w-full bg-black text-white hover:bg-gray-800 rounded-full py-6 text-base font-semibold">
-                          <Link href="/signup">Sign Up Now</Link>
+                          <Link href="/chat">Sign Up Now</Link>
                         </Button>
                       </CardFooter>
                     </Card>
