@@ -42,7 +42,7 @@ export default function AppHeader({ showGridLines, onToggleGridLines }: AppHeade
   };
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border/80 bg-background/95 px-4 backdrop-blur-sm sm:px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 bg-background/95 px-4 backdrop-blur-sm sm:px-6">
       <Sheet>
         <SheetTrigger asChild>
           <Button variant="ghost" size="icon" className="md:hidden">
