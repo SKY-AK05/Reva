@@ -31,7 +31,7 @@ export default function AppLayout({
       </div>
       <div className="flex flex-col flex-1 min-w-0">
         <AppHeader />
-        <main className="flex-1 flex flex-col w-full max-w-5xl mx-auto mt-6 bg-card rounded-t-2xl shadow-2xl border-t-2 border-x-2 border-white">
+        <main className="flex-1 flex flex-col w-full max-w-5xl mx-auto mt-6 bg-card rounded-t-2xl shadow-2xl border-t border-x border-border">
           {children}
         </main>
       </div>
