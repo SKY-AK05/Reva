@@ -29,21 +29,21 @@ const ChatInputForm = ({
   isLoading: boolean;
   inputRef: React.RefObject<HTMLInputElement>;
 }) => (
-  <div className="w-full px-6">
+  <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-card via-card/90 to-transparent">
     <form onSubmit={handleSubmit} className="relative">
-      <Input
-        ref={inputRef}
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        placeholder="Start a conversation with Reva..."
-        className="w-full rounded-full p-4 pr-14 h-14 bg-background border-border/50 text-card-foreground text-base"
-        disabled={isLoading}
-        autoComplete="off"
-      />
-      <Button type="submit" size="icon" disabled={isLoading || !input.trim()} className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full h-10 w-10">
-        <SendHorizonal className="h-5 w-5" />
-        <span className="sr-only">Send</span>
-      </Button>
+        <Input
+            ref={inputRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Start a conversation with Reva..."
+            className="w-full rounded-xl p-4 pr-14 h-14 bg-background/80 backdrop-blur-sm border-border/50 text-card-foreground text-base shadow-lg"
+            disabled={isLoading}
+            autoComplete="off"
+        />
+        <Button type="submit" size="icon" disabled={isLoading || !input.trim()} className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full h-10 w-10">
+            <SendHorizonal className="h-5 w-5" />
+            <span className="sr-only">Send</span>
+        </Button>
     </form>
   </div>
 );
@@ -115,27 +115,30 @@ export default function ChatInterface() {
     </div>
   );
 
-  return (
-    <div className="h-full w-full relative">
-      <ScrollArea className="h-full p-6 sm:p-8 lg:p-12 pb-24 notebook-lines-chat" viewportRef={scrollViewportRef}>
-        {messages.length > 0 ? content : (
-            <div className="flex h-full flex-col items-center justify-center p-4 text-center">
-                <div className="space-y-2">
-                    <h1 className="text-3xl font-bold tracking-tight">Chat</h1>
-                    <p className="text-muted-foreground">Start a conversation with Reva below.</p>
-                </div>
-            </div>
-        )}
-      </ScrollArea>
-      <div className="absolute bottom-0 left-0 right-0 py-4 border-t border-border/80 bg-card">
-        <ChatInputForm 
-            handleSubmit={handleSubmit}
-            input={input}
-            setInput={setInput}
-            isLoading={isLoading}
-            inputRef={inputRef}
-        />
+  const welcomeScreen = (
+    <div className="flex h-full flex-col items-center justify-center p-4 text-center min-h-[calc(100vh-25rem)]">
+      <div className="space-y-4 max-w-sm">
+        <span className="text-6xl" role="img" aria-label="waving hand">👋</span>
+        <h1 className="text-4xl font-bold tracking-tight">Welcome to Reva!</h1>
+        <p className="text-muted-foreground text-lg">
+          Just start typing to create tasks, track expenses, set reminders, and more.
+        </p>
       </div>
+    </div>
+  );
+
+  return (
+    <div className="h-full w-full relative notebook-lines-chat">
+      <ScrollArea className="h-full p-6 sm:p-8 lg:p-12 pb-32" viewportRef={scrollViewportRef}>
+        {messages.length > 0 ? content : welcomeScreen}
+      </ScrollArea>
+      <ChatInputForm 
+          handleSubmit={handleSubmit}
+          input={input}
+          setInput={setInput}
+          isLoading={isLoading}
+          inputRef={inputRef}
+      />
     </div>
   );
 }
