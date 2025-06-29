@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect, FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -22,14 +21,16 @@ export default function ChatInterface() {
   const [isLoading, setIsLoading] = useState(false);
   const scrollViewportRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Focus the input field on initial load
   useEffect(() => {
-    if (scrollViewportRef.current) {
-        const viewport = scrollViewportRef.current;
-        setTimeout(() => {
-            viewport.scrollTop = viewport.scrollHeight;
-        }, 100); // Small delay to allow DOM update
-    }
+    inputRef.current?.focus();
+  }, []);
+
+  // Automatically scroll to the bottom whenever messages are updated
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -45,12 +46,11 @@ export default function ChatInterface() {
     try {
       const botResponseText = await processUserChat(input);
       const botMessage: Message = { id: (Date.now() + 1).toString(), text: botResponseText, sender: 'bot' };
-      setMessages(prev => prev.filter(m => !m.isTyping));
-      setMessages(prev => [...prev, botMessage]);
+      setMessages(prev => [...prev.filter(m => !m.isTyping), botMessage]);
     } catch (error) {
+      console.error(error);
       const errorMessage: Message = { id: (Date.now() + 1).toString(), text: "Sorry, I encountered an error. Please try again.", sender: 'bot' };
-      setMessages(prev => prev.filter(m => !m.isTyping));
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages(prev => [...prev.filter(m => !m.isTyping), errorMessage]);
     } finally {
       setIsLoading(false);
       inputRef.current?.focus();
@@ -58,29 +58,32 @@ export default function ChatInterface() {
   };
   
   const content = (
-    <div className="space-y-8">
-      {messages.map((message) => (
-        <div
-          key={message.id}
-          className={cn('w-full flex', {
-            'justify-end': message.sender === 'user',
-            'justify-start': message.sender === 'bot',
-          })}
-        >
-          <div className="max-w-xl">
-            {message.isTyping ? (
-               <div className="flex items-center space-x-1 py-1">
-                    <span className="h-2 w-2 animate-bounce rounded-full bg-foreground [animation-delay:-0.3s]"></span>
-                    <span className="h-2 w-2 animate-bounce rounded-full bg-foreground [animation-delay:-0.15s]"></span>
-                    <span className="h-2 w-2 animate-bounce rounded-full bg-foreground"></span>
-                </div>
-            ) : (
-              <p className="whitespace-pre-wrap leading-8 text-base text-foreground/90">{message.text}</p>
-            )}
+    <>
+      <div className="space-y-8">
+        {messages.map((message) => (
+          <div
+            key={message.id}
+            className={cn('w-full flex', {
+              'justify-end': message.sender === 'user',
+              'justify-start': message.sender === 'bot',
+            })}
+          >
+            <div className="max-w-xl">
+              {message.isTyping ? (
+                 <div className="flex items-center space-x-1 py-1">
+                      <span className="h-2 w-2 animate-bounce rounded-full bg-foreground [animation-delay:-0.3s]"></span>
+                      <span className="h-2 w-2 animate-bounce rounded-full bg-foreground [animation-delay:-0.15s]"></span>
+                      <span className="h-2 w-2 animate-bounce rounded-full bg-foreground"></span>
+                  </div>
+              ) : (
+                <p className="whitespace-pre-wrap leading-8 text-base text-foreground/90">{message.text}</p>
+              )}
+            </div>
           </div>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+      <div ref={messagesEndRef} />
+    </>
   );
 
   const welcomeScreen = (
