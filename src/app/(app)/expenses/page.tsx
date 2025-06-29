@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -103,7 +102,7 @@ export default function ExpensesPage() {
     <div className="flex flex-1 flex-col p-6 sm:p-8 lg:p-12 notebook-lines">
       <div className="h-[5.5rem] flex items-center">
         <header className="flex items-center gap-4">
-          <HandCoins className="w-8 h-8 text-muted-foreground" />
+          <HandCoins className="w-9 h-9 text-primary" />
           <div className="space-y-1">
             <h1 className="text-3xl font-bold tracking-tight">Expenses</h1>
             <p className="text-muted-foreground">Track and manage your spending.</p>
