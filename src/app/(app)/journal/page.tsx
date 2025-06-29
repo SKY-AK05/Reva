@@ -26,7 +26,7 @@ export default function JournalPage() {
   return (
     <div className="flex flex-1 flex-col space-y-8 p-6 sm:p-8 lg:p-12 notebook-lines-journal">
       <header className="flex items-center gap-4">
-        <BookText className="w-8 h-8 text-muted-foreground" />
+        <BookText className="w-9 h-9 text-primary" />
         <div className="space-y-1">
           <h1 className="text-3xl font-bold tracking-tight">Journal</h1>
           <p className="text-muted-foreground">Your private space for thoughts and ideas.</p>
