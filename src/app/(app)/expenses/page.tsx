@@ -100,14 +100,16 @@ export default function ExpensesPage() {
 
 
   return (
-    <div className="flex flex-1 flex-col space-y-8 p-6 sm:p-8 lg:p-12 notebook-lines">
-      <header className="flex items-center gap-4">
-        <DollarSign className="w-8 h-8 text-muted-foreground" />
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">Expenses</h1>
-          <p className="text-muted-foreground">Track and manage your spending. Click on any cell to edit.</p>
-        </div>
-      </header>
+    <div className="flex flex-1 flex-col p-6 sm:p-8 lg:p-12 notebook-lines">
+      <div className="h-[5.5rem] flex items-center">
+        <header className="flex items-center gap-4">
+          <DollarSign className="w-8 h-8 text-muted-foreground" />
+          <div className="space-y-1">
+            <h1 className="text-3xl font-bold tracking-tight">Expenses</h1>
+            <p className="text-muted-foreground">Track and manage your spending. Click on any cell to edit.</p>
+          </div>
+        </header>
+      </div>
       
       <div className="border rounded-lg">
         <Table>
