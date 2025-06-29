@@ -8,6 +8,18 @@ const overviewCards = [
   { title: 'Goals', value: '5 in Progress', icon: Target, colorClass: 'text-chart-4' },
 ];
 
+const upcomingTasks = [
+  { id: '1', description: 'Finish Q3 report for work', dueDate: 'Tomorrow' },
+  { id: '2', description: 'Schedule dentist appointment', dueDate: 'In 3 days' },
+  { id: '3', description: 'Call mom', dueDate: 'Friday' },
+];
+
+const recentExpenses = [
+  { id: '1', description: 'Lunch with team', amount: 25.00 },
+  { id: '2', description: 'Coffee', amount: 5.50 },
+  { id: '3', description: 'Monthly subscription', amount: 12.00 },
+];
+
 export default function OverviewPage() {
   return (
     <div className="flex flex-1 flex-col space-y-6 p-6 sm:p-8 lg:p-12 notebook-lines">
@@ -34,7 +46,18 @@ export default function OverviewPage() {
                 <CardTitle>Upcoming Tasks</CardTitle>
             </CardHeader>
             <CardContent>
-                <p className="text-muted-foreground">You have no upcoming tasks.</p>
+                {upcomingTasks.length > 0 ? (
+                    <ul className="space-y-3">
+                        {upcomingTasks.map((task) => (
+                            <li key={task.id} className="flex justify-between items-center text-sm">
+                                <span>{task.description}</span>
+                                <span className="text-muted-foreground">{task.dueDate}</span>
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <p className="text-muted-foreground">You have no upcoming tasks.</p>
+                )}
             </CardContent>
          </Card>
          <Card className="bg-secondary/50">
@@ -42,7 +65,18 @@ export default function OverviewPage() {
                 <CardTitle>Recent Expenses</CardTitle>
             </CardHeader>
             <CardContent>
-                <p className="text-muted-foreground">You have no recent expenses.</p>
+                {recentExpenses.length > 0 ? (
+                    <ul className="space-y-3">
+                        {recentExpenses.map((expense) => (
+                            <li key={expense.id} className="flex justify-between items-center text-sm">
+                                <span>{expense.description}</span>
+                                <span className="font-medium">${expense.amount.toFixed(2)}</span>
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <p className="text-muted-foreground">You have no recent expenses.</p>
+                )}
             </CardContent>
          </Card>
        </div>
