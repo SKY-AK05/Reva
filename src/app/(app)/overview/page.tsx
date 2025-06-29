@@ -10,7 +10,7 @@ const overviewCards = [
 
 export default function OverviewPage() {
   return (
-    <div className="flex flex-col space-y-6 p-6 sm:p-8 lg:p-12">
+    <div className="flex flex-col space-y-6 p-6 sm:p-8 lg:p-12 notebook-lines">
       <div className="space-y-1">
         <h1 className="text-3xl font-bold tracking-tight">Library</h1>
         <p className="text-muted-foreground">An overview of all your notebooks.</p>

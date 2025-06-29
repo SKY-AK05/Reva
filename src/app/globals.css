@@ -89,17 +89,17 @@
 
 @layer utilities {
   .notebook-lines {
-    background-image: linear-gradient(hsla(var(--foreground), 0.05) 1px, transparent 1px);
+    background-image: linear-gradient(hsla(var(--foreground), 0.07) 1px, transparent 1px);
     background-size: 100% 2.75rem; /* Corresponds to leading-loose on text and consistent row height */
     line-height: 2.75rem;
   }
   .notebook-lines-journal {
-    background-image: linear-gradient(hsla(var(--foreground), 0.05) 1px, transparent 1px);
+    background-image: linear-gradient(hsla(var(--foreground), 0.07) 1px, transparent 1px);
     background-size: 100% 1.75rem; /* Corresponds to leading-relaxed on text */
     background-position-y: 0.5rem;
   }
   .notebook-lines-chat {
-    background-image: linear-gradient(hsla(var(--foreground), 0.05) 1px, transparent 1px);
+    background-image: linear-gradient(hsla(var(--foreground), 0.07) 1px, transparent 1px);
     background-size: 100% 2rem;
      background-position-y: 0.75rem;
   }
