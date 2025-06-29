@@ -101,9 +101,15 @@ export default function ChatInterface() {
 
   return (
     <div className="flex h-full flex-col">
-       <ScrollArea className="flex-1 p-6 sm:p-8 lg:p-12 notebook-lines-chat" viewportRef={scrollViewportRef}>
-        {messages.length > 0 ? content : welcomeScreen}
-      </ScrollArea>
+      {messages.length > 0 ? (
+        <ScrollArea className="flex-1 p-6 sm:p-8 lg:p-12 notebook-lines-chat" viewportRef={scrollViewportRef}>
+          {content}
+        </ScrollArea>
+      ) : (
+        <div className="flex-1 p-6 sm:p-8 lg:p-12 notebook-lines-chat">
+          {welcomeScreen}
+        </div>
+      )}
       
       <div className="p-4 bg-card">
         <div className="w-full max-w-3xl mx-auto">
