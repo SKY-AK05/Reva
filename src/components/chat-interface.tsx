@@ -116,8 +116,8 @@ export default function ChatInterface() {
   );
 
   return (
-    <div className="flex flex-col h-full w-full">
-      <ScrollArea className="flex-1 p-6 sm:p-8 lg:p-12 notebook-lines-chat" viewportRef={scrollViewportRef}>
+    <div className="h-full w-full relative">
+      <ScrollArea className="h-full p-6 sm:p-8 lg:p-12 pb-24 notebook-lines-chat" viewportRef={scrollViewportRef}>
         {messages.length > 0 ? content : (
             <div className="flex h-full flex-col items-center justify-center p-4 text-center">
                 <div className="space-y-2">
@@ -127,7 +127,7 @@ export default function ChatInterface() {
             </div>
         )}
       </ScrollArea>
-      <div className="py-4 border-t border-border/80 bg-card">
+      <div className="absolute bottom-0 left-0 right-0 py-4 border-t border-border/80 bg-card">
         <ChatInputForm 
             handleSubmit={handleSubmit}
             input={input}
