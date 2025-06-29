@@ -51,12 +51,12 @@ export default function RemindersPage() {
             <TableHead className="w-[200px]">Time</TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody>
+        <TableBody className="notebook-lines">
           {reminders.map((reminder) => (
-            <TableRow key={reminder.id}>
-              <TableCell className="font-medium">{reminder.title}</TableCell>
-              <TableCell>{reminder.notes}</TableCell>
-              <TableCell>{reminder.time}</TableCell>
+            <TableRow key={reminder.id} className="border-none">
+              <TableCell className="h-12 align-middle font-medium">{reminder.title}</TableCell>
+              <TableCell className="h-12 align-middle">{reminder.notes}</TableCell>
+              <TableCell className="h-12 align-middle">{reminder.time}</TableCell>
             </TableRow>
           ))}
         </TableBody>

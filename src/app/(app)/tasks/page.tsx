@@ -77,15 +77,15 @@ export default function TasksPage() {
             <TableHead className="w-[100px]">Priority</TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody>
+        <TableBody className="notebook-lines">
           {tasks.map((task) => (
-            <TableRow key={task.id} data-state={task.completed ? 'completed' : ''} className="data-[state=completed]:text-muted-foreground data-[state=completed]:line-through">
-              <TableCell>
+            <TableRow key={task.id} data-state={task.completed ? 'completed' : ''} className="border-none data-[state=completed]:text-muted-foreground data-[state=completed]:line-through">
+              <TableCell className="h-12 align-middle">
                 <Checkbox id={`task-${task.id}`} checked={task.completed} />
               </TableCell>
-              <TableCell className="font-medium">{task.description}</TableCell>
-              <TableCell>{task.dueDate}</TableCell>
-              <TableCell>
+              <TableCell className="h-12 align-middle font-medium">{task.description}</TableCell>
+              <TableCell className="h-12 align-middle">{task.dueDate}</TableCell>
+              <TableCell className="h-12 align-middle">
                 <Badge variant={priorityVariant[task.priority as keyof typeof priorityVariant]}>
                   {task.priority}
                 </Badge>

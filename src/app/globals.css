@@ -104,3 +104,15 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .notebook-lines {
+    background-image: linear-gradient(hsl(var(--border)) 1px, transparent 1px);
+    background-size: 100% 3rem;
+  }
+  .notebook-lines-journal {
+    background-image: linear-gradient(hsl(var(--border)) 1px, transparent 1px);
+    background-size: 100% 1.625rem;
+    background-position-y: 0.5rem;
+  }
+}

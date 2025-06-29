@@ -62,12 +62,12 @@ export default function GoalsPage() {
               <TableHead className="w-[200px]">Progress</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
+          <TableBody className="notebook-lines">
             {goals.map((goal) => (
-              <TableRow key={goal.id}>
-                <TableCell className="font-medium">{goal.title}</TableCell>
-                <TableCell className="hidden sm:table-cell">{goal.description}</TableCell>
-                <TableCell>
+              <TableRow key={goal.id} className="border-none">
+                <TableCell className="h-12 align-middle font-medium">{goal.title}</TableCell>
+                <TableCell className="h-12 align-middle hidden sm:table-cell">{goal.description}</TableCell>
+                <TableCell className="h-12 align-middle">
                   <div className="flex flex-col gap-2">
                     <Progress value={goal.progress} className="h-2" />
                     <span className="text-sm text-muted-foreground">{goal.status}</span>

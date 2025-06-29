@@ -70,13 +70,13 @@ export default function ExpensesPage() {
             <TableHead className="w-[100px] text-right">Amount</TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody>
+        <TableBody className="notebook-lines">
           {expenses.map((expense) => (
-            <TableRow key={expense.id}>
-              <TableCell className="font-medium">{expense.item}</TableCell>
-              <TableCell>{expense.category}</TableCell>
-              <TableCell>{expense.date}</TableCell>
-              <TableCell className="text-right">${expense.amount.toFixed(2)}</TableCell>
+            <TableRow key={expense.id} className="border-none">
+              <TableCell className="h-12 align-middle font-medium">{expense.item}</TableCell>
+              <TableCell className="h-12 align-middle">{expense.category}</TableCell>
+              <TableCell className="h-12 align-middle">{expense.date}</TableCell>
+              <TableCell className="h-12 align-middle text-right">${expense.amount.toFixed(2)}</TableCell>
             </TableRow>
           ))}
         </TableBody>

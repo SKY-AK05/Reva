@@ -25,7 +25,7 @@ const entries = [
 
 export default function JournalPage() {
   return (
-    <div className="flex flex-col space-y-6 p-4 sm:p-6">
+    <div className="flex flex-col space-y-6 p-4 sm:p-6 notebook-lines-journal">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <h1 className="text-3xl font-bold tracking-tight">Journal</h1>
