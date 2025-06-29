@@ -8,11 +8,7 @@ import AppSidebar from '@/components/app-sidebar';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
-export default function AppHeader({
-  onToggleSidebar,
-}: {
-  onToggleSidebar: () => void;
-}) {
+export default function AppHeader() {
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border/80 bg-background/95 px-4 backdrop-blur-sm sm:px-6">
       {/* Mobile Toggle */}
@@ -30,17 +26,6 @@ export default function AppHeader({
           <AppSidebar />
         </SheetContent>
       </Sheet>
-
-      {/* Desktop Toggle */}
-      <Button
-        variant="ghost"
-        size="icon"
-        className="hidden md:flex"
-        onClick={onToggleSidebar}
-      >
-        <PanelLeft className="h-5 w-5" />
-        <span className="sr-only">Toggle sidebar</span>
-      </Button>
 
       <Button
         variant="outline"

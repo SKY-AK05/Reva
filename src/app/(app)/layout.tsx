@@ -24,10 +24,13 @@ export default function AppLayout({
           isSidebarOpen ? 'w-72' : 'w-20'
         )}
       >
-        <AppSidebar isCollapsed={!isSidebarOpen} />
+        <AppSidebar
+          isCollapsed={!isSidebarOpen}
+          onToggleSidebar={toggleSidebar}
+        />
       </div>
       <div className="flex flex-col flex-1 min-w-0">
-        <AppHeader onToggleSidebar={toggleSidebar} />
+        <AppHeader />
         <main className="flex-1 flex flex-col w-full max-w-5xl mx-auto mt-6 bg-card rounded-t-2xl shadow-2xl border-t-2 border-x-2 border-white">
           {children}
         </main>

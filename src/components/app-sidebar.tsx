@@ -10,6 +10,7 @@ import {
   Bell,
   Target,
   BookText,
+  PanelLeft,
 } from 'lucide-react';
 import RevaLogo from './reva-logo';
 import { Button } from './ui/button';
@@ -21,7 +22,13 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 
-export default function AppSidebar({ isCollapsed }: { isCollapsed?: boolean }) {
+export default function AppSidebar({
+  isCollapsed,
+  onToggleSidebar,
+}: {
+  isCollapsed?: boolean;
+  onToggleSidebar?: () => void;
+}) {
   const pathname = usePathname();
 
   const menuItems = [
@@ -44,7 +51,9 @@ export default function AppSidebar({ isCollapsed }: { isCollapsed?: boolean }) {
       >
         <Link href="/chat" className="flex items-center gap-3">
           <RevaLogo size="sm" />
-          <span className={cn('font-semibold text-lg', isCollapsed && 'hidden')}>
+          <span
+            className={cn('font-semibold text-lg', isCollapsed && 'hidden')}
+          >
             Reva
           </span>
         </Link>
@@ -94,6 +103,33 @@ export default function AppSidebar({ isCollapsed }: { isCollapsed?: boolean }) {
             )
           )}
         </nav>
+        <div className="mt-auto border-t p-2">
+          {onToggleSidebar &&
+            (isCollapsed ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-center"
+                    onClick={onToggleSidebar}
+                  >
+                    <PanelLeft className="h-5 w-5" />
+                    <span className="sr-only">Expand Sidebar</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right">Expand Sidebar</TooltipContent>
+              </Tooltip>
+            ) : (
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+                onClick={onToggleSidebar}
+              >
+                <PanelLeft className="mr-2 h-5 w-5" />
+                Collapse
+              </Button>
+            ))}
+        </div>
       </TooltipProvider>
     </div>
   );
