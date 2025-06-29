@@ -70,10 +70,11 @@ export default function ChatInterface() {
             })}
           >
             <div
-              className={cn("max-w-xl p-4 rounded-2xl", {
-                "bg-primary text-primary-foreground": message.sender === 'user',
-                "bg-muted": message.sender === 'bot',
-              })}
+              className={cn(
+                "max-w-xl p-4",
+                message.sender === 'user' && "rounded-2xl bg-primary text-primary-foreground",
+                message.isTyping && "rounded-2xl bg-muted"
+              )}
             >
               {message.isTyping ? (
                  <div className="flex items-center space-x-1 py-1">
