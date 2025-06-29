@@ -99,17 +99,43 @@ export async function processUserChat(chatInput: string): Promise<string> {
         }
     }
 
-    if (lowerCaseInput.includes('expense') || lowerCaseInput.includes('spent') || lowerCaseInput.includes('cost') || lowerCaseInput.includes('$')) {
+    if (lowerCaseInput.includes('expense') || lowerCaseInput.includes('spent') || lowerCaseInput.includes('cost') || lowerCaseInput.includes('$') || lowerCaseInput.includes('rupees')) {
         try {
             const result = await trackExpenseFromChat({ chatInput });
             if (result.needsClarification) {
                 return result.clarificationPrompt || "I need a bit more information to track that expense. Could you provide more details?";
             }
-            let response = "Expense tracked!";
-            if(result.amount) response += `\n\n**Amount:** $${result.amount.toFixed(2)}`;
-            if(result.category) response += `\n**Category:** ${result.category}`;
+            
+            if (!result.expenses || result.expenses.length === 0) {
+                return "I couldn't find any expenses to track in your message. Could you try rephrasing?";
+            }
+
+            if (result.expenses.length === 1) {
+                const expense = result.expenses[0];
+                const currencySymbol = result.currency?.toLowerCase().includes('rupee') ? '₹' : '$';
+                let response = `Expense tracked!`;
+                response += `\n\n**Item:** ${expense.description}`;
+                response += `\n**Amount:** ${currencySymbol}${expense.amount.toFixed(2)}`;
+                response += `\n**Category:** ${expense.category || 'N/A'}`;
+                if(result.date) response += `\n**Date:** ${result.date}`;
+                return response;
+            }
+            
+            const currencySymbol = result.currency?.toLowerCase().includes('rupee') ? '₹' : '$';
+            const totalAmount = result.expenses.reduce((sum, item) => sum + item.amount, 0);
+
+            let response = "Okay, I've recorded your expenses:\n\n";
+            response += "| Item | Amount | Category |\n";
+            response += "|:---|---:|:---|\n";
+            result.expenses.forEach(item => {
+                response += `| ${item.description} | ${currencySymbol}${item.amount.toFixed(2)} | ${item.category || 'N/A'} |\n`;
+            });
+
+            response += `\n**Total:** ${currencySymbol}${totalAmount.toFixed(2)}`;
             if(result.date) response += `\n**Date:** ${result.date}`;
+
             return response;
+
         } catch (e) {
             console.error(e);
             return "I had trouble tracking that expense. Can you try rephrasing?";
