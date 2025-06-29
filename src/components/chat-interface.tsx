@@ -29,14 +29,17 @@ const ChatInputForm = ({
   isLoading: boolean;
   inputRef: React.RefObject<HTMLInputElement>;
 }) => (
-  <div className="absolute bottom-0 left-0 right-0 px-6 pb-8 pt-12 bg-gradient-to-t from-card via-card/90 to-transparent">
+  // This bar is absolutely positioned at the bottom of the parent container.
+  // It has a top shadow to separate it from the content above.
+  <div className="absolute bottom-0 left-0 right-0 bg-card p-4 pt-2 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_-4px_12px_rgba(0,0,0,0.15)]">
     <form onSubmit={handleSubmit} className="relative">
         <Input
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Start a conversation with Reva..."
-            className="w-full rounded-xl p-4 pr-14 h-14 bg-background/80 backdrop-blur-sm border-border/50 text-card-foreground text-base shadow-lg"
+            // Restyled for a more grounded look.
+            className="w-full rounded-xl p-4 pr-14 h-14 bg-background/80 backdrop-blur-sm border-border/50 text-card-foreground text-base shadow-lg transition-transform focus:scale-[1.01]"
             disabled={isLoading}
             autoComplete="off"
         />
@@ -116,7 +119,7 @@ export default function ChatInterface() {
   );
 
   const welcomeScreen = (
-    <div className="flex h-full flex-col items-center justify-center p-4 text-center min-h-[calc(100vh-25rem)]">
+    <div className="flex h-full flex-col items-center justify-center p-4 text-center">
       <div className="space-y-4 max-w-sm">
         <span className="text-6xl" role="img" aria-label="waving hand">👋</span>
         <h1 className="text-4xl font-bold tracking-tight">Welcome to Reva!</h1>
@@ -129,7 +132,8 @@ export default function ChatInterface() {
 
   return (
     <div className="h-full w-full relative notebook-lines-chat">
-      <ScrollArea className="h-full p-6 sm:p-8 lg:p-12 pb-32" viewportRef={scrollViewportRef}>
+      {/* The padding-bottom on the scroll area makes space for the fixed input bar */}
+      <ScrollArea className="h-full p-6 sm:p-8 lg:p-12 pb-28" viewportRef={scrollViewportRef}>
         {messages.length > 0 ? content : welcomeScreen}
       </ScrollArea>
       <ChatInputForm 
