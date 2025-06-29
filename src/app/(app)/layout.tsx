@@ -39,12 +39,14 @@ export default function AppLayout({
           showGridLines={showGridLines}
           onToggleGridLines={toggleGridLines}
         />
-        <main className={cn(
-          "flex-1 flex flex-col w-full max-w-5xl mx-auto mt-6 bg-card rounded-t-2xl shadow-2xl border-t border-x border-border",
-          !showGridLines && 'no-grid-lines'
-          )}>
-          {children}
-        </main>
+        <div className="flex-1 mt-6">
+          <main className={cn(
+            "flex flex-col w-full max-w-5xl mx-auto bg-card rounded-t-2xl shadow-2xl border-t border-x border-border h-full",
+            !showGridLines && 'no-grid-lines'
+            )}>
+            {children}
+          </main>
+        </div>
       </div>
     </div>
   );
