@@ -107,7 +107,7 @@ export default function TasksPage() {
         </header>
       </div>
       
-      <div className="border rounded-lg mt-11">
+      <div className="border border-primary rounded-lg mt-11">
         <Table>
           <TableHeader>
             <TableRow>
