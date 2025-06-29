@@ -29,7 +29,7 @@ const ChatInputForm = ({
   isLoading: boolean;
   inputRef: React.RefObject<HTMLInputElement>;
 }) => (
-  <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-card via-card/90 to-transparent">
+  <div className="absolute bottom-0 left-0 right-0 px-6 pb-8 pt-12 bg-gradient-to-t from-card via-card/90 to-transparent">
     <form onSubmit={handleSubmit} className="relative">
         <Input
             ref={inputRef}
