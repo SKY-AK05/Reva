@@ -60,7 +60,7 @@ export default function ChatInterface() {
   
   const content = (
     <>
-      <div className="space-y-8">
+      <div className="space-y-4">
         {messages.map((message) => (
           <div
             key={message.id}
@@ -69,7 +69,12 @@ export default function ChatInterface() {
               'justify-start': message.sender === 'bot',
             })}
           >
-            <div className="max-w-xl">
+            <div
+              className={cn("max-w-xl p-4 rounded-2xl", {
+                "bg-primary text-primary-foreground": message.sender === 'user',
+                "bg-muted": message.sender === 'bot',
+              })}
+            >
               {message.isTyping ? (
                  <div className="flex items-center space-x-1 py-1">
                       <span className="h-2 w-2 animate-bounce rounded-full bg-foreground [animation-delay:-0.3s]"></span>
@@ -77,7 +82,7 @@ export default function ChatInterface() {
                       <span className="h-2 w-2 animate-bounce rounded-full bg-foreground"></span>
                   </div>
               ) : (
-                <p className="whitespace-pre-wrap leading-8 text-base text-foreground/90">{message.text}</p>
+                <p className="whitespace-pre-wrap leading-relaxed text-base">{message.text}</p>
               )}
             </div>
           </div>
@@ -100,7 +105,7 @@ export default function ChatInterface() {
   );
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex flex-1 flex-col">
       {messages.length > 0 ? (
         <ScrollArea className="flex-1 p-6 sm:p-8 lg:p-12 notebook-lines-chat" viewportRef={scrollViewportRef}>
           {content}
@@ -111,7 +116,7 @@ export default function ChatInterface() {
         </div>
       )}
       
-      <div className="p-4 bg-card">
+      <div className="p-4 bg-card border-t">
         <div className="w-full max-w-3xl mx-auto">
           <form onSubmit={handleSubmit} className="relative">
               <Input
