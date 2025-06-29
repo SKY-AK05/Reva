@@ -12,12 +12,16 @@ const upcomingTasks = [
   { id: '1', description: 'Finish Q3 report for work', dueDate: 'Tomorrow' },
   { id: '2', description: 'Schedule dentist appointment', dueDate: 'In 3 days' },
   { id: '3', description: 'Call mom', dueDate: 'Friday' },
+  { id: '4', description: 'Buy birthday gift for Sarah', dueDate: 'Next week' },
+  { id: '5', description: 'Renew car insurance', dueDate: 'Oct 31st' },
 ];
 
 const recentExpenses = [
   { id: '1', description: 'Lunch with team', amount: 25.00 },
   { id: '2', description: 'Coffee', amount: 5.50 },
   { id: '3', description: 'Monthly subscription', amount: 12.00 },
+  { id: '4', description: 'Groceries from store', amount: 78.21 },
+  { id: '5', description: 'Movie tickets', amount: 22.00 },
 ];
 
 export default function OverviewPage() {
