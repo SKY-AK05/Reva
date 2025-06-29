@@ -68,34 +68,32 @@ export default function TasksPage() {
           Add Task
         </Button>
       </div>
-      <div className="rounded-lg border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[50px]"></TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead className="w-[120px]">Due Date</TableHead>
-              <TableHead className="w-[100px]">Priority</TableHead>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-[50px]"></TableHead>
+            <TableHead>Description</TableHead>
+            <TableHead className="w-[120px]">Due Date</TableHead>
+            <TableHead className="w-[100px]">Priority</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {tasks.map((task) => (
+            <TableRow key={task.id} data-state={task.completed ? 'completed' : ''} className="data-[state=completed]:text-muted-foreground data-[state=completed]:line-through">
+              <TableCell>
+                <Checkbox id={`task-${task.id}`} checked={task.completed} />
+              </TableCell>
+              <TableCell className="font-medium">{task.description}</TableCell>
+              <TableCell>{task.dueDate}</TableCell>
+              <TableCell>
+                <Badge variant={priorityVariant[task.priority as keyof typeof priorityVariant]}>
+                  {task.priority}
+                </Badge>
+              </TableCell>
             </TableRow>
-          </TableHeader>
-          <TableBody>
-            {tasks.map((task) => (
-              <TableRow key={task.id} data-state={task.completed ? 'completed' : ''} className="data-[state=completed]:text-muted-foreground data-[state=completed]:line-through">
-                <TableCell>
-                  <Checkbox id={`task-${task.id}`} checked={task.completed} />
-                </TableCell>
-                <TableCell className="font-medium">{task.description}</TableCell>
-                <TableCell>{task.dueDate}</TableCell>
-                <TableCell>
-                  <Badge variant={priorityVariant[task.priority as keyof typeof priorityVariant]}>
-                    {task.priority}
-                  </Badge>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }

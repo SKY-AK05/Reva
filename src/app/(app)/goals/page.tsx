@@ -1,6 +1,13 @@
 import { PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Progress } from '@/components/ui/progress';
 
 const goals = [
@@ -47,23 +54,29 @@ export default function GoalsPage() {
           Add Goal
         </Button>
       </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {goals.map((goal) => (
-          <Card key={goal.id}>
-            <CardHeader>
-              <CardTitle>{goal.title}</CardTitle>
-              <CardDescription>{goal.description}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Progress value={goal.progress} className="h-2" />
-            </CardContent>
-            <CardFooter>
-              <p className="text-sm text-muted-foreground">{goal.status}</p>
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
+      <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Goal</TableHead>
+              <TableHead className="hidden sm:table-cell">Description</TableHead>
+              <TableHead className="w-[200px]">Progress</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {goals.map((goal) => (
+              <TableRow key={goal.id}>
+                <TableCell className="font-medium">{goal.title}</TableCell>
+                <TableCell className="hidden sm:table-cell">{goal.description}</TableCell>
+                <TableCell>
+                  <div className="flex flex-col gap-2">
+                    <Progress value={goal.progress} className="h-2" />
+                    <span className="text-sm text-muted-foreground">{goal.status}</span>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
     </div>
   );
 }

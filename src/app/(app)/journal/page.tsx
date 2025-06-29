@@ -1,6 +1,6 @@
 import { PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 
 const entries = [
   {
@@ -37,17 +37,14 @@ export default function JournalPage() {
         </Button>
       </div>
 
-      <div className="space-y-4">
-        {entries.map((entry) => (
-          <Card key={entry.id}>
-            <CardHeader>
-              <CardTitle>{entry.title}</CardTitle>
-              <CardDescription>{entry.date}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">{entry.content}</p>
-            </CardContent>
-          </Card>
+      <div className="space-y-8">
+        {entries.map((entry, index) => (
+          <div key={entry.id}>
+            <h2 className="text-2xl font-semibold tracking-tight">{entry.title}</h2>
+            <p className="text-sm text-muted-foreground mb-4">{entry.date}</p>
+            <p className="text-muted-foreground leading-relaxed">{entry.content}</p>
+            {index < entries.length - 1 && <Separator className="my-8" />}
+          </div>
         ))}
       </div>
     </div>

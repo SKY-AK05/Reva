@@ -1,6 +1,13 @@
-import { PlusCircle, Bell, Clock } from 'lucide-react';
+import { PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 const reminders = [
   {
@@ -36,26 +43,24 @@ export default function RemindersPage() {
           Add Reminder
         </Button>
       </div>
-
-      <div className="space-y-4">
-        {reminders.map((reminder) => (
-          <Card key={reminder.id}>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <div>
-                    <CardTitle className="text-lg">{reminder.title}</CardTitle>
-                    <CardDescription>{reminder.notes}</CardDescription>
-                </div>
-                <Bell className="h-5 w-5 text-primary" />
-            </CardHeader>
-            <CardContent>
-                <div className="flex items-center text-sm text-muted-foreground">
-                    <Clock className="mr-2 h-4 w-4" />
-                    <span>{reminder.time}</span>
-                </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Reminder</TableHead>
+            <TableHead>Notes</TableHead>
+            <TableHead className="w-[200px]">Time</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {reminders.map((reminder) => (
+            <TableRow key={reminder.id}>
+              <TableCell className="font-medium">{reminder.title}</TableCell>
+              <TableCell>{reminder.notes}</TableCell>
+              <TableCell>{reminder.time}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }
