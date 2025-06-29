@@ -1,4 +1,12 @@
 import { DollarSign } from 'lucide-react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const expenses = [
   {
@@ -49,15 +57,27 @@ export default function ExpensesPage() {
         </div>
       </header>
       
-      <div className="border-t border-border/80">
-          {expenses.map((expense) => (
-            <div key={expense.id} className="grid grid-cols-3 gap-4 border-b border-border/80 h-11 items-center">
-              <div className="font-medium col-span-2 sm:col-span-1">{expense.item}</div>
-              <div className="hidden sm:block text-muted-foreground">{expense.category}</div>
-              <div className="text-right text-muted-foreground">{expense.date}</div>
-              <div className="text-right font-semibold col-start-3">${expense.amount.toFixed(2)}</div>
-            </div>
-          ))}
+      <div className="border rounded-lg">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Item</TableHead>
+              <TableHead className="hidden sm:table-cell">Category</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead className="text-right">Amount</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {expenses.map((expense) => (
+              <TableRow key={expense.id}>
+                <TableCell className="font-medium">{expense.item}</TableCell>
+                <TableCell className="hidden sm:table-cell">{expense.category}</TableCell>
+                <TableCell>{expense.date}</TableCell>
+                <TableCell className="text-right font-semibold">${expense.amount.toFixed(2)}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
 
     </div>
