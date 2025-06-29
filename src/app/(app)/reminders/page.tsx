@@ -76,8 +76,8 @@ export default function RemindersPage() {
   };
 
   return (
-    <div className="flex flex-1 flex-col space-y-8 p-6 sm:p-8 lg:p-12 notebook-lines-journal">
-      <header className="flex items-center gap-4">
+    <div className="flex flex-1 flex-col p-6 sm:p-8 lg:p-12 notebook-lines-journal">
+      <header className="flex items-center gap-4 h-[5.25rem]">
         <Bell className="w-9 h-9 text-primary" />
         <div className="space-y-1">
           <h1 className="text-3xl font-bold tracking-tight">Reminders</h1>
@@ -85,7 +85,7 @@ export default function RemindersPage() {
         </div>
       </header>
 
-      <div className="space-y-6">
+      <div className="space-y-6 mt-7">
         <h2 className="text-xl font-semibold">Upcoming</h2>
         <ul className="space-y-6">
           {reminders.map((reminder) => (

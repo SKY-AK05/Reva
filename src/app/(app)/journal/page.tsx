@@ -24,8 +24,8 @@ const entries = [
 
 export default function JournalPage() {
   return (
-    <div className="flex flex-1 flex-col space-y-8 p-6 sm:p-8 lg:p-12 notebook-lines-journal">
-      <header className="flex items-center gap-4">
+    <div className="flex flex-1 flex-col p-6 sm:p-8 lg:p-12 notebook-lines-journal">
+      <header className="flex items-center gap-4 h-[5.25rem]">
         <BookText className="w-9 h-9 text-primary" />
         <div className="space-y-1">
           <h1 className="text-3xl font-bold tracking-tight">Journal</h1>
@@ -33,7 +33,7 @@ export default function JournalPage() {
         </div>
       </header>
 
-      <div className="space-y-8">
+      <div className="space-y-8 mt-7">
         {entries.map((entry, index) => (
           <article key={entry.id}>
             <h2 className="text-2xl font-semibold tracking-tight">{entry.title}</h2>

@@ -26,12 +26,14 @@ const recentExpenses = [
 
 export default function OverviewPage() {
   return (
-    <div className="flex flex-1 flex-col space-y-6 p-6 sm:p-8 lg:p-12 notebook-lines">
-      <div className="space-y-1">
-        <h1 className="text-3xl font-bold tracking-tight">Library</h1>
-        <p className="text-muted-foreground">An overview of all your notebooks.</p>
+    <div className="flex flex-1 flex-col p-6 sm:p-8 lg:p-12 notebook-lines">
+      <div className="h-[5.5rem] flex items-center">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold tracking-tight">Library</h1>
+          <p className="text-muted-foreground">An overview of all your notebooks.</p>
+        </div>
       </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mt-11">
         {overviewCards.map((card) => (
           <Card key={card.title} className="bg-secondary/50">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -44,7 +46,7 @@ export default function OverviewPage() {
           </Card>
         ))}
       </div>
-       <div className="grid gap-4 md:grid-cols-2">
+       <div className="grid gap-4 md:grid-cols-2 mt-6">
          <Card className="bg-secondary/50">
             <CardHeader>
                 <CardTitle>Upcoming Tasks</CardTitle>
