@@ -33,9 +33,9 @@ export default function AppHeader() {
         asChild
         className="border-border/80 hover:bg-accent"
       >
-        <Link href="/journal" className="flex items-center gap-2">
+        <Link href="/chat" className="flex items-center gap-2">
           <Plus className="h-4 w-4" />
-          <span>New Entry</span>
+          <span>New Chat</span>
         </Link>
       </Button>
       <div className="ml-auto flex items-center gap-2 sm:gap-4">
