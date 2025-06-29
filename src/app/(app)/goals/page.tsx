@@ -1,12 +1,4 @@
 import { Target } from 'lucide-react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { Progress } from '@/components/ui/progress';
 
 const goals = [
@@ -42,37 +34,29 @@ const goals = [
 
 export default function GoalsPage() {
   return (
-    <div className="flex flex-col space-y-6">
-       <div className="flex items-center gap-4">
+    <div className="flex flex-col space-y-8 p-6 sm:p-8 lg:p-12 notebook-lines-journal">
+       <header className="flex items-center gap-4">
         <Target className="w-8 h-8 text-muted-foreground" />
         <div className="space-y-1">
           <h1 className="text-3xl font-bold tracking-tight">Goals</h1>
           <p className="text-muted-foreground">Your ambitions, tracked and realized.</p>
         </div>
+      </header>
+      
+      <div className="space-y-8">
+        {goals.map((goal) => (
+            <div key={goal.id} className="">
+              <div className="mb-2">
+                <h3 className="font-semibold text-lg">{goal.title}</h3>
+                <p className="text-sm text-muted-foreground">{goal.description}</p>
+              </div>
+              <div className="flex flex-col gap-2">
+                <Progress value={goal.progress} className="h-2" />
+                <span className="text-sm text-muted-foreground">{goal.status}</span>
+              </div>
+            </div>
+          ))}
       </div>
-      <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Goal</TableHead>
-              <TableHead className="hidden sm:table-cell">Description</TableHead>
-              <TableHead className="w-[200px]">Progress</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody className="notebook-lines">
-            {goals.map((goal) => (
-              <TableRow key={goal.id} className="border-none">
-                <TableCell className="h-12 align-middle font-medium">{goal.title}</TableCell>
-                <TableCell className="h-12 align-middle hidden sm:table-cell">{goal.description}</TableCell>
-                <TableCell className="h-12 align-middle">
-                  <div className="flex flex-col gap-2">
-                    <Progress value={goal.progress} className="h-2" />
-                    <span className="text-sm text-muted-foreground">{goal.status}</span>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
     </div>
   );
 }

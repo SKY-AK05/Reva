@@ -10,14 +10,14 @@ const overviewCards = [
 
 export default function OverviewPage() {
   return (
-    <div className="flex flex-col space-y-6 p-4 sm:p-6">
+    <div className="flex flex-col space-y-6 p-6 sm:p-8 lg:p-12">
       <div className="space-y-1">
-        <h1 className="text-3xl font-bold tracking-tight">Overview</h1>
-        <p className="text-muted-foreground">A smarter way to manage life</p>
+        <h1 className="text-3xl font-bold tracking-tight">Library</h1>
+        <p className="text-muted-foreground">An overview of all your notebooks.</p>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {overviewCards.map((card) => (
-          <Card key={card.title}>
+          <Card key={card.title} className="bg-secondary/50">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
               <card.icon className={`h-5 w-5 ${card.colorClass}`} />
@@ -29,7 +29,7 @@ export default function OverviewPage() {
         ))}
       </div>
        <div className="grid gap-4 md:grid-cols-2">
-         <Card>
+         <Card className="bg-secondary/50">
             <CardHeader>
                 <CardTitle>Upcoming Tasks</CardTitle>
             </CardHeader>
@@ -37,7 +37,7 @@ export default function OverviewPage() {
                 <p className="text-muted-foreground">You have no upcoming tasks.</p>
             </CardContent>
          </Card>
-         <Card>
+         <Card className="bg-secondary/50">
             <CardHeader>
                 <CardTitle>Recent Expenses</CardTitle>
             </CardHeader>

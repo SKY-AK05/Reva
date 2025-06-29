@@ -24,23 +24,23 @@ const entries = [
 
 export default function JournalPage() {
   return (
-    <div className="flex flex-col space-y-6 notebook-lines-journal">
-      <div className="flex items-center gap-4">
+    <div className="flex flex-col space-y-8 p-6 sm:p-8 lg:p-12 notebook-lines-journal">
+      <header className="flex items-center gap-4">
         <BookText className="w-8 h-8 text-muted-foreground" />
         <div className="space-y-1">
           <h1 className="text-3xl font-bold tracking-tight">Journal</h1>
           <p className="text-muted-foreground">Your private space for thoughts and ideas.</p>
         </div>
-      </div>
+      </header>
 
       <div className="space-y-8">
         {entries.map((entry, index) => (
-          <div key={entry.id}>
+          <article key={entry.id}>
             <h2 className="text-2xl font-semibold tracking-tight">{entry.title}</h2>
             <p className="text-sm text-muted-foreground mb-4">{entry.date}</p>
             <p className="text-muted-foreground leading-relaxed">{entry.content}</p>
-            {index < entries.length - 1 && <Separator className="my-8" />}
-          </div>
+            {index < entries.length - 1 && <Separator className="my-8 bg-border/50" />}
+          </article>
         ))}
       </div>
     </div>

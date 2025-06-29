@@ -1,12 +1,4 @@
 import { DollarSign } from 'lucide-react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 
 const expenses = [
   {
@@ -48,35 +40,26 @@ const expenses = [
 
 export default function ExpensesPage() {
   return (
-    <div className="flex flex-col space-y-6">
-      <div className="flex items-center gap-4">
+    <div className="flex flex-col space-y-8 p-6 sm:p-8 lg:p-12 notebook-lines">
+      <header className="flex items-center gap-4">
         <DollarSign className="w-8 h-8 text-muted-foreground" />
         <div className="space-y-1">
           <h1 className="text-3xl font-bold tracking-tight">Expenses</h1>
           <p className="text-muted-foreground">Track and manage your spending.</p>
         </div>
+      </header>
+      
+      <div className="border-t border-border/80">
+          {expenses.map((expense) => (
+            <div key={expense.id} className="grid grid-cols-3 gap-4 border-b border-border/80 h-11 items-center">
+              <div className="font-medium col-span-2 sm:col-span-1">{expense.item}</div>
+              <div className="hidden sm:block text-muted-foreground">{expense.category}</div>
+              <div className="text-right text-muted-foreground">{expense.date}</div>
+              <div className="text-right font-semibold col-start-3">${expense.amount.toFixed(2)}</div>
+            </div>
+          ))}
       </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Item</TableHead>
-            <TableHead className="w-[150px]">Category</TableHead>
-            <TableHead className="w-[120px]">Date</TableHead>
-            <TableHead className="w-[100px] text-right">Amount</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody className="notebook-lines">
-          {expenses.map((expense) => (
-            <TableRow key={expense.id} className="border-none">
-              <TableCell className="h-12 align-middle font-medium">{expense.item}</TableCell>
-              <TableCell className="h-12 align-middle">{expense.category}</TableCell>
-              <TableCell className="h-12 align-middle">{expense.date}</TableCell>
-              <TableCell className="h-12 align-middle text-right">${expense.amount.toFixed(2)}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
     </div>
   );
 }
