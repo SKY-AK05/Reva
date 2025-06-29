@@ -40,7 +40,7 @@ const expenses = [
 
 export default function ExpensesPage() {
   return (
-    <div className="flex flex-col space-y-8 p-6 sm:p-8 lg:p-12 notebook-lines">
+    <div className="flex flex-1 flex-col space-y-8 p-6 sm:p-8 lg:p-12 notebook-lines">
       <header className="flex items-center gap-4">
         <DollarSign className="w-8 h-8 text-muted-foreground" />
         <div className="space-y-1">
