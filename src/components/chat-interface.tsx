@@ -9,6 +9,8 @@ import { cn } from '@/lib/utils';
 import { SendHorizonal, CheckSquare, DollarSign, Bell, Target } from 'lucide-react';
 import { processUserChat } from '@/app/(app)/chat/actions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 type Message = {
   id: string;
@@ -106,9 +108,9 @@ export default function ChatInterface() {
           >
             <div
               className={cn(
-                "max-w-xl p-4",
-                message.sender === 'user' && "rounded-2xl bg-primary text-primary-foreground",
-                message.isTyping && "rounded-2xl bg-muted"
+                "max-w-xl",
+                message.sender === 'user' && "p-4 rounded-2xl bg-primary text-primary-foreground",
+                message.isTyping && "p-4 rounded-2xl bg-muted"
               )}
             >
               {message.isTyping ? (
@@ -117,6 +119,10 @@ export default function ChatInterface() {
                       <span className="h-2 w-2 animate-bounce rounded-full bg-foreground [animation-delay:-0.15s]"></span>
                       <span className="h-2 w-2 animate-bounce rounded-full bg-foreground"></span>
                   </div>
+              ) : message.sender === 'bot' ? (
+                 <div className="prose dark:prose-invert leading-relaxed text-base">
+                   <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.text}</ReactMarkdown>
+                 </div>
               ) : (
                 <p className="whitespace-pre-wrap leading-relaxed text-base">{message.text}</p>
               )}

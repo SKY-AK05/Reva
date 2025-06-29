@@ -85,6 +85,39 @@
   body {
     @apply bg-background text-foreground;
   }
+  .prose {
+    @apply text-foreground max-w-none;
+  }
+  .prose :where(p):first-child {
+      margin-top: 0;
+  }
+  .prose :where(p):last-child {
+      margin-bottom: 0;
+  }
+  .prose strong {
+    @apply text-foreground;
+  }
+  .dark .prose {
+    @apply text-foreground;
+  }
+  .dark .prose strong {
+    @apply text-foreground;
+  }
+  .prose table {
+    @apply my-0 w-full;
+  }
+  .prose thead {
+    @apply border-b border-border/50;
+  }
+  .prose th {
+    @apply px-2 py-1 text-left font-semibold;
+  }
+  .prose tbody tr {
+    @apply border-b-0;
+  }
+  .prose td {
+    @apply px-2 py-1 align-top;
+  }
 }
 
 @layer utilities {
