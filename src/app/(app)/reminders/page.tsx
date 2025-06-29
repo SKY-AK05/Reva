@@ -69,38 +69,40 @@ export default function RemindersPage() {
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 shrink-0 mt-1">
                 <Bell className="h-5 w-5 text-primary" />
               </div>
-              <div className="flex-1">
-                <div className="font-semibold cursor-pointer" onClick={() => setEditingField({ id: reminder.id, field: 'title' })}>
-                  {isEditing(reminder.id, 'title') ? (
-                     <Input
-                        value={reminder.title}
-                        onChange={(e) => handleInputChange(e, reminder.id, 'title')}
-                        onBlur={handleInputBlur}
-                        onKeyDown={handleInputKeyDown}
-                        autoFocus
-                        className="font-semibold h-8"
-                      />
-                  ) : (
-                    <p className="leading-tight">{reminder.title}</p>
-                  )}
-                </div>
-                
-                <div className="text-sm text-muted-foreground mt-1 cursor-pointer" onClick={() => setEditingField({ id: reminder.id, field: 'notes' })}>
-                  {isEditing(reminder.id, 'notes') ? (
-                     <Textarea
-                        value={reminder.notes}
-                        onChange={(e) => handleInputChange(e, reminder.id, 'notes')}
-                        onBlur={handleInputBlur}
-                        onKeyDown={handleInputKeyDown}
-                        autoFocus
-                        className="text-sm text-muted-foreground min-h-0"
-                      />
-                  ) : (
-                    <p className="leading-tight">{reminder.notes}</p>
-                  )}
+              <div className="flex flex-1 items-start justify-between gap-4">
+                <div className="flex-1">
+                  <div className="font-semibold cursor-pointer" onClick={() => setEditingField({ id: reminder.id, field: 'title' })}>
+                    {isEditing(reminder.id, 'title') ? (
+                      <Input
+                          value={reminder.title}
+                          onChange={(e) => handleInputChange(e, reminder.id, 'title')}
+                          onBlur={handleInputBlur}
+                          onKeyDown={handleInputKeyDown}
+                          autoFocus
+                          className="font-semibold h-8"
+                        />
+                    ) : (
+                      <p className="leading-tight">{reminder.title}</p>
+                    )}
+                  </div>
+                  
+                  <div className="text-sm text-muted-foreground mt-1 cursor-pointer" onClick={() => setEditingField({ id: reminder.id, field: 'notes' })}>
+                    {isEditing(reminder.id, 'notes') ? (
+                      <Textarea
+                          value={reminder.notes}
+                          onChange={(e) => handleInputChange(e, reminder.id, 'notes')}
+                          onBlur={handleInputBlur}
+                          onKeyDown={handleInputKeyDown}
+                          autoFocus
+                          className="text-sm text-muted-foreground min-h-0"
+                        />
+                    ) : (
+                      <p className="leading-tight">{reminder.notes}</p>
+                    )}
+                  </div>
                 </div>
 
-                <div className="text-sm text-muted-foreground mt-2 cursor-pointer" onClick={() => setEditingField({ id: reminder.id, field: 'time' })}>
+                <div className="text-sm text-muted-foreground cursor-pointer shrink-0" onClick={() => setEditingField({ id: reminder.id, field: 'time' })}>
                   {isEditing(reminder.id, 'time') ? (
                     <Input
                       value={reminder.time}
