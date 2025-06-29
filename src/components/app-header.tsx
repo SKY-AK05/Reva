@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { PanelLeft, Plus } from 'lucide-react';
@@ -9,6 +8,11 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export default function AppHeader() {
+  const handleNewChat = () => {
+    // A full page navigation/reload will reset the chat component's state.
+    window.location.href = '/chat';
+  };
+
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border/80 bg-background/95 px-4 backdrop-blur-sm sm:px-6">
       {/* Mobile Toggle */}
@@ -30,13 +34,11 @@ export default function AppHeader() {
       <Button
         variant="outline"
         size="sm"
-        asChild
-        className="border-border/80 hover:bg-accent"
+        onClick={handleNewChat}
+        className="border-border/80 hover:bg-accent flex items-center gap-2"
       >
-        <Link href="/chat" className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          <span>New Chat</span>
-        </Link>
+        <Plus className="h-4 w-4" />
+        <span>New Chat</span>
       </Button>
       <div className="ml-auto flex items-center gap-2 sm:gap-4">
         <ThemeToggle />
