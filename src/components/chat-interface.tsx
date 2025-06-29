@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { SendHorizonal } from 'lucide-react';
+import { SendHorizonal, CheckSquare, DollarSign, Bell, Target } from 'lucide-react';
 import { processUserChat } from '@/app/(app)/chat/actions';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 type Message = {
   id: string;
@@ -15,6 +16,13 @@ type Message = {
   sender: 'user' | 'bot';
   isTyping?: boolean;
 };
+
+const quickStartCards = [
+  { title: 'Tasks', value: '12', icon: CheckSquare, colorClass: 'text-chart-1' },
+  { title: 'Expenses', value: '$258.50', icon: DollarSign, colorClass: 'text-chart-2' },
+  { title: 'Reminders', value: '3 Upcoming', icon: Bell, colorClass: 'text-chart-3' },
+  { title: 'Goals', value: '5 in Progress', icon: Target, colorClass: 'text-chart-4' },
+];
 
 export default function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -122,18 +130,32 @@ export default function ChatInterface() {
 
   const welcomeScreen = (
     <div className="flex h-full flex-col items-center justify-center p-4 text-center">
-      <div className="space-y-4 max-w-sm">
+      <div className="space-y-4 max-w-2xl w-full">
         <span className="text-6xl" role="img" aria-label="waving hand">👋</span>
         <h1 className="text-4xl font-headline font-bold tracking-tight">Welcome to Reva!</h1>
         <p className="text-muted-foreground">
           Just start typing to create tasks, track expenses, set reminders, and more.
         </p>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-8 text-left">
+          {quickStartCards.map((card) => (
+            <Card key={card.title} className="bg-secondary/50">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+                <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
+                <card.icon className={`h-4 w-4 ${card.colorClass}`} />
+              </CardHeader>
+              <CardContent className="p-4 pt-0">
+                <div className="text-2xl font-bold">{card.value}</div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     </div>
   );
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex flex-1 flex-col h-full">
       {messages.length > 0 ? (
         <ScrollArea className="flex-1 p-6 sm:p-8 lg:p-12 notebook-lines-chat" viewportRef={scrollViewportRef}>
           {content}
