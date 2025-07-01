@@ -39,7 +39,7 @@ export default function NotesPage() {
     );
   }
 
-  const NoteIcon = getIconForTitle(activeNote.title);
+  const NoteIcon = getIconForTitle(activeNote.title, activeNote.id);
 
   return (
     <div className="flex flex-1 flex-col h-full">
