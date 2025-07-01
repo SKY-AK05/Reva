@@ -1,58 +1,51 @@
 'use client';
 
 import { Loader2, Sparkles, StickyNote, Zap } from 'lucide-react';
-import { Textarea } from '@/components/ui/textarea';
 import { useNotesContext } from '@/context/notes-context';
 import { Input } from '@/components/ui/input';
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getIconForTitle } from '@/lib/icon-map';
 import { Button } from '@/components/ui/button';
 import { getComposedNote, getChartDataFromText } from './actions';
-import {
-  FormattingToolbar,
-  type FormatType,
-  type AiActionType,
-} from '@/components/formatting-toolbar';
 import type { GenerateChartFromTextOutput } from '@/ai/flows/generate-chart-from-text';
 import NoteChart from '@/components/note-chart';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import RichTextEditor from '@/components/rich-text-editor';
 
 export default function NotesPage() {
   const { activeNote, updateNote } = useNotesContext();
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
   const [isComposing, setIsComposing] = useState(false);
-  const [showToolbar, setShowToolbar] = useState(false);
-  const [selectedText, setSelectedText] = useState('');
-  const [selection, setSelection] = useState({ start: 0, end: 0 });
   const [isGeneratingChart, setIsGeneratingChart] = useState(false);
   const [generatedChartData, setGeneratedChartData] = useState<GenerateChartFromTextOutput | null>(null);
   const [chartError, setChartError] = useState<string | null>(null);
 
-  // New state for view/edit mode
-  const [isEditing, setIsEditing] = useState(false);
+  // Debounce state to avoid updating on every keystroke
+  const [debouncedContent, setDebouncedContent] = useState(activeNote?.content || '');
 
-  // Auto-resize textarea and focus when entering edit mode
+  // Update debounced content when active note changes
   useEffect(() => {
-    if (isEditing && textareaRef.current) {
-      const textarea = textareaRef.current;
-      textarea.style.height = 'auto';
-      textarea.style.height = `${textarea.scrollHeight}px`;
-      textarea.focus();
-    }
-  }, [isEditing, activeNote?.content]);
-
-  // Reset to view mode when switching to a different note
-  useEffect(() => {
-    setIsEditing(false);
-  }, [activeNote?.id]);
-
-  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (activeNote) {
-      updateNote(activeNote.id, { content: e.target.value });
+      setDebouncedContent(activeNote.content);
     }
+  }, [activeNote]);
+
+  // Debounce effect to save note content
+  useEffect(() => {
+    if (!activeNote || debouncedContent === activeNote.content) return;
+    
+    const handler = setTimeout(() => {
+      updateNote(activeNote.id, { content: debouncedContent });
+    }, 500); // 500ms debounce delay
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [debouncedContent, activeNote, updateNote]);
+
+
+  const handleContentChange = (content: string) => {
+    // Update local state immediately for responsiveness
+    setDebouncedContent(content);
   };
 
   const handleModifyWithAi = async () => {
@@ -61,12 +54,13 @@ export default function NotesPage() {
     setIsComposing(true);
     try {
       const result = await getComposedNote(activeNote.content);
+      // Directly update the note context and the debounced state
+      const updatedContent = result.composedContent;
       updateNote(activeNote.id, {
         title: result.title,
-        content: result.composedContent,
+        content: updatedContent,
       });
-      // Ensure we are in edit mode to see the modified content
-      setIsEditing(true);
+      setDebouncedContent(updatedContent);
     } catch (error) {
       console.error('Failed to modify note with AI', error);
     } finally {
@@ -74,85 +68,24 @@ export default function NotesPage() {
     }
   };
 
-  const handleSelection = () => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-
-    // Use a small timeout to ensure selection properties are updated
-    setTimeout(() => {
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const hasSelection = start !== end;
-      if (hasSelection && document.activeElement === textarea) {
-        setShowToolbar(true);
-        setSelectedText(textarea.value.substring(start, end));
-        setSelection({ start, end });
-      } else if (document.activeElement === textarea) {
-        setShowToolbar(false);
+  const handleAiChartAction = async (selectedText: string) => {
+    if (!selectedText) return;
+    setIsGeneratingChart(true);
+    setGeneratedChartData(null);
+    setChartError(null);
+    try {
+      const result = await getChartDataFromText(selectedText);
+      if (result.isChartable && result.data && result.data.length > 0) {
+        setGeneratedChartData(result);
+      } else {
+        setChartError(result.reasoning || "Could not generate a chart from the selected text.");
       }
-    }, 10);
-  };
-
-  const handleAiAction = async (actionType: AiActionType) => {
-    setShowToolbar(false);
-    if (actionType === 'generateChart' && selectedText) {
-      setIsGeneratingChart(true);
-      setGeneratedChartData(null);
-      setChartError(null);
-      try {
-        const result = await getChartDataFromText(selectedText);
-        if (result.isChartable && result.data && result.data.length > 0) {
-          setGeneratedChartData(result);
-        } else {
-          setChartError(result.reasoning || "Could not generate a chart from the selected text.");
-        }
-      } catch (error) {
-        console.error('Failed to generate chart', error);
-        setChartError("An unexpected error occurred while generating the chart.");
-      } finally {
-        setIsGeneratingChart(false);
-      }
+    } catch (error) {
+      console.error('Failed to generate chart', error);
+      setChartError("An unexpected error occurred while generating the chart.");
+    } finally {
+      setIsGeneratingChart(false);
     }
-  };
-
-  const handleFormat = (formatType: FormatType) => {
-    if (!activeNote || !textareaRef.current) return;
-
-    const textarea = textareaRef.current;
-    const { start, end } = selection;
-    const currentText = activeNote.content;
-
-    if (start === end) return;
-
-    const selectedText = currentText.substring(start, end);
-    let replacement = '';
-    switch (formatType) {
-      case 'bold': replacement = `**${selectedText}**`; break;
-      case 'italic': replacement = `*${selectedText}*`; break;
-      case 'strikethrough': replacement = `~~${selectedText}~~`; break;
-      case 'code': replacement = `\`${selectedText}\``; break;
-      case 'h1': case 'h2': case 'blockquote':
-        const prefix = { h1: '# ', h2: '## ', blockquote: '> ' }[formatType];
-        replacement = selectedText.split('\n').map((line) => `${prefix}${line}`).join('\n');
-        break;
-      case 'bulletList':
-        replacement = selectedText.split('\n').map((line) => `- ${line}`).join('\n');
-        break;
-      case 'orderedList':
-        replacement = selectedText.split('\n').map((line, index) => `${index + 1}. ${line}`).join('\n');
-        break;
-      default: replacement = selectedText;
-    }
-
-    const newContent = `${currentText.substring(0, start)}${replacement}${currentText.substring(end)}`;
-    updateNote(activeNote.id, { content: newContent });
-
-    setShowToolbar(false);
-
-    setTimeout(() => {
-      textarea.focus();
-      textarea.setSelectionRange(start, start + replacement.length);
-    }, 0);
   };
 
   const clearChartData = () => {
@@ -196,45 +129,12 @@ export default function NotesPage() {
         </div>
       </header>
       <main className="relative flex-1 p-6 sm:p-8 lg:p-12 notebook-lines-journal overflow-y-auto">
-        {isEditing ? (
-          <>
-            <div
-              className="w-full flex justify-center mb-4 transition-opacity duration-300"
-              style={{
-                opacity: showToolbar ? 1 : 0,
-                pointerEvents: showToolbar ? 'auto' : 'none',
-              }}
-            >
-              <FormattingToolbar
-                onFormat={handleFormat}
-                onAiAction={handleAiAction}
-              />
-            </div>
-            <Textarea
-              ref={textareaRef}
-              placeholder="Start with a brain dump..."
-              value={activeNote.content}
-              onChange={handleContentChange}
-              onKeyUp={handleSelection}
-              onMouseUp={handleSelection}
-              onBlur={() => {
-                setShowToolbar(false);
-                setIsEditing(false);
-              }}
-              className="w-full text-2xl resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 bg-transparent block overflow-hidden"
-              rows={1}
-            />
-          </>
-        ) : (
-          <div
-            className="prose dark:prose-invert max-w-none text-2xl cursor-text w-full min-h-[5rem]"
-            onClick={() => setIsEditing(true)}
-          >
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {activeNote.content || 'Click to start writing...'}
-            </ReactMarkdown>
-          </div>
-        )}
+        <RichTextEditor
+            key={activeNote.id}
+            content={activeNote.content}
+            onChange={handleContentChange}
+            onAiAction={handleAiChartAction}
+        />
         <div className="mt-6">
           {isGeneratingChart && (
             <div className="flex items-center justify-center gap-3 text-muted-foreground p-8 animate-fade-in-up">
