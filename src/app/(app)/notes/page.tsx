@@ -45,7 +45,7 @@ export default function NotesPage() {
         <Input
           value={activeNote.title}
           onChange={(e) => updateNote(activeNote.id, { title: e.target.value })}
-          className="text-3xl font-bold tracking-tight border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 bg-transparent h-auto"
+          className="text-4xl font-bold tracking-tight border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 bg-transparent h-auto"
           placeholder="Untitled Note"
         />
       </header>
