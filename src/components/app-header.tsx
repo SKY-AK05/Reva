@@ -44,11 +44,6 @@ export default function AppHeader({ showGridLines, onToggleGridLines }: AppHeade
   const { notes, activeNote, setActiveNoteById, addNewNote } = useNotesContext();
   const router = useRouter();
 
-
-  const handleNewChat = () => {
-    window.location.href = '/chat';
-  };
-
   const handleNewNote = () => {
     const newNoteId = addNewNote();
     setActiveNoteById(newNoteId);
@@ -80,11 +75,11 @@ export default function AppHeader({ showGridLines, onToggleGridLines }: AppHeade
       <Button
         variant="outline"
         size="sm"
-        onClick={handleNewChat}
+        onClick={handleNewNote}
         className="border-border/80 hover:bg-accent flex items-center gap-2"
       >
         <Plus className="h-4 w-4" />
-        <span>New Chat</span>
+        <span>New Note</span>
       </Button>
 
       <DropdownMenu>
@@ -96,17 +91,17 @@ export default function AppHeader({ showGridLines, onToggleGridLines }: AppHeade
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-64">
-          <DropdownMenuItem onSelect={handleNewNote}>
-            <Plus className="mr-2 h-4 w-4" />
-            <span>New Note</span>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
           <DropdownMenuLabel>Recent Notes</DropdownMenuLabel>
-          {notes.map(note => (
-            <DropdownMenuItem key={note.id} onSelect={() => handleSelectNote(note.id)}>
-              <span className="truncate">{note.title}</span>
-            </DropdownMenuItem>
-          ))}
+          <DropdownMenuSeparator />
+          {notes.length > 0 ? (
+            notes.map(note => (
+              <DropdownMenuItem key={note.id} onSelect={() => handleSelectNote(note.id)}>
+                <span className="truncate">{note.title}</span>
+              </DropdownMenuItem>
+            ))
+           ) : (
+            <DropdownMenuItem disabled>No recent notes</DropdownMenuItem>
+           )}
         </DropdownMenuContent>
       </DropdownMenu>
 
