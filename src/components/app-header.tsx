@@ -104,37 +104,39 @@ export default function AppHeader({
         </Button>
       )}
 
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="outline"
-            size="sm"
-            className="border-border/80 hover:bg-accent flex items-center gap-2"
-          >
-            <StickyNote className="h-4 w-4" />
-            <span className="truncate max-w-28">
-              {activeNote ? activeNote.title : 'Notes'}
-            </span>
-            <ChevronDown className="h-4 w-4 text-muted-foreground" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-64">
-          <DropdownMenuLabel>Recent Notes</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          {notes.length > 0 ? (
-            notes.map((note) => (
-              <DropdownMenuItem
-                key={note.id}
-                onSelect={() => handleSelectNote(note.id)}
-              >
-                <span className="truncate">{note.title}</span>
-              </DropdownMenuItem>
-            ))
-          ) : (
-            <DropdownMenuItem disabled>No recent notes</DropdownMenuItem>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+      {pathname.startsWith('/notes') && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-border/80 hover:bg-accent flex items-center gap-2"
+            >
+              <StickyNote className="h-4 w-4" />
+              <span className="truncate max-w-28">
+                {activeNote ? activeNote.title : 'Notes'}
+              </span>
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-64">
+            <DropdownMenuLabel>Recent Notes</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {notes.length > 0 ? (
+              notes.map((note) => (
+                <DropdownMenuItem
+                  key={note.id}
+                  onSelect={() => handleSelectNote(note.id)}
+                >
+                  <span className="truncate">{note.title}</span>
+                </DropdownMenuItem>
+              ))
+            ) : (
+              <DropdownMenuItem disabled>No recent notes</DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
 
       <div className="ml-auto flex items-center gap-2 sm:gap-4">
         <DropdownMenu>
