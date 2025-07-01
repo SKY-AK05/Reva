@@ -1,130 +1,14 @@
+
 'use client';
 
-import { useEditor, EditorContent, type Editor } from '@tiptap/react';
+import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import { useState, useCallback, useRef } from 'react';
 import {
-  Bold,
-  Italic,
-  Strikethrough,
-  Code,
-  Heading1,
-  Heading2,
-  List,
-  ListOrdered,
-  Quote,
-  Zap,
-} from 'lucide-react';
-import { Button } from './ui/button';
-import { Separator } from './ui/separator';
-
-interface EditorToolbarProps {
-  editor: Editor | null;
-  onAiAction: () => void;
-}
-
-const EditorToolbar = ({ editor, onAiAction }: EditorToolbarProps) => {
-  if (!editor) {
-    return null;
-  }
-
-  return (
-    <div className="flex items-center gap-1 rounded-t-lg border-x border-t border-input bg-background p-1 sticky top-0 z-10 backdrop-blur-sm">
-      <Button
-        variant={editor.isActive('bold') ? 'secondary' : 'ghost'}
-        size="icon"
-        className="h-8 w-8"
-        onClick={() => editor.chain().focus().toggleBold().run()}
-        aria-label="Bold"
-      >
-        <Bold className="h-4 w-4" />
-      </Button>
-      <Button
-        variant={editor.isActive('italic') ? 'secondary' : 'ghost'}
-        size="icon"
-        className="h-8 w-8"
-        onClick={() => editor.chain().focus().toggleItalic().run()}
-        aria-label="Italic"
-      >
-        <Italic className="h-4 w-4" />
-      </Button>
-      <Button
-        variant={editor.isActive('strike') ? 'secondary' : 'ghost'}
-        size="icon"
-        className="h-8 w-8"
-        onClick={() => editor.chain().focus().toggleStrike().run()}
-        aria-label="Strikethrough"
-      >
-        <Strikethrough className="h-4 w-4" />
-      </Button>
-      <Button
-        variant={editor.isActive('code') ? 'secondary' : 'ghost'}
-        size="icon"
-        className="h-8 w-8"
-        onClick={() => editor.chain().focus().toggleCode().run()}
-        aria-label="Code"
-      >
-        <Code className="h-4 w-4" />
-      </Button>
-      <Separator orientation="vertical" className="mx-1 h-6" />
-      <Button
-        variant={editor.isActive('heading', { level: 1 }) ? 'secondary' : 'ghost'}
-        size="icon"
-        className="h-8 w-8"
-        onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-        aria-label="Heading 1"
-      >
-        <Heading1 className="h-4 w-4" />
-      </Button>
-      <Button
-        variant={editor.isActive('heading', { level: 2 }) ? 'secondary' : 'ghost'}
-        size="icon"
-        className="h-8 w-8"
-        onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-        aria-label="Heading 2"
-      >
-        <Heading2 className="h-4 w-4" />
-      </Button>
-      <Separator orientation="vertical" className="mx-1 h-6" />
-      <Button
-        variant={editor.isActive('bulletList') ? 'secondary' : 'ghost'}
-        size="icon"
-        className="h-8 w-8"
-        onClick={() => editor.chain().focus().toggleBulletList().run()}
-        aria-label="Bullet List"
-      >
-        <List className="h-4 w-4" />
-      </Button>
-      <Button
-        variant={editor.isActive('orderedList') ? 'secondary' : 'ghost'}
-        size="icon"
-        className="h-8 w-8"
-        onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        aria-label="Ordered List"
-      >
-        <ListOrdered className="h-4 w-4" />
-      </Button>
-      <Button
-        variant={editor.isActive('blockquote') ? 'secondary' : 'ghost'}
-        size="icon"
-        className="h-8 w-8"
-        onClick={() => editor.chain().focus().toggleBlockquote().run()}
-        aria-label="Blockquote"
-      >
-        <Quote className="h-4 w-4" />
-      </Button>
-      <Separator orientation="vertical" className="mx-1 h-6" />
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-8 w-8 text-primary hover:text-primary"
-        onClick={onAiAction}
-        aria-label="Generate Chart"
-      >
-        <Zap className="h-4 w-4" />
-      </Button>
-    </div>
-  );
-};
+  FormattingToolbar,
+  type FormatType,
+  type AiActionType,
+} from './formatting-toolbar';
 
 interface RichTextEditorProps {
   content: string;
@@ -132,39 +16,139 @@ interface RichTextEditorProps {
   onAiAction: (selectedText: string) => void;
 }
 
-const RichTextEditor = ({ content, onChange, onAiAction }: RichTextEditorProps) => {
+const RichTextEditor = ({
+  content,
+  onChange,
+  onAiAction,
+}: RichTextEditorProps) => {
+  const [toolbarState, setToolbarState] = useState({
+    show: false,
+    top: 0,
+    left: 0,
+  });
+  const editorContainerRef = useRef<HTMLDivElement>(null);
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        heading: {
-          levels: [1, 2],
-        },
+        heading: { levels: [1, 2] },
       }),
     ],
     content: content,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
     },
+    onSelectionUpdate({ editor }) {
+      const { empty, from } = editor.state.selection;
+
+      if (empty) {
+        if (toolbarState.show) {
+          setToolbarState((s) => ({ ...s, show: false }));
+        }
+        return;
+      }
+
+      const editorBounds = editorContainerRef.current?.getBoundingClientRect();
+      if (!editorBounds) return;
+
+      const start = editor.view.coordsAtPos(from);
+      
+      const box = {
+        top: start.top - editorBounds.top,
+        left: start.left - editorBounds.left,
+      };
+      
+      setToolbarState({
+        show: true,
+        // Position toolbar 50px above the selection
+        // And make sure it doesn't go above the editor container
+        top: Math.max(box.top - 50, 10), 
+        left: box.left,
+      });
+    },
+    onBlur: () => {
+      // Use a short delay to allow clicks on the toolbar
+      // The onMouseDown handler in the toolbar should prevent the blur, but this is a fallback.
+      setTimeout(() => {
+        if (!editor?.isFocused) {
+          setToolbarState((s) => ({...s, show: false}))
+        }
+      }, 150);
+    },
     editorProps: {
       attributes: {
-        class: 'prose dark:prose-invert max-w-none focus:outline-none w-full min-h-[10rem] p-4',
+        class:
+          'prose dark:prose-invert max-w-none focus:outline-none w-full min-h-[10rem] p-4',
       },
     },
   });
-  
-  const handleAiAction = () => {
-    if (editor) {
+
+  const handleFormat = useCallback(
+    (formatType: FormatType) => {
+      if (!editor) return;
+      const chain = editor.chain().focus();
+      switch (formatType) {
+        case 'bold':
+          chain.toggleBold().run();
+          break;
+        case 'italic':
+          chain.toggleItalic().run();
+          break;
+        case 'strikethrough':
+          chain.toggleStrike().run();
+          break;
+        case 'code':
+          chain.toggleCode().run();
+          break;
+        case 'h1':
+          chain.toggleHeading({ level: 1 }).run();
+          break;
+        case 'h2':
+          chain.toggleHeading({ level: 2 }).run();
+          break;
+        case 'bulletList':
+          chain.toggleBulletList().run();
+          break;
+        case 'orderedList':
+          chain.toggleOrderedList().run();
+          break;
+        case 'blockquote':
+          chain.toggleBlockquote().run();
+          break;
+      }
+    },
+    [editor]
+  );
+
+  const handleAiActionWrapper = useCallback(
+    (actionType: AiActionType) => {
+      if (!editor || actionType !== 'generateChart') return;
       const { from, to } = editor.state.selection;
       const selectedText = editor.state.doc.textBetween(from, to);
-      if(selectedText) {
+      if (selectedText) {
         onAiAction(selectedText);
       }
-    }
-  }
+      // Hide the toolbar after action
+      setToolbarState((s) => ({...s, show: false}));
+    },
+    [editor, onAiAction]
+  );
 
   return (
-    <div className="flex flex-col border border-input rounded-lg bg-transparent">
-      <EditorToolbar editor={editor} onAiAction={handleAiAction} />
+    <div
+      ref={editorContainerRef}
+      className="relative flex flex-col border border-input rounded-lg bg-transparent"
+    >
+      {editor && toolbarState.show && (
+        <FormattingToolbar
+          onFormat={handleFormat}
+          onAiAction={handleAiActionWrapper}
+          style={{
+            top: `${toolbarState.top}px`,
+            left: `${toolbarState.left}px`,
+          }}
+        />
+      )}
       <EditorContent editor={editor} />
     </div>
   );
