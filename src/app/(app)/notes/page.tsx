@@ -3,7 +3,7 @@
 import { Loader2, Sparkles, StickyNote, Zap } from 'lucide-react';
 import { useNotesContext } from '@/context/notes-context';
 import { Input } from '@/components/ui/input';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { getIconForTitle } from '@/lib/icon-map';
 import { Button } from '@/components/ui/button';
 import { getComposedNote, getChartDataFromText } from './actions';
@@ -21,6 +21,7 @@ export default function NotesPage() {
 
   // Debounce state to avoid updating on every keystroke
   const [debouncedContent, setDebouncedContent] = useState(activeNote?.content || '');
+  const debouncedUpdateNote = useCallback(updateNote, [updateNote]);
 
   // Update debounced content when active note changes
   useEffect(() => {
@@ -34,13 +35,13 @@ export default function NotesPage() {
     if (!activeNote || debouncedContent === activeNote.content) return;
     
     const handler = setTimeout(() => {
-      updateNote(activeNote.id, { content: debouncedContent });
+      debouncedUpdateNote(activeNote.id, { content: debouncedContent });
     }, 500); // 500ms debounce delay
 
     return () => {
       clearTimeout(handler);
     };
-  }, [debouncedContent, activeNote, updateNote]);
+  }, [debouncedContent, activeNote, debouncedUpdateNote]);
 
 
   const handleContentChange = (content: string) => {
@@ -73,16 +74,17 @@ export default function NotesPage() {
     setIsGeneratingChart(true);
     setGeneratedChartData(null);
     setChartError(null);
+    const betaErrorMessage = "Chart generation is a beta feature and we're working to improve it. Please try rephrasing your text or using a different selection.";
     try {
       const result = await getChartDataFromText(selectedText);
       if (result.isChartable && result.data && result.data.length > 0) {
         setGeneratedChartData(result);
       } else {
-        setChartError(result.reasoning || "Could not generate a chart from the selected text.");
+        setChartError(betaErrorMessage);
       }
     } catch (error) {
       console.error('Failed to generate chart', error);
-      setChartError("An unexpected error occurred while generating the chart.");
+      setChartError(betaErrorMessage);
     } finally {
       setIsGeneratingChart(false);
     }
