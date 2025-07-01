@@ -78,7 +78,7 @@ const RichTextEditor = ({
     editorProps: {
       attributes: {
         class:
-          'prose dark:prose-invert max-w-none focus:outline-none w-full min-h-[10rem] p-4',
+          'prose dark:prose-invert max-w-none focus:outline-none w-full min-h-[10rem]',
       },
     },
   });
@@ -137,7 +137,7 @@ const RichTextEditor = ({
   return (
     <div
       ref={editorContainerRef}
-      className="relative flex flex-col border border-input rounded-lg bg-transparent"
+      className="relative"
     >
       {editor && toolbarState.show && (
         <FormattingToolbar
