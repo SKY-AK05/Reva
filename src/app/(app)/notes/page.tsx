@@ -45,7 +45,7 @@ export default function NotesPage() {
         <Input
           value={activeNote.title}
           onChange={(e) => updateNote(activeNote.id, { title: e.target.value })}
-          className="text-3xl font-bold tracking-tight border-0 focus-visible:ring-0 p-0 bg-transparent h-auto"
+          className="text-3xl font-bold tracking-tight border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 bg-transparent h-auto"
           placeholder="Untitled Note"
         />
       </header>
@@ -55,7 +55,7 @@ export default function NotesPage() {
           placeholder="Start with a brain dump... just write anything that comes to mind."
           value={activeNote.content}
           onChange={handleContentChange}
-          className="w-full text-base resize-none border-0 focus-visible:ring-0 p-0 bg-transparent block overflow-hidden"
+          className="w-full text-base resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 bg-transparent block overflow-hidden"
           rows={1}
         />
       </main>
