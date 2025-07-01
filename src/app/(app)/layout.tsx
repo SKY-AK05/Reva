@@ -24,7 +24,7 @@ export default function AppLayout({
 
   return (
     <NotesContextProvider>
-      <div className="bg-background text-foreground min-h-screen flex w-full">
+      <div className="bg-background text-foreground flex w-full h-screen overflow-hidden">
         <div
           className={cn(
             'hidden md:flex flex-col border-r border-border/80 transition-all duration-300',
@@ -36,18 +36,20 @@ export default function AppLayout({
             onToggleSidebar={toggleSidebar}
           />
         </div>
-        <div className="flex flex-col flex-1 min-w-0">
+        <div className="flex flex-1 flex-col min-w-0">
           <AppHeader 
             showGridLines={showGridLines}
             onToggleGridLines={toggleGridLines}
           />
-          <div className="flex-1 mt-6">
-            <main className={cn(
-              "flex flex-col w-full max-w-5xl mx-auto bg-card rounded-t-2xl shadow-2xl border-t border-x border-border h-full",
-              !showGridLines && 'no-grid-lines'
-              )}>
-              {children}
-            </main>
+          <div className="flex-1 overflow-y-auto">
+            <div className="p-6">
+              <main className={cn(
+                "flex flex-col w-full max-w-5xl mx-auto bg-card rounded-t-2xl shadow-2xl border-t border-x border-border min-h-[calc(100vh-4rem-3rem)]",
+                !showGridLines && 'no-grid-lines'
+                )}>
+                {children}
+              </main>
+            </div>
           </div>
         </div>
       </div>
