@@ -60,9 +60,9 @@ const RichTextEditor = ({
       
       setToolbarState({
         show: true,
-        // Position toolbar 50px above the selection
+        // Position toolbar 60px above the selection to give it more space
         // And make sure it doesn't go above the editor container
-        top: Math.max(box.top - 50, 10), 
+        top: Math.max(box.top - 60, 10), 
         left: box.left,
       });
     },
