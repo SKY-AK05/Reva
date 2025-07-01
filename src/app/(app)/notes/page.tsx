@@ -1,6 +1,7 @@
+
 'use client';
 
-import { Plus, Sparkles, StickyNote } from 'lucide-react';
+import { Sparkles, StickyNote } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { useNotesContext } from '@/context/notes-context';
 import { Input } from '@/components/ui/input';
@@ -14,7 +15,7 @@ import {
 } from '@/components/formatting-toolbar';
 
 export default function NotesPage() {
-  const { activeNote, updateNote, addNewNote } = useNotesContext();
+  const { activeNote, updateNote } = useNotesContext();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isComposing, setIsComposing] = useState(false);
 
@@ -178,13 +179,6 @@ export default function NotesPage() {
           placeholder="Untitled Note"
         />
         <div className="ml-auto flex items-center gap-2">
-          <Button
-            variant="outline"
-            onClick={addNewNote}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            New Note
-          </Button>
           <Button
             onClick={handleModifyWithAi}
             disabled={isComposing || !activeNote.content.trim()}
