@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import {
   PanelLeft,
-  Plus,
   User,
   HelpCircle,
   LogOut,
@@ -14,6 +13,7 @@ import {
   Grid,
   StickyNote,
   ChevronDown,
+  MessageSquare,
 } from 'lucide-react';
 import AppSidebar from '@/components/app-sidebar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -41,14 +41,8 @@ interface AppHeaderProps {
 
 export default function AppHeader({ showGridLines, onToggleGridLines }: AppHeaderProps) {
   const { theme, setTheme } = useTheme();
-  const { notes, activeNote, setActiveNoteById, addNewNote } = useNotesContext();
+  const { notes, activeNote, setActiveNoteById } = useNotesContext();
   const router = useRouter();
-
-  const handleNewNote = () => {
-    const newNoteId = addNewNote();
-    setActiveNoteById(newNoteId);
-    router.push('/notes');
-  };
 
   const handleSelectNote = (noteId: string) => {
     setActiveNoteById(noteId);
@@ -75,11 +69,13 @@ export default function AppHeader({ showGridLines, onToggleGridLines }: AppHeade
       <Button
         variant="outline"
         size="sm"
-        onClick={handleNewNote}
+        asChild
         className="border-border/80 hover:bg-accent flex items-center gap-2"
       >
-        <Plus className="h-4 w-4" />
-        <span>New Note</span>
+        <Link href="/chat">
+          <MessageSquare className="h-4 w-4" />
+          <span>New Chat</span>
+        </Link>
       </Button>
 
       <DropdownMenu>
