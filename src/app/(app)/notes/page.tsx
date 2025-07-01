@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useNotesContext } from '@/context/notes-context';
 import { Input } from '@/components/ui/input';
 import React, { useRef, useEffect } from 'react';
+import { getIconForTitle } from '@/lib/icon-map';
 
 export default function NotesPage() {
   const { activeNote, updateNote } = useNotesContext();
@@ -38,10 +39,12 @@ export default function NotesPage() {
     );
   }
 
+  const NoteIcon = getIconForTitle(activeNote.title);
+
   return (
     <div className="flex flex-1 flex-col h-full">
       <header className="flex items-center gap-4 p-6 sm:p-8 lg:p-12 border-b shrink-0">
-        <StickyNote className="w-9 h-9 text-primary flex-shrink-0" />
+        <NoteIcon className="w-9 h-9 text-primary flex-shrink-0" />
         <Input
           value={activeNote.title}
           onChange={(e) => updateNote(activeNote.id, { title: e.target.value })}
