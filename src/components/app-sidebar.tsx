@@ -11,6 +11,7 @@ import {
   Target,
   BookText,
   PanelLeft,
+  StickyNote,
 } from 'lucide-react';
 import RevaLogo from './reva-logo';
 import { Button } from './ui/button';
@@ -39,6 +40,7 @@ export default function AppSidebar({
     { href: '/reminders', label: 'Reminders', icon: Bell },
     { href: '/goals', label: 'Goals', icon: Target },
     { href: '/journal', label: 'Journal', icon: BookText },
+    { href: '/notes', label: 'Notes', icon: StickyNote },
   ];
 
   return (
