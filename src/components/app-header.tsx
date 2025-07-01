@@ -12,6 +12,8 @@ import {
   Moon,
   Laptop,
   Grid,
+  StickyNote,
+  ChevronDown,
 } from 'lucide-react';
 import AppSidebar from '@/components/app-sidebar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -28,6 +30,9 @@ import { useTheme } from 'next-themes';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { useNotesContext } from '@/context/notes-context';
+import { useRouter } from 'next/navigation';
+
 
 interface AppHeaderProps {
   showGridLines: boolean;
@@ -36,10 +41,24 @@ interface AppHeaderProps {
 
 export default function AppHeader({ showGridLines, onToggleGridLines }: AppHeaderProps) {
   const { theme, setTheme } = useTheme();
+  const { notes, activeNote, setActiveNoteById, addNewNote } = useNotesContext();
+  const router = useRouter();
+
 
   const handleNewChat = () => {
     window.location.href = '/chat';
   };
+
+  const handleNewNote = () => {
+    const newNoteId = addNewNote();
+    setActiveNoteById(newNoteId);
+    router.push('/notes');
+  };
+
+  const handleSelectNote = (noteId: string) => {
+    setActiveNoteById(noteId);
+    router.push('/notes');
+  }
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 bg-background/95 px-4 backdrop-blur-sm sm:px-6">
@@ -67,6 +86,31 @@ export default function AppHeader({ showGridLines, onToggleGridLines }: AppHeade
         <Plus className="h-4 w-4" />
         <span>New Chat</span>
       </Button>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" size="sm" className="border-border/80 hover:bg-accent flex items-center gap-2">
+            <StickyNote className="h-4 w-4" />
+            <span className="truncate max-w-28">{activeNote ? activeNote.title : 'Notes'}</span>
+            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-64">
+          <DropdownMenuItem onSelect={handleNewNote}>
+            <Plus className="mr-2 h-4 w-4" />
+            <span>New Note</span>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuLabel>Recent Notes</DropdownMenuLabel>
+          {notes.map(note => (
+            <DropdownMenuItem key={note.id} onSelect={() => handleSelectNote(note.id)}>
+              <span className="truncate">{note.title}</span>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+
       <div className="ml-auto flex items-center gap-2 sm:gap-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
