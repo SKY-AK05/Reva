@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -11,6 +10,7 @@ import {
   ListOrdered,
   Quote,
   Strikethrough,
+  Zap, // Added
 } from 'lucide-react';
 import type { CSSProperties } from 'react';
 
@@ -29,14 +29,19 @@ export type FormatType =
   | 'orderedList'
   | 'blockquote';
 
+// Add new type for AI actions
+export type AiActionType = 'generateChart';
+
 interface FormattingToolbarProps {
   onFormat: (formatType: FormatType) => void;
+  onAiAction: (actionType: AiActionType) => void; // Added
   className?: string;
   style?: CSSProperties;
 }
 
 export function FormattingToolbar({
   onFormat,
+  onAiAction, // Added
   className,
   style,
 }: FormattingToolbarProps) {
@@ -61,6 +66,10 @@ export function FormattingToolbar({
     { type: 'bulletList', icon: List, label: 'Bullet List' },
     { type: 'orderedList', icon: ListOrdered, label: 'Ordered List' },
     { type: 'blockquote', icon: Quote, label: 'Blockquote' },
+  ] as const;
+
+  const aiActions = [
+    { type: 'generateChart', icon: Zap, label: 'Generate Chart' },
   ] as const;
 
   return (
@@ -105,6 +114,19 @@ export function FormattingToolbar({
           size="icon"
           className="h-8 w-8"
           onClick={() => onFormat(btn.type)}
+          aria-label={btn.label}
+        >
+          <btn.icon className="h-4 w-4" />
+        </Button>
+      ))}
+       <Separator orientation="vertical" className="mx-1 h-6" />
+      {aiActions.map((btn) => (
+        <Button
+          key={btn.type}
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 text-primary hover:text-primary"
+          onClick={() => onAiAction(btn.type)}
           aria-label={btn.label}
         >
           <btn.icon className="h-4 w-4" />

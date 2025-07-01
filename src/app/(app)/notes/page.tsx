@@ -1,28 +1,37 @@
-
 'use client';
 
-import { Sparkles, StickyNote } from 'lucide-react';
+import { Loader2, Sparkles, StickyNote, Zap } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { useNotesContext } from '@/context/notes-context';
 import { Input } from '@/components/ui/input';
 import React, { useRef, useEffect, useState } from 'react';
 import { getIconForTitle } from '@/lib/icon-map';
 import { Button } from '@/components/ui/button';
-import { getComposedNote } from './actions';
+import { getComposedNote, getChartDataFromText } from './actions';
 import {
   FormattingToolbar,
   type FormatType,
+  type AiActionType,
 } from '@/components/formatting-toolbar';
+import type { GenerateChartFromTextOutput } from '@/ai/flows/generate-chart-from-text';
+import NoteChart from '@/components/note-chart';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export default function NotesPage() {
   const { activeNote, updateNote } = useNotesContext();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [isComposing, setIsComposing] = useState(false);
+  const mainContainerRef = useRef<HTMLDivElement>(null);
 
-  // State for the formatting toolbar
-  const mainContainerRef = useRef<HTMLElement>(null);
+  const [isComposing, setIsComposing] = useState(false);
+  
+  // State for toolbar and chart generation
   const [showToolbar, setShowToolbar] = useState(false);
   const [toolbarPosition, setToolbarPosition] = useState({ top: 0, left: 0 });
+  const [selectedText, setSelectedText] = useState('');
+  const [isGeneratingChart, setIsGeneratingChart] = useState(false);
+  const [generatedChartData, setGeneratedChartData] = useState<GenerateChartFromTextOutput | null>(null);
+  const [chartError, setChartError] = useState<string | null>(null);
+
 
   // Adjust textarea height to fit content when the note changes
   useEffect(() => {
@@ -61,7 +70,6 @@ export default function NotesPage() {
   };
 
   const handleSelection = () => {
-    // We need a slight delay to allow the selection to be reported
     setTimeout(() => {
       if (!mainContainerRef.current) return;
       const selection = window.getSelection();
@@ -76,17 +84,41 @@ export default function NotesPage() {
         const rangeRect = range.getBoundingClientRect();
         const containerRect = mainContainerRef.current.getBoundingClientRect();
 
-        const top = rangeRect.top - containerRect.top - 60; // Offset for toolbar height
+        const top = rangeRect.top - containerRect.top + mainContainerRef.current.scrollTop - 50; // Offset for toolbar height
         const left =
           rangeRect.left - containerRect.left + rangeRect.width / 2;
 
         setToolbarPosition({ top, left });
         setShowToolbar(true);
+        setSelectedText(selection.toString());
       } else {
         setShowToolbar(false);
+        setSelectedText('');
       }
     }, 10);
   };
+
+  const handleAiAction = async (actionType: AiActionType) => {
+    setShowToolbar(false);
+    if (actionType === 'generateChart' && selectedText) {
+        setIsGeneratingChart(true);
+        setGeneratedChartData(null);
+        setChartError(null);
+        try {
+            const result = await getChartDataFromText(selectedText);
+            if (result.isChartable && result.data && result.data.length > 0) {
+                setGeneratedChartData(result);
+            } else {
+                setChartError(result.reasoning || "Could not generate a chart from the selected text.");
+            }
+        } catch (error) {
+            console.error('Failed to generate chart', error);
+            setChartError("An unexpected error occurred while generating the chart.");
+        } finally {
+            setIsGeneratingChart(false);
+        }
+    }
+  }
 
   const handleFormat = (formatType: FormatType) => {
     if (!activeNote || !textareaRef.current) return;
@@ -152,6 +184,11 @@ export default function NotesPage() {
       textarea.setSelectionRange(start, start + replacement.length);
     }, 0);
   };
+  
+  const clearChartData = () => {
+    setGeneratedChartData(null);
+    setChartError(null);
+  }
 
   if (!activeNote) {
     return (
@@ -196,6 +233,7 @@ export default function NotesPage() {
         {showToolbar && (
           <FormattingToolbar
             onFormat={handleFormat}
+            onAiAction={handleAiAction}
             className="absolute"
             style={{
               top: toolbarPosition.top,
@@ -214,6 +252,26 @@ export default function NotesPage() {
           className="w-full text-2xl resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 bg-transparent block overflow-hidden"
           rows={1}
         />
+        <div className="mt-6">
+            {isGeneratingChart && (
+                <div className="flex items-center justify-center gap-3 text-muted-foreground p-8 animate-fade-in-up">
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                    <span className="text-lg">Generating chart...</span>
+                </div>
+            )}
+            {chartError && (
+                <Alert variant="destructive" className="animate-fade-in-up">
+                    <Zap className="h-4 w-4" />
+                    <AlertTitle>Chart Generation Failed</AlertTitle>
+                    <AlertDescription>
+                        {chartError}
+                    </AlertDescription>
+                </Alert>
+            )}
+            {generatedChartData && (
+                <NoteChart chartData={generatedChartData} onClear={clearChartData} />
+            )}
+        </div>
       </main>
     </div>
   );
