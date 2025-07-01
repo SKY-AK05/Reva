@@ -34,7 +34,7 @@ export default function AppSidebar({
 
   const menuItems = [
     { href: '/chat', label: 'Chat', icon: MessageSquare },
-    { href: '/overview', label: 'Overview', icon: LayoutDashboard },
+    { href: '/overview', label: 'Library', icon: LayoutDashboard },
     { href: '/tasks', label: 'Tasks', icon: CheckSquare },
     { href: '/expenses', label: 'Expenses', icon: DollarSign },
     { href: '/reminders', label: 'Reminders', icon: Bell },
