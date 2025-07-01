@@ -3,7 +3,7 @@
 
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import {
   FormattingToolbar,
   type FormatType,
@@ -82,6 +82,17 @@ const RichTextEditor = ({
       },
     },
   });
+
+  useEffect(() => {
+    if (editor) {
+      // If the external content is different from the editor's content, update the editor.
+      const isSame = editor.getHTML() === content;
+      if (!isSame) {
+        // The `false` argument prevents the onUpdate callback from firing, avoiding an infinite loop.
+        editor.commands.setContent(content, false);
+      }
+    }
+  }, [content, editor]);
 
   const handleFormat = useCallback(
     (formatType: FormatType) => {
