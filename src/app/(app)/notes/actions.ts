@@ -1,11 +1,11 @@
 'use server';
 
-import { summarizeNote, type SummarizeNoteOutput } from '@/ai/flows/summarize-note';
+import { composeNote, type ComposeNoteOutput } from '@/ai/flows/compose-note';
 
-export async function getNoteSummary(noteContent: string): Promise<SummarizeNoteOutput> {
+export async function getComposedNote(noteContent: string): Promise<ComposeNoteOutput> {
     if (!noteContent.trim()) {
         throw new Error("Note content cannot be empty.");
     }
-    const result = await summarizeNote({ noteContent });
+    const result = await composeNote({ noteContent });
     return result;
 }

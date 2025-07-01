@@ -1,56 +1,55 @@
 'use client';
 
 import { useState } from 'react';
-import { StickyNote, Bot, Sparkles, Loader2, ListTodo, Key } from 'lucide-react';
+import { StickyNote, Bot, Sparkles, Loader2 } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
-import { getNoteSummary } from './actions';
+import { getComposedNote } from './actions';
 import { cn } from '@/lib/utils';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 // Types
-type Summary = {
-  title: string;
-  summary: string;
-  actionItems: string[];
-  keyPoints: string[];
-};
-
 type Note = {
   id: string;
   title: string;
-  content: string;
-  summary: Summary | null;
+  rawContent: string;
+  composedContent: string | null;
 };
 
 // Initial Data
 const initialNotes: Note[] = [
   {
     id: '1',
-    title: 'Initial Idea',
-    content: 'This is a sample note to get you started. You can write anything here - meeting notes, random thoughts, project plans, or even a journal entry. When you\'re ready, click the "Summarize with AI" button to see the magic happen!',
-    summary: null,
+    title: 'Getting Started',
+    rawContent: 'This is a sample note to get you started. You can write anything here - meeting notes, random thoughts, a project plan, or even a journal entry. When you\'re ready, click the "Organize with AI" button to see the magic happen!',
+    composedContent: `### Getting Started with Smart Notes
+
+Welcome to your new intelligent note-taking space! Here's how to make the most of it:
+
+1.  **Write Freely:** Capture your thoughts, meeting notes, or brilliant ideas in this editor. Don't worry about formatting.
+2.  **Let AI Organize:** Click the **"Organize with AI"** button.
+3.  **See the Magic:** Your note will be transformed into a structured, easy-to-read format on the right.
+
+Happy writing!`,
   },
   {
     id: '2',
     title: 'Project Phoenix Plan',
-    content: 'Okay, big meeting today about Project Phoenix. We need to finalize the roadmap. John thinks we should focus on the new dashboard first. Maria wants to prioritize the mobile app. I think we need to do both, but we have to start with the backend refactor. I need to remember to schedule a follow-up with the design team about the new mockups and also draft the Q3 goals for the leadership review. The deadline for the prototype is end of next month.',
-    summary: {
-      title: 'Project Phoenix Roadmap Discussion',
-      summary: 'A summary of a meeting to finalize the Project Phoenix roadmap, discussing priorities between the dashboard, mobile app, and backend refactor.',
-      actionItems: [
-        'Schedule follow-up with the design team about mockups.',
-        'Draft Q3 goals for leadership review.',
-      ],
-      keyPoints: [
-        'John advocates for prioritizing the new dashboard.',
-        'Maria suggests focusing on the mobile app first.',
-        'The consensus is a backend refactor is the necessary first step.',
-        'The prototype deadline is the end of next month.',
-      ],
-    },
+    rawContent: 'Okay, big meeting today about Project Phoenix. We need to finalize the roadmap. John thinks we should focus on the new dashboard first. Maria wants to prioritize the mobile app. I think we need to do both, but we have to start with the backend refactor. I need to remember to schedule a follow-up with the design team about the new mockups and also draft the Q3 goals for the leadership review. The deadline for the prototype is end of next month.',
+    composedContent: `### Project Phoenix Roadmap Discussion
+
+**Key Priorities:**
+- **John's View:** Focus on the new dashboard first.
+- **Maria's View:** Prioritize the mobile app.
+- **My Conclusion:** A backend refactor is the essential first step before tackling both the dashboard and mobile app.
+
+**Action Items:**
+- [ ] Schedule follow-up with the design team about new mockups.
+- [ ] Draft Q3 goals for leadership review.
+
+**🗓️ Deadline:** The prototype must be completed by the end of next month.`,
   },
 ];
 
@@ -64,20 +63,20 @@ export default function NotesPage() {
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (!activeNoteId) return;
     setNotes(notes.map(note =>
-      note.id === activeNoteId ? { ...note, content: e.target.value } : note
+      note.id === activeNoteId ? { ...note, rawContent: e.target.value } : note
     ));
   };
 
-  const handleSummarize = async () => {
-    if (!activeNote || !activeNote.content.trim()) return;
+  const handleCompose = async () => {
+    if (!activeNote || !activeNote.rawContent.trim()) return;
     setIsLoading(true);
     try {
-      const summaryResult = await getNoteSummary(activeNote.content);
+      const result = await getComposedNote(activeNote.rawContent);
       setNotes(notes.map(note =>
-        note.id === activeNoteId ? { ...note, summary: summaryResult, title: summaryResult.title } : note
+        note.id === activeNoteId ? { ...note, composedContent: result.composedContent, title: result.title } : note
       ));
     } catch (error) {
-      console.error("Failed to get summary:", error);
+      console.error("Failed to compose note:", error);
       // Here you could use a toast to show an error to the user
     } finally {
       setIsLoading(false);
@@ -88,8 +87,8 @@ export default function NotesPage() {
     const newNote: Note = {
       id: Date.now().toString(),
       title: "Untitled Note",
-      content: "",
-      summary: null,
+      rawContent: "",
+      composedContent: null,
     };
     setNotes([newNote, ...notes]);
     setActiveNoteId(newNote.id);
@@ -101,8 +100,8 @@ export default function NotesPage() {
       <header className="flex items-center gap-4 h-[5.5rem] px-6 sm:px-8 lg:px-12 border-b shrink-0">
         <StickyNote className="w-9 h-9 text-primary" />
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">Smart Notes</h1>
-          <p className="text-muted-foreground">Capture your thoughts, let AI find the clarity.</p>
+          <h1 className="text-3xl font-bold tracking-tight">AI Note Composer</h1>
+          <p className="text-muted-foreground">Turn raw thoughts into structured clarity.</p>
         </div>
       </header>
       <div className="flex flex-1 overflow-hidden">
@@ -130,84 +129,68 @@ export default function NotesPage() {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 flex flex-col overflow-y-auto">
+        <main className="flex-1 grid grid-cols-1 md:grid-cols-2 overflow-y-auto">
           {activeNote ? (
-            <div className="flex-1 flex flex-col">
-              <div className="p-6 sm:p-8 flex-1">
-                <Textarea
-                  placeholder="Start writing your note here..."
-                  value={activeNote.content}
-                  onChange={handleContentChange}
-                  className="w-full h-full min-h-[300px] text-base resize-none border-0 focus-visible:ring-0 p-0 bg-transparent"
-                />
-              </div>
-              <div className="p-6 sm:p-8 border-t bg-background/50 sticky bottom-0">
-                <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
-                    <p className="text-sm text-muted-foreground text-center sm:text-left">Let AI organize your thoughts into actionable insights.</p>
-                    <Button onClick={handleSummarize} disabled={isLoading || !activeNote.content.trim()} className="w-full sm:w-auto">
-                      {isLoading ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Summarizing...
-                        </>
-                      ) : (
-                         <>
-                          <Sparkles className="mr-2 h-4 w-4" />
-                          Summarize with AI
-                        </>
-                      )}
-                    </Button>
+            <>
+              {/* Editor Panel */}
+              <div className="flex flex-col md:border-r relative">
+                <ScrollArea className="flex-1">
+                  <div className="p-6 sm:p-8">
+                    <Textarea
+                      placeholder="Start with a brain dump... just write anything that comes to mind."
+                      value={activeNote.rawContent}
+                      onChange={handleContentChange}
+                      className="w-full h-full min-h-[calc(100vh-15rem)] text-base resize-none border-0 focus-visible:ring-0 p-0 bg-transparent"
+                    />
+                  </div>
+                </ScrollArea>
+                <div className="p-4 border-t sticky bottom-0 bg-card/80 backdrop-blur-sm">
+                  <Button onClick={handleCompose} disabled={isLoading || !activeNote.rawContent.trim()} className="w-full">
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Composing...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        Organize with AI
+                      </>
+                    )}
+                  </Button>
                 </div>
-                {activeNote.summary && (
-                  <Card className="mt-6 bg-secondary/50">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Bot className="w-6 h-6 text-primary" />
-                        AI Summary
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                       <div>
-                          <h4 className="font-semibold mb-2">Summary</h4>
-                          <p className="text-muted-foreground">{activeNote.summary.summary}</p>
-                       </div>
-                       
-                       {(activeNote.summary.keyPoints.length > 0 || activeNote.summary.actionItems.length > 0) && <Separator />}
-                       
-                       {activeNote.summary.keyPoints.length > 0 && (
-                          <div>
-                            <h4 className="font-semibold mb-3 flex items-center gap-2">
-                                <Key className="w-4 h-4 text-muted-foreground" />
-                                Key Points
-                            </h4>
-                            <ul className="space-y-2 pl-5 list-disc text-muted-foreground">
-                              {activeNote.summary.keyPoints.map((point, index) => (
-                                <li key={index}>{point}</li>
-                              ))}
-                            </ul>
-                          </div>
-                       )}
-
-                       {activeNote.summary.actionItems.length > 0 && (
-                          <div>
-                            <h4 className="font-semibold mb-3 flex items-center gap-2">
-                                <ListTodo className="w-4 h-4 text-muted-foreground" />
-                                Action Items
-                            </h4>
-                            <ul className="space-y-2 pl-5 list-disc text-muted-foreground">
-                              {activeNote.summary.actionItems.map((item, index) => (
-                                <li key={index}>{item}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                    </CardContent>
-                  </Card>
-                )}
               </div>
-            </div>
+
+              {/* Output Panel */}
+              <ScrollArea className="flex-1">
+                <div className="p-6 sm:p-8">
+                  {isLoading && !activeNote.composedContent ? (
+                    <div className="flex items-center justify-center h-full text-muted-foreground min-h-[calc(100vh-15rem)]">
+                      <div className="text-center">
+                        <Loader2 className="mx-auto h-8 w-8 animate-spin" />
+                        <p className="mt-4">AI is thinking...</p>
+                      </div>
+                    </div>
+                  ) : activeNote.composedContent ? (
+                    <div className={cn(
+                        "prose dark:prose-invert max-w-none",
+                        isLoading && "opacity-50 transition-opacity"
+                    )}>
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{activeNote.composedContent}</ReactMarkdown>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-center text-muted-foreground min-h-[calc(100vh-15rem)]">
+                      <div>
+                        <Bot className="mx-auto h-12 w-12" />
+                        <p className="mt-2">Your organized note will appear here.</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
+            </>
           ) : (
-            <div className="flex-1 flex items-center justify-center text-center text-muted-foreground">
+            <div className="md:col-span-2 flex-1 flex items-center justify-center text-center text-muted-foreground">
               <div className="space-y-2">
                 <StickyNote className="mx-auto h-12 w-12" />
                 <p>Select a note to view or create a new one.</p>
