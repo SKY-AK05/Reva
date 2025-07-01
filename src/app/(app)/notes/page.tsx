@@ -40,12 +40,12 @@ export default function NotesPage() {
 
   return (
     <div className="flex flex-1 flex-col h-full">
-      <header className="flex items-center gap-4 h-[5.5rem] px-6 sm:px-8 lg:p-12 border-b shrink-0">
-        <StickyNote className="w-9 h-9 text-primary" />
+      <header className="flex items-start gap-4 p-6 sm:p-8 lg:p-12 border-b shrink-0">
+        <StickyNote className="w-9 h-9 text-primary mt-4 flex-shrink-0" />
         <Input
           value={activeNote.title}
           onChange={(e) => updateNote(activeNote.id, { title: e.target.value })}
-          className="text-4xl font-bold tracking-tight border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 bg-transparent h-auto"
+          className="text-8xl font-bold tracking-tighter border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 bg-transparent h-auto leading-tight"
           placeholder="Untitled Note"
         />
       </header>
