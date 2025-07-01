@@ -27,6 +27,7 @@ export default function NotesPage() {
   // State for toolbar and chart generation
   const [showToolbar, setShowToolbar] = useState(false);
   const [selectedText, setSelectedText] = useState('');
+  const [selection, setSelection] = useState({ start: 0, end: 0 });
   const [isGeneratingChart, setIsGeneratingChart] = useState(false);
   const [generatedChartData, setGeneratedChartData] = useState<GenerateChartFromTextOutput | null>(null);
   const [chartError, setChartError] = useState<string | null>(null);
@@ -74,11 +75,14 @@ export default function NotesPage() {
 
     // Use a small timeout to ensure selection properties are updated
     setTimeout(() => {
-      const hasSelection = textarea.selectionStart !== textarea.selectionEnd;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const hasSelection = start !== end;
       // Show toolbar only if there's a selection and the textarea is focused
       if (hasSelection && document.activeElement === textarea) {
         setShowToolbar(true);
-        setSelectedText(textarea.value.substring(textarea.selectionStart, textarea.selectionEnd));
+        setSelectedText(textarea.value.substring(start, end));
+        setSelection({ start, end });
       } else {
         // Hide the toolbar if there is no selection, but not on blur,
         // as blur is handled separately to allow toolbar interaction.
@@ -116,12 +120,12 @@ export default function NotesPage() {
     if (!activeNote || !textareaRef.current) return;
 
     const textarea = textareaRef.current;
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
+    const { start, end } = selection;
     const currentText = activeNote.content;
-    const selectedText = currentText.substring(start, end);
-
+    
     if (start === end) return;
+
+    const selectedText = currentText.substring(start, end);
 
     let replacement = '';
     switch (formatType) {

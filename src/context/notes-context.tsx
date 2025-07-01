@@ -1,6 +1,7 @@
+
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface Note {
@@ -39,6 +40,12 @@ const initialNotes: Note[] = [
         content: '1. "The only way to do great work is to love what you do." - Steve Jobs\n2. "The best way to predict the future is to create it." - Peter Drucker',
         createdAt: new Date().toISOString(),
     },
+     {
+      id: '4',
+      title: 'Q3 Sales Data',
+      content: 'Here are the final numbers for our Q3 sales.\n\n- North America: $1,200,000\n- Europe: $950,000\n- Asia: $780,000\n- South America: $450,000\n- Australia: $320,000',
+      createdAt: new Date().toISOString(),
+    },
 ];
 
 export const NotesContextProvider = ({ children }: { children: ReactNode }) => {
@@ -47,11 +54,11 @@ export const NotesContextProvider = ({ children }: { children: ReactNode }) => {
 
   const activeNote = notes.find(note => note.id === activeNoteId) || null;
 
-  const setActiveNoteById = (id: string | null) => {
+  const setActiveNoteById = useCallback((id: string | null) => {
     setActiveNoteId(id);
-  };
+  }, []);
 
-  const addNewNote = () => {
+  const addNewNote = useCallback(() => {
     const newNote: Note = {
       id: uuidv4(),
       title: 'Untitled Note',
@@ -61,15 +68,15 @@ export const NotesContextProvider = ({ children }: { children: ReactNode }) => {
     setNotes(prevNotes => [newNote, ...prevNotes]);
     setActiveNoteId(newNote.id);
     return newNote.id;
-  };
+  }, []);
 
-  const updateNote = (id: string, updates: Partial<Omit<Note, 'id' | 'createdAt'>>) => {
+  const updateNote = useCallback((id: string, updates: Partial<Omit<Note, 'id' | 'createdAt'>>) => {
     setNotes(prevNotes =>
       prevNotes.map(note =>
         note.id === id ? { ...note, ...updates } : note
       )
     );
-  };
+  }, []);
   
   const value = {
     notes,
