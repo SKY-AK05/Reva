@@ -68,15 +68,16 @@ export default function NotesPage() {
       if (
         selection &&
         selection.rangeCount > 0 &&
-        selection.toString().length > 0 &&
-        textareaRef.current?.contains(selection.anchorNode)
+        selection.toString().trim().length > 0 &&
+        document.activeElement === textareaRef.current
       ) {
         const range = selection.getRangeAt(0);
         const rangeRect = range.getBoundingClientRect();
         const containerRect = mainContainerRef.current.getBoundingClientRect();
 
         const top = rangeRect.top - containerRect.top - 60; // Offset for toolbar height
-        const left = rangeRect.left - containerRect.left + rangeRect.width / 2;
+        const left =
+          rangeRect.left - containerRect.left + rangeRect.width / 2;
 
         setToolbarPosition({ top, left });
         setShowToolbar(true);
