@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Loader2, Sparkles, StickyNote, Zap } from 'lucide-react';
@@ -20,13 +21,11 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 export default function NotesPage() {
   const { activeNote, updateNote } = useNotesContext();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const mainContainerRef = useRef<HTMLDivElement>(null);
 
   const [isComposing, setIsComposing] = useState(false);
   
   // State for toolbar and chart generation
   const [showToolbar, setShowToolbar] = useState(false);
-  const [toolbarPosition, setToolbarPosition] = useState({ top: 0, left: 0 });
   const [selectedText, setSelectedText] = useState('');
   const [isGeneratingChart, setIsGeneratingChart] = useState(false);
   const [generatedChartData, setGeneratedChartData] = useState<GenerateChartFromTextOutput | null>(null);
@@ -70,33 +69,26 @@ export default function NotesPage() {
   };
 
   const handleSelection = () => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    // Use a small timeout to ensure selection properties are updated
     setTimeout(() => {
-      if (!mainContainerRef.current) return;
-      const selection = window.getSelection();
-
-      if (
-        selection &&
-        selection.rangeCount > 0 &&
-        selection.toString().trim().length > 0 &&
-        document.activeElement === textareaRef.current
-      ) {
-        const range = selection.getRangeAt(0);
-        const rangeRect = range.getBoundingClientRect();
-        const containerRect = mainContainerRef.current.getBoundingClientRect();
-
-        const top = rangeRect.top - containerRect.top + mainContainerRef.current.scrollTop - 50; // Offset for toolbar height
-        const left =
-          rangeRect.left - containerRect.left + rangeRect.width / 2;
-
-        setToolbarPosition({ top, left });
+      const hasSelection = textarea.selectionStart !== textarea.selectionEnd;
+      // Show toolbar only if there's a selection and the textarea is focused
+      if (hasSelection && document.activeElement === textarea) {
         setShowToolbar(true);
-        setSelectedText(selection.toString());
+        setSelectedText(textarea.value.substring(textarea.selectionStart, textarea.selectionEnd));
       } else {
-        setShowToolbar(false);
-        setSelectedText('');
+        // Hide the toolbar if there is no selection, but not on blur,
+        // as blur is handled separately to allow toolbar interaction.
+        if (document.activeElement === textarea) {
+             setShowToolbar(false);
+        }
       }
     }, 10);
   };
+  
 
   const handleAiAction = async (actionType: AiActionType) => {
     setShowToolbar(false);
@@ -189,6 +181,14 @@ export default function NotesPage() {
     setGeneratedChartData(null);
     setChartError(null);
   }
+  
+  const handleBlur = () => {
+    // We need to delay hiding the toolbar so that clicks on its buttons can be registered
+    setTimeout(() => {
+        setShowToolbar(false);
+    }, 200);
+  };
+
 
   if (!activeNote) {
     return (
@@ -226,29 +226,23 @@ export default function NotesPage() {
         </div>
       </header>
       <main
-        ref={mainContainerRef}
         onMouseUp={handleSelection}
         className="relative flex-1 p-6 sm:p-8 lg:p-12 notebook-lines-journal overflow-y-auto"
       >
-        {showToolbar && (
-          <FormattingToolbar
-            onFormat={handleFormat}
-            onAiAction={handleAiAction}
-            className="absolute"
-            style={{
-              top: toolbarPosition.top,
-              left: toolbarPosition.left,
-              transform: 'translateX(-50%)',
-            }}
-          />
-        )}
+        <div className="w-full flex justify-center mb-4 transition-opacity duration-300"
+         style={{ opacity: showToolbar ? 1 : 0, pointerEvents: showToolbar ? 'auto' : 'none' }}>
+            <FormattingToolbar
+                onFormat={handleFormat}
+                onAiAction={handleAiAction}
+            />
+        </div>
         <Textarea
           ref={textareaRef}
           placeholder="Start with a brain dump... just write anything that comes to mind."
           value={activeNote.content}
           onChange={handleContentChange}
           onKeyUp={handleSelection}
-          onBlur={() => setTimeout(() => setShowToolbar(false), 200)} // delay to allow clicks
+          onBlur={handleBlur}
           className="w-full text-2xl resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 bg-transparent block overflow-hidden"
           rows={1}
         />
