@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Loader2, Sparkles, StickyNote, Zap } from 'lucide-react';
@@ -17,14 +16,14 @@ import {
 import type { GenerateChartFromTextOutput } from '@/ai/flows/generate-chart-from-text';
 import NoteChart from '@/components/note-chart';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 export default function NotesPage() {
   const { activeNote, updateNote } = useNotesContext();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const [isComposing, setIsComposing] = useState(false);
-  
-  // State for toolbar and chart generation
   const [showToolbar, setShowToolbar] = useState(false);
   const [selectedText, setSelectedText] = useState('');
   const [selection, setSelection] = useState({ start: 0, end: 0 });
@@ -32,23 +31,28 @@ export default function NotesPage() {
   const [generatedChartData, setGeneratedChartData] = useState<GenerateChartFromTextOutput | null>(null);
   const [chartError, setChartError] = useState<string | null>(null);
 
+  // New state for view/edit mode
+  const [isEditing, setIsEditing] = useState(false);
 
-  // Adjust textarea height to fit content when the note changes
+  // Auto-resize textarea and focus when entering edit mode
   useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    if (isEditing && textareaRef.current) {
+      const textarea = textareaRef.current;
+      textarea.style.height = 'auto';
+      textarea.style.height = `${textarea.scrollHeight}px`;
+      textarea.focus();
     }
-  }, [activeNote]);
+  }, [isEditing, activeNote?.content]);
+
+  // Reset to view mode when switching to a different note
+  useEffect(() => {
+    setIsEditing(false);
+  }, [activeNote?.id]);
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (activeNote) {
       updateNote(activeNote.id, { content: e.target.value });
     }
-    // Auto-resize the textarea
-    const textarea = e.target;
-    textarea.style.height = 'auto';
-    textarea.style.height = `${textarea.scrollHeight}px`;
   };
 
   const handleModifyWithAi = async () => {
@@ -61,9 +65,10 @@ export default function NotesPage() {
         title: result.title,
         content: result.composedContent,
       });
+      // Ensure we are in edit mode to see the modified content
+      setIsEditing(true);
     } catch (error) {
       console.error('Failed to modify note with AI', error);
-      // TODO: Add user-facing error toast
     } finally {
       setIsComposing(false);
     }
@@ -78,43 +83,37 @@ export default function NotesPage() {
       const start = textarea.selectionStart;
       const end = textarea.selectionEnd;
       const hasSelection = start !== end;
-      // Show toolbar only if there's a selection and the textarea is focused
       if (hasSelection && document.activeElement === textarea) {
         setShowToolbar(true);
         setSelectedText(textarea.value.substring(start, end));
         setSelection({ start, end });
-      } else {
-        // Hide the toolbar if there is no selection, but not on blur,
-        // as blur is handled separately to allow toolbar interaction.
-        if (document.activeElement === textarea) {
-             setShowToolbar(false);
-        }
+      } else if (document.activeElement === textarea) {
+        setShowToolbar(false);
       }
     }, 10);
   };
-  
 
   const handleAiAction = async (actionType: AiActionType) => {
     setShowToolbar(false);
     if (actionType === 'generateChart' && selectedText) {
-        setIsGeneratingChart(true);
-        setGeneratedChartData(null);
-        setChartError(null);
-        try {
-            const result = await getChartDataFromText(selectedText);
-            if (result.isChartable && result.data && result.data.length > 0) {
-                setGeneratedChartData(result);
-            } else {
-                setChartError(result.reasoning || "Could not generate a chart from the selected text.");
-            }
-        } catch (error) {
-            console.error('Failed to generate chart', error);
-            setChartError("An unexpected error occurred while generating the chart.");
-        } finally {
-            setIsGeneratingChart(false);
+      setIsGeneratingChart(true);
+      setGeneratedChartData(null);
+      setChartError(null);
+      try {
+        const result = await getChartDataFromText(selectedText);
+        if (result.isChartable && result.data && result.data.length > 0) {
+          setGeneratedChartData(result);
+        } else {
+          setChartError(result.reasoning || "Could not generate a chart from the selected text.");
         }
+      } catch (error) {
+        console.error('Failed to generate chart', error);
+        setChartError("An unexpected error occurred while generating the chart.");
+      } finally {
+        setIsGeneratingChart(false);
+      }
     }
-  }
+  };
 
   const handleFormat = (formatType: FormatType) => {
     if (!activeNote || !textareaRef.current) return;
@@ -122,55 +121,30 @@ export default function NotesPage() {
     const textarea = textareaRef.current;
     const { start, end } = selection;
     const currentText = activeNote.content;
-    
+
     if (start === end) return;
 
     const selectedText = currentText.substring(start, end);
-
     let replacement = '';
     switch (formatType) {
-      case 'bold':
-        replacement = `**${selectedText}**`;
-        break;
-      case 'italic':
-        replacement = `*${selectedText}*`;
-        break;
-      case 'strikethrough':
-        replacement = `~~${selectedText}~~`;
-        break;
-      case 'code':
-        replacement = `\`${selectedText}\``;
-        break;
-      case 'h1':
-      case 'h2':
-      case 'blockquote':
-        const prefix =
-          { h1: '# ', h2: '## ', blockquote: '> ' }[formatType];
-        replacement = selectedText
-          .split('\n')
-          .map((line) => `${prefix}${line}`)
-          .join('\n');
+      case 'bold': replacement = `**${selectedText}**`; break;
+      case 'italic': replacement = `*${selectedText}*`; break;
+      case 'strikethrough': replacement = `~~${selectedText}~~`; break;
+      case 'code': replacement = `\`${selectedText}\``; break;
+      case 'h1': case 'h2': case 'blockquote':
+        const prefix = { h1: '# ', h2: '## ', blockquote: '> ' }[formatType];
+        replacement = selectedText.split('\n').map((line) => `${prefix}${line}`).join('\n');
         break;
       case 'bulletList':
-        replacement = selectedText
-          .split('\n')
-          .map((line) => `- ${line}`)
-          .join('\n');
+        replacement = selectedText.split('\n').map((line) => `- ${line}`).join('\n');
         break;
       case 'orderedList':
-        replacement = selectedText
-          .split('\n')
-          .map((line, index) => `${index + 1}. ${line}`)
-          .join('\n');
+        replacement = selectedText.split('\n').map((line, index) => `${index + 1}. ${line}`).join('\n');
         break;
-      default:
-        replacement = selectedText;
+      default: replacement = selectedText;
     }
 
-    const newContent = `${currentText.substring(
-      0,
-      start
-    )}${replacement}${currentText.substring(end)}`;
+    const newContent = `${currentText.substring(0, start)}${replacement}${currentText.substring(end)}`;
     updateNote(activeNote.id, { content: newContent });
 
     setShowToolbar(false);
@@ -180,19 +154,11 @@ export default function NotesPage() {
       textarea.setSelectionRange(start, start + replacement.length);
     }, 0);
   };
-  
+
   const clearChartData = () => {
     setGeneratedChartData(null);
     setChartError(null);
-  }
-  
-  const handleBlur = () => {
-    // We need to delay hiding the toolbar so that clicks on its buttons can be registered
-    setTimeout(() => {
-        setShowToolbar(false);
-    }, 200);
   };
-
 
   if (!activeNote) {
     return (
@@ -229,46 +195,66 @@ export default function NotesPage() {
           </Button>
         </div>
       </header>
-      <main
-        onMouseUp={handleSelection}
-        className="relative flex-1 p-6 sm:p-8 lg:p-12 notebook-lines-journal overflow-y-auto"
-      >
-        <div className="w-full flex justify-center mb-4 transition-opacity duration-300"
-         style={{ opacity: showToolbar ? 1 : 0, pointerEvents: showToolbar ? 'auto' : 'none' }}>
-            <FormattingToolbar
+      <main className="relative flex-1 p-6 sm:p-8 lg:p-12 notebook-lines-journal overflow-y-auto">
+        {isEditing ? (
+          <>
+            <div
+              className="w-full flex justify-center mb-4 transition-opacity duration-300"
+              style={{
+                opacity: showToolbar ? 1 : 0,
+                pointerEvents: showToolbar ? 'auto' : 'none',
+              }}
+            >
+              <FormattingToolbar
                 onFormat={handleFormat}
                 onAiAction={handleAiAction}
+              />
+            </div>
+            <Textarea
+              ref={textareaRef}
+              placeholder="Start with a brain dump..."
+              value={activeNote.content}
+              onChange={handleContentChange}
+              onKeyUp={handleSelection}
+              onMouseUp={handleSelection}
+              onBlur={() => {
+                setShowToolbar(false);
+                setIsEditing(false);
+              }}
+              className="w-full text-2xl resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 bg-transparent block overflow-hidden"
+              rows={1}
             />
-        </div>
-        <Textarea
-          ref={textareaRef}
-          placeholder="Start with a brain dump... just write anything that comes to mind."
-          value={activeNote.content}
-          onChange={handleContentChange}
-          onKeyUp={handleSelection}
-          onBlur={handleBlur}
-          className="w-full text-2xl resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 bg-transparent block overflow-hidden"
-          rows={1}
-        />
+          </>
+        ) : (
+          <div
+            className="prose dark:prose-invert max-w-none text-2xl cursor-text w-full min-h-[5rem]"
+            onClick={() => setIsEditing(true)}
+          >
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {activeNote.content || 'Click to start writing...'}
+            </ReactMarkdown>
+          </div>
+        )}
         <div className="mt-6">
-            {isGeneratingChart && (
-                <div className="flex items-center justify-center gap-3 text-muted-foreground p-8 animate-fade-in-up">
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                    <span className="text-lg">Generating chart...</span>
-                </div>
-            )}
-            {chartError && (
-                <Alert variant="destructive" className="animate-fade-in-up">
-                    <Zap className="h-4 w-4" />
-                    <AlertTitle>Chart Generation Failed</AlertTitle>
-                    <AlertDescription>
-                        {chartError}
-                    </AlertDescription>
-                </Alert>
-            )}
-            {generatedChartData && (
-                <NoteChart chartData={generatedChartData} onClear={clearChartData} />
-            )}
+          {isGeneratingChart && (
+            <div className="flex items-center justify-center gap-3 text-muted-foreground p-8 animate-fade-in-up">
+              <Loader2 className="h-6 w-6 animate-spin" />
+              <span className="text-lg">Generating chart...</span>
+            </div>
+          )}
+          {chartError && (
+            <Alert variant="destructive" className="animate-fade-in-up">
+              <Zap className="h-4 w-4" />
+              <AlertTitle>Chart Generation Failed</AlertTitle>
+              <AlertDescription>{chartError}</AlertDescription>
+            </Alert>
+          )}
+          {generatedChartData && (
+            <NoteChart
+              chartData={generatedChartData}
+              onClear={clearChartData}
+            />
+          )}
         </div>
       </main>
     </div>
