@@ -9,7 +9,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import { Sun, Laptop, Moon, LogOut, User, HelpCircle } from 'lucide-react';
+import { Sun, Laptop, Moon, LogOut, Settings, HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function PublicHeader() {
@@ -100,9 +100,11 @@ export default function PublicHeader() {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Account Settings</span>
+                <DropdownMenuItem asChild>
+                  <Link href="/settings">
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <HelpCircle className="mr-2 h-4 w-4" />
