@@ -13,7 +13,6 @@ import {
   BookText,
   PanelLeft,
   StickyNote,
-  Settings,
 } from 'lucide-react';
 import RevaLogo from './reva-logo';
 import { Button } from './ui/button';
@@ -43,7 +42,6 @@ export default function AppSidebar({
     { href: '/goals', label: 'Goals', icon: Target },
     { href: '/journal', label: 'Journal', icon: BookText },
     { href: '/notes', label: 'Notes', icon: StickyNote },
-    { href: '/settings', label: 'Settings', icon: Settings },
   ];
 
   return (
