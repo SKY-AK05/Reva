@@ -21,6 +21,7 @@ export default function SignupPage() {
     e.preventDefault();
     setError(null);
     const form = e.currentTarget;
+    const name = (form.elements.namedItem("name") as HTMLInputElement).value;
     const email = (form.elements.namedItem("email") as HTMLInputElement).value;
     const password = (form.elements.namedItem("password") as HTMLInputElement).value;
     const confirmPassword = (form.elements.namedItem("confirm-password") as HTMLInputElement).value;
@@ -28,7 +29,13 @@ export default function SignupPage() {
       setError("Passwords do not match");
       return;
     }
-    const { error } = await supabase.auth.signUp({ email, password });
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { name },
+      },
+    });
     if (error) {
       setError(error.message);
     } else {
@@ -48,6 +55,15 @@ export default function SignupPage() {
         </p>
       </div>
       <form className="grid gap-4" onSubmit={handleSignup}>
+        <div className="grid gap-2">
+          <Label htmlFor="name">Name</Label>
+          <Input
+            id="name"
+            type="text"
+            placeholder="Enter your name"
+            required
+          />
+        </div>
         <div className="grid gap-2">
           <Label htmlFor="email">Email</Label>
           <Input

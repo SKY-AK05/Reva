@@ -1,4 +1,4 @@
-
+'use client';
 import Image from 'next/image';
 import PublicHeader from '@/components/public-header';
 import RevaLogo from '@/components/reva-logo';
@@ -20,6 +20,9 @@ import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabaseClient';
 
 const styledFeatures = [
   {
@@ -121,6 +124,32 @@ const testimonials = [
 ];
 
 export default function HomePage() {
+  const [loading, setLoading] = useState(true);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setLoggedIn(!!session);
+      setLoading(false);
+    });
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      setLoggedIn(!!session);
+    });
+    return () => {
+      listener?.subscription.unsubscribe();
+    };
+  }, []);
+
+  const handleGetStarted = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    if (loggedIn) {
+      router.push('/chat');
+    } else {
+      router.push('/login');
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <PublicHeader />
@@ -140,10 +169,10 @@ export default function HomePage() {
               <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Button
                   size="lg"
-                  asChild
                   className="w-full sm:w-auto bg-black text-white hover:bg-gray-800 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90"
+                  onClick={handleGetStarted}
                 >
-                  <Link href="/signup">Get Started for Free</Link>
+                  Get Started for Free
                 </Button>
               </div>
             </div>
@@ -305,7 +334,7 @@ export default function HomePage() {
                       </CardContent>
                       <CardFooter className="p-0 pt-8">
                         <Button size="lg" asChild className="w-full bg-black text-white hover:bg-gray-800 rounded-full py-6 text-base font-semibold">
-                          <Link href="/signup">Sign Up Now</Link>
+                          <Link href="/signup">Get Started</Link>
                         </Button>
                       </CardFooter>
                     </Card>

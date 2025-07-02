@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -34,6 +33,8 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useNotesContext } from '@/context/notes-context';
 import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabaseClient';
 
 interface AppHeaderProps {
   showGridLines: boolean;
@@ -49,6 +50,7 @@ export default function AppHeader({
     useNotesContext();
   const router = useRouter();
   const pathname = usePathname();
+  const [user, setUser] = useState<any>(null);
 
   const handleSelectNote = (noteId: string) => {
     setActiveNoteById(noteId);
@@ -61,6 +63,24 @@ export default function AppHeader({
     if (pathname !== '/notes') {
       router.push('/notes');
     }
+  };
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+    });
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => {
+      listener?.subscription.unsubscribe();
+    };
+  }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    router.push('/login');
   };
 
   return (
@@ -139,26 +159,33 @@ export default function AppHeader({
       )}
 
       <div className="ml-auto flex items-center gap-2 sm:gap-4">
+        {user && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-9 w-9 rounded-full">
               <Avatar className="h-9 w-9">
                 <AvatarImage
-                  src="https://placehold.co/40x40.png"
-                  alt="User"
-                  data-ai-hint="smiling man"
+                  src={user?.user_metadata?.avatar_url || undefined}
+                  alt={user?.user_metadata?.name || user?.email || 'User'}
                 />
-                <AvatarFallback>A</AvatarFallback>
+                <AvatarFallback>{user?.user_metadata?.name ? user.user_metadata.name[0].toUpperCase() : (user?.email?.[0]?.toUpperCase() ?? 'U')}</AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-64" align="end" forceMount>
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">Alex</p>
-                <p className="text-xs leading-none text-muted-foreground">
-                  alex@example.com
-                </p>
+                {user.user_metadata?.name ? (
+                  <>
+                    <p className="text-sm font-medium leading-none">{user.user_metadata.name}</p>
+                    <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm font-medium leading-none">{user.email}</p>
+                    <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                  </>
+                )}
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
@@ -226,14 +253,13 @@ export default function AppHeader({
               <span>Help & Support</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link href="/login">
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Sign Out</span>
-              </Link>
+            <DropdownMenuItem onClick={handleSignOut}>
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Sign Out</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        )}
       </div>
     </header>
   );
