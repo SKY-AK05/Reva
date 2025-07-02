@@ -61,7 +61,7 @@ export default function AppSidebar({
         </Link>
       </div>
       <TooltipProvider delayDuration={0}>
-        <nav className="flex-1 flex flex-col gap-1 p-2">
+        <nav className="flex-1 flex flex-col p-2">
           {menuItems.map((item) =>
             isCollapsed ? (
               <Tooltip key={item.href}>
