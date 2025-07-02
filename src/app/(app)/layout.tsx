@@ -24,8 +24,6 @@ export default function AppLayout({
     setShowGridLines((prev) => !prev);
   }
 
-  const isSettingsPage = pathname === '/settings';
-
   return (
     <NotesContextProvider>
       <div className="bg-background text-foreground flex w-full h-screen overflow-hidden">
@@ -47,18 +45,12 @@ export default function AppLayout({
           />
           <div className="flex-1 overflow-y-auto">
             <div className="p-6">
-              {isSettingsPage ? (
-                 <main className="w-full max-w-5xl mx-auto">
-                    {children}
-                </main>
-              ) : (
-                <main className={cn(
-                  "flex flex-col w-full max-w-5xl mx-auto bg-card rounded-t-2xl shadow-2xl border-t border-x border-border min-h-[calc(100vh-4rem-3rem)]",
-                  !showGridLines && 'no-grid-lines'
-                  )}>
-                  {children}
-                </main>
-              )}
+              <main className={cn(
+                "flex flex-col w-full max-w-5xl mx-auto bg-card rounded-t-2xl shadow-2xl border-t border-x border-border min-h-[calc(100vh-4rem-3rem)]",
+                !showGridLines && 'no-grid-lines'
+                )}>
+                {children}
+              </main>
             </div>
           </div>
         </div>
