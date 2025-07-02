@@ -56,8 +56,8 @@ export default function LoginPage() {
           <Checkbox id="remember-me" />
           <Label htmlFor="remember-me" className="text-sm font-normal text-muted-foreground">Remember me</Label>
         </div>
-        <Button type="submit" className="w-full bg-black text-white hover:bg-gray-800 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90" asChild>
-          <Link href="/chat">Sign In</Link>
+        <Button type="submit" className="w-full bg-black text-white hover:bg-gray-800 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90">
+          Sign In
         </Button>
         <Button variant="outline" className="w-full">
           <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512"><path fill="currentColor" d="M488 261.8C488 403.3 381.5 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 126 25.5 169.3 65.5l-69.2 69.2c-20.3-19.3-46.1-31-75.1-31-57.2 0-104 46.8-104 104s46.8 104 104 104c63.9 0 94.9-50.4 98.7-74.9H248v-96h240c2.6 14.1 4 29.3 4 44.8z"></path></svg>

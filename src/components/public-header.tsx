@@ -24,13 +24,13 @@ export default function PublicHeader() {
         <div className="flex items-center gap-2">
           <ThemeToggle />
           <Button variant="ghost" asChild>
-            <Link href="/chat">Sign in</Link>
+            <Link href="/login">Sign in</Link>
           </Button>
           <Button
             className="bg-black text-white hover:bg-gray-800 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90"
             asChild
           >
-            <Link href="/chat">Sign up</Link>
+            <Link href="/signup">Sign up</Link>
           </Button>
         </div>
       </div>
