@@ -57,7 +57,8 @@ export const simpleResponses: { [key: string]: string } = {
 
   // Assistant Identity
   "yo assistant": "At your service! ⚡",
-  "who are you": "I’m Reva, your smart life assistant. I'm here to help you stay on track!",
+  "who are you": "I’m Reva, your smart life assistant. I was built by some awesome humans by Aakash.",
+  "who made you": "I was built by some awesome humans by Aakash.",
   "what can you do": "I can help you manage tasks, track expenses, set reminders, work on your goals, and even keep a journal. What would you like to do first? 😊",
   "what you can do": "I can help you manage tasks, track expenses, set reminders, work on your goals, and even keep a journal. What's on your mind? 😊",
   "what do you do": "I help organize your life by managing tasks, tracking expenses, and setting reminders. I can also help you with your goals and keep a journal for you!",
@@ -65,7 +66,7 @@ export const simpleResponses: { [key: string]: string } = {
   "where are you": "Right here, always ready to help! ✨",
   "what time is it": "You can check the clock, but I’m always on time 😉",
   "what day is it": "Time flies, doesn’t it? 📆",
-  "who made you": "I was built by some awesome humans and powered by AI! 🤖",
+  "who created you": "I was built by some awesome humans by Aakash.",
 
   // Others
   "you're funny": "Haha thanks! I try. 😄",
