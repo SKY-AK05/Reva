@@ -3,6 +3,8 @@
 import Link from "next/link"
 import { Eye, EyeOff } from "lucide-react"
 import { useState } from "react"
+import { supabase } from "@/lib/supabaseClient"
+import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -12,6 +14,22 @@ import { Checkbox } from "@/components/ui/checkbox"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+
+  async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError(null);
+    const form = e.currentTarget;
+    const email = (form.elements.namedItem("email") as HTMLInputElement).value;
+    const password = (form.elements.namedItem("password") as HTMLInputElement).value;
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      setError(error.message);
+    } else {
+      router.push("/overview"); // or your desired route
+    }
+  }
 
   return (
     <div className="mx-auto grid w-full max-w-sm gap-6">
@@ -24,7 +42,7 @@ export default function LoginPage() {
           Enter your email and password to access your account
         </p>
       </div>
-      <form className="grid gap-4">
+      <form className="grid gap-4" onSubmit={handleLogin}>
         <div className="grid gap-2">
           <Label htmlFor="email">Email</Label>
           <Input
@@ -56,6 +74,7 @@ export default function LoginPage() {
           <Checkbox id="remember-me" />
           <Label htmlFor="remember-me" className="text-sm font-normal text-muted-foreground">Remember me</Label>
         </div>
+        {error && <div className="text-red-500 text-sm">{error}</div>}
         <Button type="submit" className="w-full bg-black text-white hover:bg-gray-800 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90">
           Sign In
         </Button>

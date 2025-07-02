@@ -3,6 +3,8 @@
 import Link from "next/link"
 import { Eye, EyeOff } from "lucide-react"
 import { useState } from "react"
+import { supabase } from "@/lib/supabaseClient"
+import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -12,6 +14,27 @@ import RevaLogo from "@/components/reva-logo"
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+
+  async function handleSignup(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError(null);
+    const form = e.currentTarget;
+    const email = (form.elements.namedItem("email") as HTMLInputElement).value;
+    const password = (form.elements.namedItem("password") as HTMLInputElement).value;
+    const confirmPassword = (form.elements.namedItem("confirm-password") as HTMLInputElement).value;
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+    const { error } = await supabase.auth.signUp({ email, password });
+    if (error) {
+      setError(error.message);
+    } else {
+      router.push("/login"); // or your desired route
+    }
+  }
 
   return (
     <div className="mx-auto grid w-full max-w-sm gap-6">
@@ -24,7 +47,7 @@ export default function SignupPage() {
           Enter your details below to get started
         </p>
       </div>
-      <form className="grid gap-4">
+      <form className="grid gap-4" onSubmit={handleSignup}>
         <div className="grid gap-2">
           <Label htmlFor="email">Email</Label>
           <Input
@@ -54,6 +77,7 @@ export default function SignupPage() {
             </Button>
           </div>
         </div>
+        {error && <div className="text-red-500 text-sm">{error}</div>}
         <Button type="submit" className="w-full bg-black text-white hover:bg-gray-800 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90">
           Sign Up
         </Button>
