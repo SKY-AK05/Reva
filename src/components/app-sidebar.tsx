@@ -13,6 +13,7 @@ import {
   BookText,
   PanelLeft,
   StickyNote,
+  Settings,
 } from 'lucide-react';
 import RevaLogo from './reva-logo';
 import { Button } from './ui/button';
@@ -42,6 +43,7 @@ export default function AppSidebar({
     { href: '/goals', label: 'Goals', icon: Target },
     { href: '/journal', label: 'Journal', icon: BookText },
     { href: '/notes', label: 'Notes', icon: StickyNote },
+    { href: '/settings', label: 'Settings', icon: Settings },
   ];
 
   return (
@@ -63,7 +65,7 @@ export default function AppSidebar({
       </div>
       <TooltipProvider delayDuration={0}>
         <div className="flex-1 overflow-y-auto">
-          <nav className="flex flex-col p-2 gap-1">
+          <nav className="flex flex-col p-2">
             {menuItems.map((item) =>
               isCollapsed ? (
                 <Tooltip key={item.href}>

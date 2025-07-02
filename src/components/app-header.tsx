@@ -15,6 +15,7 @@ import {
   ChevronDown,
   MessageSquare,
   Plus,
+  Settings,
 } from 'lucide-react';
 import AppSidebar from '@/components/app-sidebar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -28,7 +29,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Switch } from '@/components/ui/switch';
 import { useTheme } from 'next-themes';
-import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useNotesContext } from '@/context/notes-context';
@@ -66,12 +66,16 @@ export default function AppHeader({
   };
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user);
-    });
+    const fetchUser = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user);
+    };
+    fetchUser();
+
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
     });
+    
     return () => {
       listener?.subscription.unsubscribe();
     };
@@ -82,6 +86,8 @@ export default function AppHeader({
     setUser(null);
     router.push('/login');
   };
+
+  const userInitial = user?.user_metadata?.name ? user.user_metadata.name[0].toUpperCase() : (user?.email?.[0]?.toUpperCase() ?? 'U');
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 bg-background/95 px-4 backdrop-blur-sm sm:px-6">
@@ -168,7 +174,7 @@ export default function AppHeader({
                   src={user?.user_metadata?.avatar_url || undefined}
                   alt={user?.user_metadata?.name || user?.email || 'User'}
                 />
-                <AvatarFallback>{user?.user_metadata?.name ? user.user_metadata.name[0].toUpperCase() : (user?.email?.[0]?.toUpperCase() ?? 'U')}</AvatarFallback>
+                <AvatarFallback>{userInitial}</AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
@@ -181,10 +187,7 @@ export default function AppHeader({
                     <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
                   </>
                 ) : (
-                  <>
                     <p className="text-sm font-medium leading-none">{user.email}</p>
-                    <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
-                  </>
                 )}
               </div>
             </DropdownMenuLabel>
@@ -238,15 +241,11 @@ export default function AppHeader({
               />
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <User className="mr-2 h-4 w-4" />
-              <span>Account Settings</span>
-              <Badge
-                variant="secondary"
-                className="ml-auto bg-yellow-400/20 text-yellow-600 dark:text-yellow-400"
-              >
-                BETA
-              </Badge>
+            <DropdownMenuItem asChild>
+              <Link href="/settings">
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Settings</span>
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
               <HelpCircle className="mr-2 h-4 w-4" />
