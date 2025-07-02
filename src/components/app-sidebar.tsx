@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -61,13 +62,14 @@ export default function AppSidebar({
         </Link>
       </div>
       <TooltipProvider delayDuration={0}>
-        <nav className="flex-1 flex flex-col p-2">
+        <nav className="flex-1 flex flex-col p-2 gap-1">
           {menuItems.map((item) =>
             isCollapsed ? (
               <Tooltip key={item.href}>
                 <TooltipTrigger asChild>
                   <Button
                     variant="ghost"
+                    size="sm"
                     className={cn(
                       'justify-center',
                       pathname.startsWith(item.href) && 'bg-accent'
@@ -91,6 +93,7 @@ export default function AppSidebar({
               <Button
                 key={item.href}
                 variant="ghost"
+                size="sm"
                 className={cn(
                   'justify-start',
                   pathname.startsWith(item.href) && 'bg-accent'
@@ -112,6 +115,7 @@ export default function AppSidebar({
                 <TooltipTrigger asChild>
                   <Button
                     variant="ghost"
+                    size="sm"
                     className="w-full justify-center"
                     onClick={onToggleSidebar}
                   >
@@ -124,6 +128,7 @@ export default function AppSidebar({
             ) : (
               <Button
                 variant="ghost"
+                size="sm"
                 className="w-full justify-start"
                 onClick={onToggleSidebar}
               >
