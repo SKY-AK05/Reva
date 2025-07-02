@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import AppHeader from '@/components/app-header';
 import AppSidebar from '@/components/app-sidebar';
 import { cn } from '@/lib/utils';
@@ -13,6 +14,7 @@ export default function AppLayout({
 }>) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showGridLines, setShowGridLines] = useState(true);
+  const pathname = usePathname();
 
   const toggleSidebar = () => {
     setIsSidebarOpen((prev) => !prev);
@@ -21,6 +23,8 @@ export default function AppLayout({
   const toggleGridLines = () => {
     setShowGridLines((prev) => !prev);
   }
+
+  const isSettingsPage = pathname === '/settings';
 
   return (
     <NotesContextProvider>
@@ -43,12 +47,18 @@ export default function AppLayout({
           />
           <div className="flex-1 overflow-y-auto">
             <div className="p-6">
-              <main className={cn(
-                "flex flex-col w-full max-w-5xl mx-auto bg-card rounded-t-2xl shadow-2xl border-t border-x border-border min-h-[calc(100vh-4rem-3rem)]",
-                !showGridLines && 'no-grid-lines'
-                )}>
-                {children}
-              </main>
+              {isSettingsPage ? (
+                 <main className="w-full max-w-5xl mx-auto">
+                    {children}
+                </main>
+              ) : (
+                <main className={cn(
+                  "flex flex-col w-full max-w-5xl mx-auto bg-card rounded-t-2xl shadow-2xl border-t border-x border-border min-h-[calc(100vh-4rem-3rem)]",
+                  !showGridLines && 'no-grid-lines'
+                  )}>
+                  {children}
+                </main>
+              )}
             </div>
           </div>
         </div>

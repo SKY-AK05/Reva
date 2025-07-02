@@ -113,7 +113,7 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="flex flex-1 flex-col p-6 sm:p-8 lg:p-12">
+      <div className="flex flex-1 flex-col">
          <header className="flex items-center gap-4 h-[5.5rem]">
             <Skeleton className="w-9 h-9 rounded-full" />
             <div className="space-y-2">
@@ -130,7 +130,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="flex flex-1 flex-col p-6 sm:p-8 lg:p-12 notebook-lines">
+    <div className="flex flex-1 flex-col">
       <header className="flex items-center gap-4 h-[5.5rem]">
         <Settings className="w-9 h-9 text-primary" />
         <div className="space-y-1">
