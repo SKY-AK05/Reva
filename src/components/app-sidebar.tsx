@@ -62,53 +62,55 @@ export default function AppSidebar({
         </Link>
       </div>
       <TooltipProvider delayDuration={0}>
-        <nav className="flex flex-col p-2 gap-1">
-          {menuItems.map((item) =>
-            isCollapsed ? (
-              <Tooltip key={item.href}>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={cn(
-                      'justify-center',
-                      pathname.startsWith(item.href) && 'bg-accent'
-                    )}
-                    asChild
+        <div className="flex-1 overflow-y-auto">
+          <nav className="flex flex-col p-2 gap-1">
+            {menuItems.map((item) =>
+              isCollapsed ? (
+                <Tooltip key={item.href}>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={cn(
+                        'justify-center',
+                        pathname.startsWith(item.href) && 'bg-accent'
+                      )}
+                      asChild
+                    >
+                      <Link href={item.href}>
+                        <item.icon className="h-5 w-5" />
+                        <span className="sr-only">{item.label}</span>
+                      </Link>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="right"
+                    className="flex items-center gap-4"
                   >
-                    <Link href={item.href}>
-                      <item.icon className="h-5 w-5" />
-                      <span className="sr-only">{item.label}</span>
-                    </Link>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent
-                  side="right"
-                  className="flex items-center gap-4"
+                    {item.label}
+                  </TooltipContent>
+                </Tooltip>
+              ) : (
+                <Button
+                  key={item.href}
+                  variant="ghost"
+                  size="sm"
+                  className={cn(
+                    'justify-start',
+                    pathname.startsWith(item.href) && 'bg-accent'
+                  )}
+                  asChild
                 >
-                  {item.label}
-                </TooltipContent>
-              </Tooltip>
-            ) : (
-              <Button
-                key={item.href}
-                variant="ghost"
-                size="sm"
-                className={cn(
-                  'justify-start',
-                  pathname.startsWith(item.href) && 'bg-accent'
-                )}
-                asChild
-              >
-                <Link href={item.href}>
-                  <item.icon className="mr-2 h-5 w-5" />
-                  {item.label}
-                </Link>
-              </Button>
-            )
-          )}
-        </nav>
-        <div className="mt-auto border-t p-2">
+                  <Link href={item.href}>
+                    <item.icon className="mr-2 h-5 w-5" />
+                    {item.label}
+                  </Link>
+                </Button>
+              )
+            )}
+          </nav>
+        </div>
+        <div className="border-t p-2">
           {onToggleSidebar &&
             (isCollapsed ? (
               <Tooltip>
