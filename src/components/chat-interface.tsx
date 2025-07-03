@@ -17,6 +17,7 @@ import { useExpensesContext } from '@/context/expenses-context';
 import { useRemindersContext } from '@/context/reminders-context';
 import { useGoalsContext } from '@/context/goals-context';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import BotTypingMessage from './bot-typing-message';
 
 export default function ChatInterface() {
   const { messages, setMessages, lastItemContext, setLastItemContext, loading: isFetchingHistory } = useChatContext();
@@ -161,12 +162,12 @@ export default function ChatInterface() {
       <ScrollArea className="flex-1 p-6 sm:p-8 lg:p-12 notebook-lines-chat" viewportRef={scrollViewportRef}>
         {messages.length > 0 ? (
           <div className="space-y-6">
-            {messages.map((message) => (
+            {messages.map((message, index) => (
               <div
                 key={message.id}
                 className={cn('w-full flex', {
                   'justify-end': message.sender === 'user',
-                  'items-start gap-3': message.sender === 'bot',
+                  'items-start': message.sender === 'bot',
                 })}
               >
                 {message.sender === 'user' ? (
@@ -177,24 +178,20 @@ export default function ChatInterface() {
                   </div>
                 ) : (
                   <>
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 shrink-0 mt-1">
-                      <Bot className="h-5 w-5 text-primary" />
-                    </div>
-                    <div className="flex-1 prose dark:prose-invert leading-relaxed text-base pt-1">
-                       <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.text}</ReactMarkdown>
-                    </div>
+                    {index === messages.length - 1 && !isLoading ? (
+                      <BotTypingMessage content={message.text} />
+                    ) : (
+                      <div className="flex-1 prose dark:prose-invert leading-relaxed text-base pt-1">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.text}</ReactMarkdown>
+                      </div>
+                    )}
                   </>
                 )}
               </div>
             ))}
             {isLoading && (
-              <div className="w-full flex items-start gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 shrink-0 mt-1">
-                  <Bot className="h-5 w-5 text-primary" />
-                </div>
-                <div className="pt-3">
-                  <div className="loader"></div>
-                </div>
+              <div className="w-full flex items-start">
+                 <p className="text-sm text-muted-foreground animate-pulse pt-1">Reva is thinking...</p>
               </div>
             )}
           </div>
