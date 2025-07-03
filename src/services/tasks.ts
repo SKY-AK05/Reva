@@ -10,7 +10,7 @@ export async function getTasks(): Promise<Task[]> {
 
   const { data, error } = await supabase
     .from('tasks')
-    .select('*')
+    .select('id, description, due_date, priority, completed')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
@@ -18,7 +18,14 @@ export async function getTasks(): Promise<Task[]> {
     console.error('Error fetching tasks:', error);
     return [];
   }
-  return data.map(t => ({...t, dueDate: t.due_date})) as Task[];
+  
+  return (data || []).map(task => ({
+    id: task.id,
+    description: task.description,
+    dueDate: task.due_date,
+    priority: task.priority,
+    completed: task.completed,
+  }));
 }
 
 export async function addTask(task: Partial<Omit<Task, 'id' | 'completed'>> & { userId: string, description: string }): Promise<Task | null> {
@@ -31,38 +38,49 @@ export async function addTask(task: Partial<Omit<Task, 'id' | 'completed'>> & { 
             due_date: task.dueDate,
             priority: task.priority,
         })
-        .select()
+        .select('id, description, due_date, priority, completed')
         .single();
     
     if (error) {
         console.error('Error adding task:', error);
         return null;
     }
-    return {...data, dueDate: data.due_date } as Task;
+    return {
+        id: data.id,
+        description: data.description,
+        dueDate: data.due_date,
+        priority: data.priority,
+        completed: data.completed,
+    };
 }
 
 
 export async function updateTask(id: string, updates: Partial<Omit<Task, 'id' | 'completed'>>): Promise<Task | null> {
     const supabase = createServerClient();
-    // Supabase uses snake_case for column names
     const updatesForDb: {[key: string]: any} = {};
-    if (updates.description) updatesForDb.description = updates.description;
-    if (updates.dueDate) updatesForDb.due_date = updates.dueDate;
-    if (updates.priority) updatesForDb.priority = updates.priority;
+    if (updates.description !== undefined) updatesForDb.description = updates.description;
+    if (updates.dueDate !== undefined) updatesForDb.due_date = updates.dueDate;
+    if (updates.priority !== undefined) updatesForDb.priority = updates.priority;
 
 
     const { data, error } = await supabase
         .from('tasks')
         .update(updatesForDb)
         .eq('id', id)
-        .select()
+        .select('id, description, due_date, priority, completed')
         .single();
 
     if (error) {
         console.error('Error updating task:', error);
         return null;
     }
-    return {...data, dueDate: data.due_date } as Task;
+    return {
+        id: data.id,
+        description: data.description,
+        dueDate: data.due_date,
+        priority: data.priority,
+        completed: data.completed,
+    };
 }
 
 export async function toggleTask(id: string, completed: boolean): Promise<Task | null> {
@@ -71,12 +89,18 @@ export async function toggleTask(id: string, completed: boolean): Promise<Task |
         .from('tasks')
         .update({ completed })
         .eq('id', id)
-        .select()
+        .select('id, description, due_date, priority, completed')
         .single();
 
     if (error) {
         console.error('Error toggling task:', error);
         return null;
     }
-    return {...data, dueDate: data.due_date } as Task;
+    return {
+        id: data.id,
+        description: data.description,
+        dueDate: data.due_date,
+        priority: data.priority,
+        completed: data.completed,
+    };
 }
