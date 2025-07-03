@@ -225,9 +225,11 @@ The user was just interacting with a {{contextItem.type}} (ID: {{contextItem.id}
 User's request: {{{chatInput}}}
 
 Analyze the request and choose the best tool.
-- For creating new items, ensure you have all the required information. For dates/times, use the current date as a reference.
+- For creating new items, extract or infer all required information.
+- **Title/Description:** If a 'title' for a reminder or 'description' for a task is not explicitly stated, create a short, sensible one from the user's request. For example, for "remind me to call my girlfriend about the tickets," a good title would be "Call girlfriend about tickets."
+- **Dates/Times:** Always use the current date ({{{currentDate}}}) as a reference to resolve relative times like "tomorrow" or "in 2 hours."
+- **Clarification:** Only use the 'generalChat' tool to ask for clarification if the user's intent is completely unclear or if critical information (like a time for a reminder or an amount for an expense) is impossible to determine. Do not ask for information you can reasonably infer.
 - For updates, use the provided context ID.
-- If the request is ambiguous or you are missing information, use the 'generalChat' tool to ask for clarification.
 - For simple greetings or conversation, use the 'generalChat' tool.`,
 });
 
