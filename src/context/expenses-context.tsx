@@ -1,7 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
-import { getExpenses, addExpense, updateExpense as updateExpenseInDb } from '@/services/expenses';
+import { getExpenses, updateExpense as updateExpenseInDb } from '@/services/expenses';
+import { createClient } from '@/lib/supabase/client';
 
 export interface Expense {
   id: string;
@@ -13,7 +14,6 @@ export interface Expense {
 
 interface ExpensesContextType {
   expenses: Expense[];
-  addExpense: (newExpense: Omit<Expense, 'id'>) => Promise<void>;
   updateExpense: (id: string, updates: Partial<Omit<Expense, 'id'>>) => Promise<void>;
   loading: boolean;
 }
@@ -24,33 +24,41 @@ export const ExpensesContextProvider = ({ children }: { children: ReactNode }) =
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchExpenses = async () => {
-      setLoading(true);
-      const fetchedExpenses = await getExpenses();
-      setExpenses(fetchedExpenses);
-      setLoading(false);
-    };
-    fetchExpenses();
-  }, []);
-
-  const handleAddExpense = useCallback(async (newExpense: Omit<Expense, 'id'>) => {
-    const addedExpense = await addExpense(newExpense);
-    if(addedExpense) {
-      setExpenses(prev => [...prev, addedExpense]);
+  const fetchExpenses = useCallback(async () => {
+    const fetchedExpenses = await getExpenses();
+    setExpenses(fetchedExpenses);
+    if (loading) {
+        setLoading(false);
     }
-  }, []);
+  }, [loading]);
+
+  useEffect(() => {
+    fetchExpenses();
+
+    const client = createClient();
+    const channel = client
+      .channel('public:expenses')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'expenses' },
+        () => {
+          fetchExpenses();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      client.removeChannel(channel);
+    };
+  }, [fetchExpenses]);
 
   const handleUpdateExpense = useCallback(async (id: string, updates: Partial<Omit<Expense, 'id'>>) => {
-    const updatedExpense = await updateExpenseInDb(id, updates);
-    if (updatedExpense) {
-      setExpenses(prev => prev.map(exp => exp.id === id ? updatedExpense : exp));
-    }
+    // The realtime listener will handle the UI update after this call succeeds.
+    await updateExpenseInDb(id, updates);
   }, []);
   
   const value = {
     expenses,
-    addExpense: handleAddExpense,
     updateExpense: handleUpdateExpense,
     loading,
   };

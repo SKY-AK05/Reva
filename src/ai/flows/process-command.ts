@@ -202,7 +202,7 @@ const ProcessCommandInputSchema = z.object({
   contextItem: z.object({ id: z.string(), type: z.enum(['task', 'reminder', 'expense']) }).optional(),
   chatHistory: z.array(ChatHistoryItemSchema).optional().describe('The last few turns of the conversation.'),
 });
-export type ProcessCommandInput = z.infer<typeof ProcessCommandInputSchema>;
+type ProcessCommandInput = z.infer<typeof ProcessCommandInputSchema>;
 
 
 const ProcessCommandOutputSchema = z.object({
@@ -215,7 +215,7 @@ const ProcessCommandOutputSchema = z.object({
     .optional(),
   updatedItemType: z.enum(['task', 'reminder', 'expense']).optional(),
 });
-export type ProcessCommandOutput = z.infer<typeof ProcessCommandOutputSchema>;
+type ProcessCommandOutput = z.infer<typeof ProcessCommandOutputSchema>;
 
 
 const prompt = ai.definePrompt({
@@ -246,6 +246,7 @@ The user was just interacting with a {{contextItem.type}} (ID: {{contextItem.id}
 Analyze the NEW request based on the history and choose the best tool.
 - For creating new items, extract or infer all required information. If the user provides info over several messages, combine it from the history.
 - **Title/Description:** If a 'title' for a reminder or 'description' for a task is not explicitly stated, create a short, sensible one from the user's request. For example, for "remind me to call my girlfriend about the tickets," a good title would be "Call girlfriend about tickets."
+- **Categories:** If the user logs an expense without a category, you MUST infer a logical one (e.g., 'Food & Drink', 'Transport', 'Shopping').
 - **Dates/Times:** Always use the current date ({{{currentDate}}}) as a reference to resolve relative times like "tomorrow" or "in 2 hours."
 - **Clarification:** Only use the 'generalChat' tool to ask for clarification if the user's intent is completely unclear or if critical information (like a time for a reminder or an amount for an expense) is impossible to determine. Do not ask for information you can reasonably infer from the conversation.
 - For updates, use the provided context ID.
