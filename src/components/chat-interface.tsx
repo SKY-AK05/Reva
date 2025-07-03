@@ -108,13 +108,16 @@ export default function ChatInterface() {
       <div className="space-y-4 max-w-2xl w-full">
         <Bot className="w-16 h-16 mx-auto text-primary" />
         <h1 className="text-4xl font-headline font-bold tracking-tight">How can I help you today?</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-8 text-left">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-8">
           {quickStartSuggestions.map((suggestion, i) => (
-            <Card key={i} className="bg-secondary/50 hover:bg-secondary cursor-pointer" onClick={() => handleSendMessage(suggestion)}>
-              <CardContent className="p-4">
-                <p className="text-sm">{suggestion}</p>
-              </CardContent>
-            </Card>
+             <Button
+              key={i}
+              variant="outline"
+              className="w-full h-auto justify-start text-left font-normal p-4 whitespace-normal"
+              onClick={() => handleSendMessage(suggestion)}
+            >
+              {suggestion}
+            </Button>
           ))}
         </div>
       </div>
