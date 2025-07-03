@@ -23,19 +23,25 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { useRouter } from 'next/navigation';
 
 export default function NotesPage() {
-  const { activeNote, updateNote, loading, deleteNote } = useNotesContext();
+  const { notes, activeNote, updateNote, loading, deleteNote, addNewNote } = useNotesContext();
   const [isComposing, setIsComposing] = useState(false);
   const [isGeneratingChart, setIsGeneratingChart] = useState(false);
   const [generatedChartData, setGeneratedChartData] = useState<GenerateChartFromTextOutput | null>(null);
   const [chartError, setChartError] = useState<string | null>(null);
-  const router = useRouter();
 
   // Debounce state to avoid updating on every keystroke
   const [debouncedContent, setDebouncedContent] = useState('');
   const debouncedUpdateNote = useCallback(updateNote, []);
+
+  // Effect to handle creating the first note if none exist
+  useEffect(() => {
+    if (!loading && notes.length === 0) {
+        addNewNote();
+    }
+  }, [loading, notes.length, addNewNote]);
+
 
   // Update debounced content when active note changes
   useEffect(() => {
@@ -119,7 +125,7 @@ export default function NotesPage() {
     setChartError(null);
   };
 
-  if (loading) {
+  if (loading || !activeNote) {
     return (
         <div className="flex flex-1 flex-col h-full">
             <header className="flex items-center gap-4 p-6 sm:p-8 lg:p-12 border-b shrink-0">
@@ -132,19 +138,6 @@ export default function NotesPage() {
                 <Skeleton className="h-4 w-3/4" />
             </main>
         </div>
-    );
-  }
-
-  if (!activeNote) {
-    return (
-      <div className="flex flex-1 flex-col h-full items-center justify-center text-center text-muted-foreground p-8">
-        <StickyNote className="w-16 h-16 mb-4" />
-        <h2 className="text-xl font-semibold">No Note Selected</h2>
-        <p className="max-w-xs mt-2">
-          Create a new note or select an existing one from the "Notes" menu in
-          the header to get started.
-        </p>
-      </div>
     );
   }
 
