@@ -1,14 +1,16 @@
-
 'use client';
 
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import Image from '@tiptap/extension-image';
+import Dropcursor from '@tiptap/extension-dropcursor';
 import { useState, useCallback, useRef, useEffect } from 'react';
 import {
   FormattingToolbar,
   type FormatType,
   type AiActionType,
 } from './formatting-toolbar';
+import { uploadImage } from '@/app/(app)/notes/actions';
 
 interface RichTextEditorProps {
   content: string;
@@ -28,11 +30,20 @@ const RichTextEditor = ({
   });
   const editorContainerRef = useRef<HTMLDivElement>(null);
 
+  const handleImageUpload = async (file: File) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    const url = await uploadImage(formData);
+    return url;
+  }
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
         heading: { levels: [1, 2] },
       }),
+      Image,
+      Dropcursor,
     ],
     content: content,
     onUpdate: ({ editor }) => {
@@ -60,15 +71,11 @@ const RichTextEditor = ({
       
       setToolbarState({
         show: true,
-        // Position toolbar 60px above the selection to give it more space
-        // And make sure it doesn't go above the editor container
         top: Math.max(box.top - 60, 10), 
         left: box.left,
       });
     },
     onBlur: () => {
-      // Use a short delay to allow clicks on the toolbar
-      // The onMouseDown handler in the toolbar should prevent the blur, but this is a fallback.
       setTimeout(() => {
         if (!editor?.isFocused) {
           setToolbarState((s) => ({...s, show: false}))
@@ -80,15 +87,52 @@ const RichTextEditor = ({
         class:
           'prose dark:prose-invert max-w-none focus:outline-none w-full min-h-[10rem]',
       },
+      handleDrop: function(view, event, slice, moved) {
+        if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
+          const file = event.dataTransfer.files[0];
+          if (file.type.startsWith('image/')) {
+            event.preventDefault();
+            
+            handleImageUpload(file).then(url => {
+              if (url) {
+                const { schema } = view.state;
+                const coordinates = view.posAtCoords({ left: event.clientX, top: event.clientY });
+                if (!coordinates) return;
+                const node = schema.nodes.image.create({ src: url });
+                const transaction = view.state.tr.insert(coordinates.pos, node);
+                view.dispatch(transaction);
+              }
+            });
+            return true;
+          }
+        }
+        return false;
+      },
+      handlePaste: function(view, event, slice) {
+        const items = Array.from(event.clipboardData?.items || []);
+        const file = items.find(item => item.type.startsWith('image/'))?.getAsFile();
+
+        if (file) {
+          event.preventDefault();
+          handleImageUpload(file).then(url => {
+            if (url) {
+              const { schema } = view.state;
+              const node = schema.nodes.image.create({ src: url });
+              const transaction = view.state.tr.replaceSelectionWith(node);
+              view.dispatch(transaction);
+            }
+          });
+          return true;
+        }
+        return false;
+      }
     },
   });
 
   useEffect(() => {
     if (editor) {
-      // If the external content is different from the editor's content, update the editor.
       const isSame = editor.getHTML() === content;
       if (!isSame) {
-        // The `false` argument prevents the onUpdate callback from firing, avoiding an infinite loop.
         editor.commands.setContent(content, false);
       }
     }
@@ -139,7 +183,6 @@ const RichTextEditor = ({
       if (selectedText) {
         onAiAction(selectedText);
       }
-      // Hide the toolbar after action
       setToolbarState((s) => ({...s, show: false}));
     },
     [editor, onAiAction]

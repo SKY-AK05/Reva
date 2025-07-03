@@ -1,6 +1,6 @@
 'use client';
 
-import { Loader2, Sparkles, StickyNote, Zap } from 'lucide-react';
+import { Loader2, Sparkles, StickyNote, Zap, Trash2 } from 'lucide-react';
 import { useNotesContext } from '@/context/notes-context';
 import { Input } from '@/components/ui/input';
 import React, { useState, useEffect, useCallback } from 'react';
@@ -11,17 +11,31 @@ import type { GenerateChartFromTextOutput } from '@/ai/flows/generate-chart-from
 import NoteChart from '@/components/note-chart';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import RichTextEditor from '@/components/rich-text-editor';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { useRouter } from 'next/navigation';
 
 export default function NotesPage() {
-  const { activeNote, updateNote } = useNotesContext();
+  const { activeNote, updateNote, loading, deleteNote } = useNotesContext();
   const [isComposing, setIsComposing] = useState(false);
   const [isGeneratingChart, setIsGeneratingChart] = useState(false);
   const [generatedChartData, setGeneratedChartData] = useState<GenerateChartFromTextOutput | null>(null);
   const [chartError, setChartError] = useState<string | null>(null);
+  const router = useRouter();
 
   // Debounce state to avoid updating on every keystroke
-  const [debouncedContent, setDebouncedContent] = useState(activeNote?.content || '');
-  const debouncedUpdateNote = useCallback(updateNote, [updateNote]);
+  const [debouncedContent, setDebouncedContent] = useState('');
+  const debouncedUpdateNote = useCallback(updateNote, []);
 
   // Update debounced content when active note changes
   useEffect(() => {
@@ -45,9 +59,20 @@ export default function NotesPage() {
 
 
   const handleContentChange = (content: string) => {
-    // Update local state immediately for responsiveness
     setDebouncedContent(content);
   };
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (activeNote) {
+        updateNote(activeNote.id, { title: e.target.value })
+    }
+  }
+
+  const handleDeleteNote = async () => {
+    if (activeNote) {
+      await deleteNote(activeNote.id);
+    }
+  }
 
   const handleModifyWithAi = async () => {
     if (!activeNote || !activeNote.content) return;
@@ -55,7 +80,6 @@ export default function NotesPage() {
     setIsComposing(true);
     try {
       const result = await getComposedNote(activeNote.content);
-      // Directly update the note context and the debounced state
       const updatedContent = result.composedContent;
       updateNote(activeNote.id, {
         title: result.title,
@@ -95,6 +119,22 @@ export default function NotesPage() {
     setChartError(null);
   };
 
+  if (loading) {
+    return (
+        <div className="flex flex-1 flex-col h-full">
+            <header className="flex items-center gap-4 p-6 sm:p-8 lg:p-12 border-b shrink-0">
+                <Skeleton className="w-9 h-9 rounded-full" />
+                <Skeleton className="h-12 w-1/2" />
+            </header>
+            <main className="flex-1 p-6 sm:p-8 lg:p-12 space-y-4">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+            </main>
+        </div>
+    );
+  }
+
   if (!activeNote) {
     return (
       <div className="flex flex-1 flex-col h-full items-center justify-center text-center text-muted-foreground p-8">
@@ -115,8 +155,9 @@ export default function NotesPage() {
       <header className="flex items-center gap-4 p-6 sm:p-8 lg:p-12 border-b shrink-0">
         <NoteIcon className="w-9 h-9 text-primary flex-shrink-0" />
         <Input
-          value={activeNote.title}
-          onChange={(e) => updateNote(activeNote.id, { title: e.target.value })}
+          key={activeNote.id} // Re-mount input when active note changes
+          defaultValue={activeNote.title}
+          onChange={handleTitleChange}
           className="text-5xl font-bold tracking-tight border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 bg-transparent h-auto"
           placeholder="Untitled Note"
         />
@@ -124,10 +165,30 @@ export default function NotesPage() {
           <Button
             onClick={handleModifyWithAi}
             disabled={isComposing || !activeNote.content.trim()}
+            variant="outline"
           >
             <Sparkles className="mr-2 h-4 w-4" />
             {isComposing ? 'Modifying...' : 'Modify with AI'}
           </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="icon">
+                    <Trash2 className="h-4 w-4" />
+                </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete your note.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDeleteNote}>Delete</AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </header>
       <main className="relative flex-1 p-6 sm:p-8 lg:p-12 notebook-lines-journal overflow-y-auto">

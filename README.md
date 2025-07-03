@@ -162,7 +162,26 @@ USING (auth.uid() = user_id)
 WITH CHECK (auth.uid() = user_id);
 ```
 
-### Step 6: `training_memory` Table
+### Step 6: `notes` Table
+Stores user's notes with rich text content.
+```sql
+CREATE TABLE notes (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    title TEXT NOT NULL,
+    content TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+ALTER TABLE notes ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can manage their own notes"
+ON notes FOR ALL
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
+```
+
+### Step 7: `training_memory` Table
 Logs chat interactions for future fine-tuning.
 ```sql
 CREATE TABLE training_memory (
@@ -181,15 +200,14 @@ TO authenticated
 WITH CHECK (true);
 ```
 
-### Step 7: Supabase Storage for Avatars
-The settings page allows users to upload a profile picture. This requires creating a "bucket" in Supabase Storage.
+### Step 8: Supabase Storage Setup
+The application uses Supabase Storage for user avatars and images within notes.
 
+#### Bucket: `avatars`
 1.  Navigate to the **Storage** section in your Supabase dashboard.
 2.  Click **Create a new bucket**.
 3.  Name the bucket `avatars` and make it a **Public** bucket.
-
-Then, run the following SQL policies to control who can upload and manage avatars:
-
+4.  Run the following SQL policies to control who can manage avatars:
 ```sql
 -- Allow users to see their own avatar
 CREATE POLICY "Avatar images are publicly accessible."
@@ -208,5 +226,36 @@ ON storage.objects FOR UPDATE
 TO authenticated
 USING (auth.uid() = (storage.foldername(name))[1]::uuid)
 WITH CHECK (bucket_id = 'avatars');
+```
+
+#### Bucket: `notes_images`
+1.  Navigate to the **Storage** section in your Supabase dashboard.
+2.  Click **Create a new bucket**.
+3.  Name the bucket `notes_images` and make it a **Public** bucket.
+4.  Run the following SQL policies to control who can manage note images:
+```sql
+-- Allow users to view their own note images
+CREATE POLICY "Users can view their own note images"
+ON storage.objects FOR SELECT
+USING (bucket_id = 'notes_images' AND auth.uid() = (storage.foldername(name))[1]::uuid);
+
+-- Allow users to upload images to their folder
+CREATE POLICY "Users can upload their own note images"
+ON storage.objects FOR INSERT
+TO authenticated
+WITH CHECK (bucket_id = 'notes_images' AND auth.uid() = (storage.foldername(name))[1]::uuid);
+
+-- Allow users to update their own images
+CREATE POLICY "Users can update their own note images"
+ON storage.objects FOR UPDATE
+TO authenticated
+USING (auth.uid() = (storage.foldername(name))[1]::uuid)
+WITH CHECK (bucket_id = 'notes_images');
+
+-- Allow users to delete their own images
+CREATE POLICY "Users can delete their own note images"
+ON storage.objects FOR DELETE
+TO authenticated
+USING (auth.uid() = (storage.foldername(name))[1]::uuid);
 ```
 # Reva

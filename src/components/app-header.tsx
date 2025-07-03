@@ -16,6 +16,7 @@ import {
   MessageSquare,
   Plus,
   Settings,
+  Loader2,
 } from 'lucide-react';
 import AppSidebar from '@/components/app-sidebar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -47,24 +48,29 @@ export default function AppHeader({
   onToggleGridLines,
 }: AppHeaderProps) {
   const { theme, setTheme } = useTheme();
-  const { notes, activeNote, setActiveNoteById, addNewNote } =
+  const { notes, activeNote, setActiveNoteById, addNewNote, loading: notesLoading } =
     useNotesContext();
   const { clearChat } = useChatContext();
   const router = useRouter();
   const pathname = usePathname();
   const [user, setUser] = useState<any>(null);
+  const [isAddingNote, setIsAddingNote] = useState(false);
   const supabase = createClient();
 
   const handleSelectNote = (noteId: string) => {
     setActiveNoteById(noteId);
-    router.push('/notes');
-  };
-
-  const handleAddNewNote = () => {
-    addNewNote();
     if (pathname !== '/notes') {
       router.push('/notes');
     }
+  };
+
+  const handleAddNewNote = async () => {
+    setIsAddingNote(true);
+    const newNoteId = await addNewNote();
+    if (newNoteId && pathname !== '/notes') {
+      router.push('/notes');
+    }
+    setIsAddingNote(false);
   };
 
   const handleNewChat = async () => {
@@ -122,9 +128,10 @@ export default function AppHeader({
           variant="outline"
           size="sm"
           onClick={handleAddNewNote}
+          disabled={isAddingNote}
           className="border-border/80 hover:bg-accent flex items-center gap-2"
         >
-          <Plus className="h-4 w-4" />
+          {isAddingNote ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
           <span>New Note</span>
         </Button>
       ) : (
@@ -146,10 +153,11 @@ export default function AppHeader({
               variant="outline"
               size="sm"
               className="border-border/80 hover:bg-accent flex items-center gap-2"
+              disabled={notesLoading}
             >
               <StickyNote className="h-4 w-4" />
               <span className="truncate max-w-28">
-                {activeNote ? activeNote.title : 'Notes'}
+                {notesLoading ? 'Loading...' : (activeNote ? activeNote.title : 'Notes')}
               </span>
               <ChevronDown className="h-4 w-4 text-muted-foreground" />
             </Button>

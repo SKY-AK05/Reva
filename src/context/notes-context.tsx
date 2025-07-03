@@ -1,8 +1,8 @@
-
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
+import { getNotes, addNote as addNoteToDb, updateNote as updateNoteInDb, deleteNote as deleteNoteFromDb } from '@/services/notes';
+import { createClient } from '@/lib/supabase/client';
 
 export interface Note {
   id: string;
@@ -13,44 +13,54 @@ export interface Note {
 
 interface NotesContextType {
   notes: Note[];
+  loading: boolean;
   activeNote: Note | null;
   setActiveNoteById: (id: string | null) => void;
-  addNewNote: () => string; // Returns the new note's ID
+  addNewNote: () => Promise<string | null>; // Returns the new note's ID
   updateNote: (id: string, updates: Partial<Omit<Note, 'id' | 'createdAt'>>) => void;
+  deleteNote: (id: string) => Promise<void>;
 }
 
 const NotesContext = createContext<NotesContextType | undefined>(undefined);
 
-const initialNotes: Note[] = [
-    {
-      id: '1',
-      title: 'A breakthrough idea',
-      content: 'Had a fantastic idea for a new feature today. It involves using machine learning to predict user intent and proactively suggest actions. This could be a game-changer for the app...',
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: '2',
-      title: 'Meeting Notes 10/24',
-      content: '- Project Phoenix: Sync on Q4 goals.\n- Discussed budget for new marketing campaign.\n- Action item: Alex to draft proposal by EOD Friday.',
-      createdAt: new Date().toISOString(),
-    },
-    {
-        id: '3',
-        title: 'My Favorite Quotes',
-        content: '1. "The only way to do great work is to love what you do." - Steve Jobs\n2. "The best way to predict the future is to create it." - Peter Drucker',
-        createdAt: new Date().toISOString(),
-    },
-     {
-      id: '4',
-      title: 'Q3 Sales Data',
-      content: 'Here are the final numbers for our Q3 sales.\n\n- North America: $1,200,000\n- Europe: $950,000\n- Asia: $780,000\n- South America: $450,000\n- Australia: $320,000',
-      createdAt: new Date().toISOString(),
-    },
-];
-
 export const NotesContextProvider = ({ children }: { children: ReactNode }) => {
-  const [notes, setNotes] = useState<Note[]>(initialNotes);
-  const [activeNoteId, setActiveNoteId] = useState<string | null>(initialNotes[0]?.id || null);
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
+  
+  const supabase = createClient();
+
+  const fetchNotes = useCallback(async () => {
+    setLoading(true);
+    const fetchedNotes = await getNotes();
+    setNotes(fetchedNotes);
+    if (fetchedNotes.length > 0 && !activeNoteId) {
+      setActiveNoteId(fetchedNotes[0].id);
+    }
+    setLoading(false);
+  }, [activeNoteId]);
+
+  useEffect(() => {
+    fetchNotes();
+  }, []); // Initial fetch
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('public:notes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'notes' },
+        (payload) => {
+           // Re-fetch all notes to ensure consistency
+           fetchNotes();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [supabase, fetchNotes]);
 
   const activeNote = notes.find(note => note.id === activeNoteId) || null;
 
@@ -58,32 +68,54 @@ export const NotesContextProvider = ({ children }: { children: ReactNode }) => {
     setActiveNoteId(id);
   }, []);
 
-  const addNewNote = useCallback(() => {
-    const newNote: Note = {
-      id: uuidv4(),
+  const addNewNote = useCallback(async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+
+    const newNoteStub = {
       title: 'Untitled Note',
       content: '',
-      createdAt: new Date().toISOString(),
+      userId: user.id
     };
-    setNotes(prevNotes => [newNote, ...prevNotes]);
-    setActiveNoteId(newNote.id);
-    return newNote.id;
-  }, []);
+    const newNote = await addNoteToDb(newNoteStub);
+    if (newNote) {
+      setActiveNoteId(newNote.id);
+      return newNote.id;
+    }
+    return null;
+  }, [supabase]);
 
-  const updateNote = useCallback((id: string, updates: Partial<Omit<Note, 'id' | 'createdAt'>>) => {
+  const updateNote = useCallback(async (id: string, updates: Partial<Omit<Note, 'id' | 'createdAt'>>) => {
+    // Optimistic update
     setNotes(prevNotes =>
       prevNotes.map(note =>
         note.id === id ? { ...note, ...updates } : note
       )
     );
+    // Debounced update will be handled by the component using this.
+    // The actual DB update will be triggered from the component.
+    await updateNoteInDb(id, updates);
   }, []);
+
+  const deleteNote = useCallback(async (id: string) => {
+    const deletedNote = await deleteNoteFromDb(id);
+    if (deletedNote) {
+      // If the active note was deleted, select the next one or null
+      if (activeNoteId === id) {
+        const remainingNotes = notes.filter(n => n.id !== id);
+        setActiveNoteId(remainingNotes[0]?.id || null);
+      }
+    }
+  }, [activeNoteId, notes]);
   
   const value = {
     notes,
+    loading,
     activeNote,
     setActiveNoteById,
     addNewNote,
     updateNote,
+    deleteNote
   };
 
   return <NotesContext.Provider value={value}>{children}</NotesContext.Provider>;
