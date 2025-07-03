@@ -12,6 +12,7 @@ import { addTask } from "@/services/tasks";
 import { addExpense, addExpenses } from "@/services/expenses";
 import { addReminder } from "@/services/reminders";
 import { addChatMessage } from "@/services/chat";
+import { revalidatePath } from "next/cache";
 
 /**
  * Calculates the Levenshtein distance between two strings.
@@ -99,6 +100,8 @@ export async function processUserChat(chatInput: string): Promise<string> {
                 priority: result.priority,
                 userId: user.id,
             });
+            revalidatePath('/tasks');
+            revalidatePath('/overview');
             botResponseText = `Task created!\n\n**Description:** ${result.taskDescription}\n**Due:** ${result.dueDate}\n**Priority:** ${result.priority}`;
         } catch (e) {
             console.error(e);
@@ -149,6 +152,8 @@ export async function processUserChat(chatInput: string): Promise<string> {
                     botResponseText += `\n**Total:** ${currencySymbol}${totalAmount.toFixed(2)}`;
                     if(result.date) botResponseText += `\n**Date:** ${result.date}`;
                 }
+                revalidatePath('/expenses');
+                revalidatePath('/overview');
             }
         } catch (e) {
             console.error(e);
@@ -165,6 +170,8 @@ export async function processUserChat(chatInput: string): Promise<string> {
                 notes: `Reminder set from chat`,
                 userId: user.id
             });
+            revalidatePath('/reminders');
+            revalidatePath('/overview');
             botResponseText = `Reminder set!\n\n**For:** ${result.reminderDescription}\n**When:** ${reminderDate.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}`;
         } catch (e) {
             console.error(e);
