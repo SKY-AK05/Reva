@@ -45,12 +45,12 @@ export default function ChatInterface() {
 
   useEffect(() => {
     scrollViewportRef.current?.scrollTo({ top: scrollViewportRef.current.scrollHeight, behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, isLoading]);
 
   const handleSendMessage = async (messageText: string) => {
     if (!messageText.trim() || isLoading) return;
 
-    const optimisticUserMessage: ChatMessage = {
+    const userMessage: ChatMessage = {
       id: crypto.randomUUID(),
       sender: 'user',
       text: messageText,
@@ -58,7 +58,7 @@ export default function ChatInterface() {
       user_id: '',
     };
     
-    setMessages(prev => [...prev, optimisticUserMessage]);
+    setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
 
@@ -117,27 +117,45 @@ export default function ChatInterface() {
     <div className="flex flex-1 flex-col h-full">
       <ScrollArea className="flex-1 p-6 sm:p-8 lg:p-12 notebook-lines-chat" viewportRef={scrollViewportRef}>
         {messages.length > 0 ? (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {messages.map((message) => (
               <div
                 key={message.id}
                 className={cn('w-full flex', {
                   'justify-end': message.sender === 'user',
-                  'justify-start': message.sender === 'bot',
+                  'items-start gap-3': message.sender === 'bot',
                 })}
               >
-                <div
-                  className={cn(
-                    "max-w-xl p-4 rounded-2xl",
-                    message.sender === 'user' ? "bg-primary text-primary-foreground" : "bg-muted",
-                  )}
-                >
-                  <div className="prose dark:prose-invert leading-relaxed text-base">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.text}</ReactMarkdown>
+                {message.sender === 'user' ? (
+                  <div className="max-w-xl p-4 rounded-2xl bg-primary text-primary-foreground">
+                    <div className="leading-relaxed text-base">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.text}</ReactMarkdown>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <>
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 shrink-0 mt-1">
+                      <Bot className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex-1 prose dark:prose-invert leading-relaxed text-base pt-1">
+                       <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.text}</ReactMarkdown>
+                    </div>
+                  </>
+                )}
               </div>
             ))}
+            {isLoading && (
+              <div className="w-full flex items-start gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 shrink-0 mt-1">
+                  <Bot className="h-5 w-5 text-primary" />
+                </div>
+                <div className="flex items-center space-x-1 pt-3">
+                  <span className="h-2 w-2 bg-muted-foreground rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                  <span className="h-2 w-2 bg-muted-foreground rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                  <span className="h-2 w-2 bg-muted-foreground rounded-full animate-bounce"></span>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           !isFetchingHistory && welcomeScreen
