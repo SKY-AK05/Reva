@@ -73,64 +73,76 @@ export default function TasksPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {tasks.map((task) => (
-              <TableRow key={task.id} data-state={task.completed ? 'completed' : ''} className="data-[state=completed]:text-muted-foreground data-[state=completed]:line-through">
-                <TableCell>
-                  <Checkbox id={`task-${task.id}`} checked={task.completed} onCheckedChange={(checked) => handleCheckedChange(task.id, !!checked)} />
-                </TableCell>
-                <TableCell className="font-medium cursor-pointer" onClick={() => setEditingCell({ id: task.id, column: 'description' })}>
-                  {editingCell?.id === task.id && editingCell?.column === 'description' ? (
-                    <Input
-                      value={task.description}
-                      onChange={(e) => handleInputChange(e, task.id, 'description')}
-                      onBlur={handleInputBlur}
-                      onKeyDown={handleInputKeyDown}
-                      autoFocus
-                      className="h-8"
-                    />
-                  ) : (
-                    task.description
-                  )}
-                </TableCell>
-                <TableCell className="cursor-pointer" onClick={() => setEditingCell({ id: task.id, column: 'dueDate' })}>
-                  {editingCell?.id === task.id && editingCell?.column === 'dueDate' ? (
-                    <Input
-                      type="date"
-                      value={task.dueDate}
-                      onChange={(e) => handleInputChange(e, task.id, 'dueDate')}
-                      onBlur={handleInputBlur}
-                      onKeyDown={handleInputKeyDown}
-                      autoFocus
-                      className="h-8"
-                    />
-                  ) : (
-                    task.dueDate
-                  )}
-                </TableCell>
-                <TableCell className="text-right cursor-pointer" onClick={() => setEditingCell({ id: task.id, column: 'priority' })}>
-                   {editingCell?.id === task.id && editingCell?.column === 'priority' ? (
-                     <Select 
-                        defaultValue={task.priority}
-                        onValueChange={(value) => handlePriorityChange(task.id, value)}
-                        onOpenChange={(isOpen) => !isOpen && setEditingCell(null)}
-                      >
-                          <SelectTrigger className="capitalize h-8 w-full">
-                              <SelectValue placeholder="Priority" />
-                          </SelectTrigger>
-                          <SelectContent>
-                              <SelectItem value="high">High</SelectItem>
-                              <SelectItem value="medium">Medium</SelectItem>
-                              <SelectItem value="low">Low</SelectItem>
-                          </SelectContent>
-                      </Select>
-                   ) : (
-                    <Badge variant={priorityVariant[task.priority as keyof typeof priorityVariant]} className="capitalize">
-                      {task.priority}
-                    </Badge>
-                   )}
+            {tasks.length > 0 ? (
+              tasks.map((task) => (
+                <TableRow key={task.id} data-state={task.completed ? 'completed' : ''} className="data-[state=completed]:text-muted-foreground data-[state=completed]:line-through">
+                  <TableCell>
+                    <Checkbox id={`task-${task.id}`} checked={task.completed} onCheckedChange={(checked) => handleCheckedChange(task.id, !!checked)} />
+                  </TableCell>
+                  <TableCell className="font-medium cursor-pointer" onClick={() => setEditingCell({ id: task.id, column: 'description' })}>
+                    {editingCell?.id === task.id && editingCell?.column === 'description' ? (
+                      <Input
+                        value={task.description}
+                        onChange={(e) => handleInputChange(e, task.id, 'description')}
+                        onBlur={handleInputBlur}
+                        onKeyDown={handleInputKeyDown}
+                        autoFocus
+                        className="h-8"
+                      />
+                    ) : (
+                      task.description
+                    )}
+                  </TableCell>
+                  <TableCell className="cursor-pointer" onClick={() => setEditingCell({ id: task.id, column: 'dueDate' })}>
+                    {editingCell?.id === task.id && editingCell?.column === 'dueDate' ? (
+                      <Input
+                        type="date"
+                        value={task.dueDate}
+                        onChange={(e) => handleInputChange(e, task.id, 'dueDate')}
+                        onBlur={handleInputBlur}
+                        onKeyDown={handleInputKeyDown}
+                        autoFocus
+                        className="h-8"
+                      />
+                    ) : (
+                      task.dueDate
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right cursor-pointer" onClick={() => setEditingCell({ id: task.id, column: 'priority' })}>
+                    {editingCell?.id === task.id && editingCell?.column === 'priority' ? (
+                      <Select 
+                          defaultValue={task.priority}
+                          onValueChange={(value) => handlePriorityChange(task.id, value)}
+                          onOpenChange={(isOpen) => !isOpen && setEditingCell(null)}
+                        >
+                            <SelectTrigger className="capitalize h-8 w-full">
+                                <SelectValue placeholder="Priority" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="high">High</SelectItem>
+                                <SelectItem value="medium">Medium</SelectItem>
+                                <SelectItem value="low">Low</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    ) : (
+                      <Badge variant={priorityVariant[task.priority as keyof typeof priorityVariant]} className="capitalize">
+                        {task.priority}
+                      </Badge>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={4} className="h-48 text-center text-muted-foreground">
+                  <div className="flex flex-col items-center gap-2">
+                    <CheckSquare className="h-12 w-12" />
+                    <h3 className="font-semibold">No tasks found</h3>
+                    <p className="text-sm">Create your first task from the chat.</p>
+                  </div>
                 </TableCell>
               </TableRow>
-            ))}
+            )}
           </TableBody>
         </Table>
       </div>

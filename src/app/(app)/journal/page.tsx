@@ -58,65 +58,73 @@ export default function JournalPage() {
       </header>
 
       <div className="space-y-8 mt-7">
-        {entries.map((entry, index) => (
-          <article key={entry.id}>
-            {editingField?.id === entry.id && editingField?.field === 'title' ? (
+        {entries.length > 0 ? (
+          entries.map((entry, index) => (
+            <article key={entry.id}>
+              {editingField?.id === entry.id && editingField?.field === 'title' ? (
+                  <Input
+                    value={entry.title}
+                    onChange={(e) => handleInputChange(e, entry.id, 'title')}
+                    onBlur={handleInputBlur}
+                    onKeyDown={handleInputKeyDown}
+                    autoFocus
+                    className="text-2xl font-semibold tracking-tight h-auto mb-1"
+                  />
+                ) : (
+                  <h2 
+                    className="text-2xl font-semibold tracking-tight cursor-pointer" 
+                    onClick={() => setEditingField({ id: entry.id, field: 'title' })}
+                  >
+                    {entry.title}
+                  </h2>
+                )}
+
+              {editingField?.id === entry.id && editingField?.field === 'date' ? (
                 <Input
-                  value={entry.title}
-                  onChange={(e) => handleInputChange(e, entry.id, 'title')}
-                  onBlur={handleInputBlur}
-                  onKeyDown={handleInputKeyDown}
-                  autoFocus
-                  className="text-2xl font-semibold tracking-tight h-auto mb-1"
-                />
-              ) : (
-                <h2 
-                  className="text-2xl font-semibold tracking-tight cursor-pointer" 
-                  onClick={() => setEditingField({ id: entry.id, field: 'title' })}
-                >
-                  {entry.title}
-                </h2>
-              )}
-
-            {editingField?.id === entry.id && editingField?.field === 'date' ? (
-               <Input
-                  value={entry.date}
-                  onChange={(e) => handleInputChange(e, entry.id, 'date')}
-                  onBlur={handleInputBlur}
-                  onKeyDown={handleInputKeyDown}
-                  autoFocus
-                  className="text-sm text-muted-foreground h-auto mb-4"
-                />
-            ) : (
-              <p 
-                className="text-sm text-muted-foreground mb-4 cursor-pointer" 
-                onClick={() => setEditingField({ id: entry.id, field: 'date' })}
-              >
-                {entry.date}
-              </p>
-            )}
-
-            {editingField?.id === entry.id && editingField?.field === 'content' ? (
-                <Textarea
-                  value={entry.content}
-                  onChange={(e) => handleInputChange(e, entry.id, 'content')}
-                  onBlur={handleInputBlur}
-                  onKeyDown={handleInputKeyDown}
-                  autoFocus
-                  className="text-muted-foreground leading-relaxed w-full"
-                />
+                    value={entry.date}
+                    onChange={(e) => handleInputChange(e, entry.id, 'date')}
+                    onBlur={handleInputBlur}
+                    onKeyDown={handleInputKeyDown}
+                    autoFocus
+                    className="text-sm text-muted-foreground h-auto mb-4"
+                  />
               ) : (
                 <p 
-                  className="text-muted-foreground leading-relaxed cursor-pointer" 
-                  onClick={() => setEditingField({ id: entry.id, field: 'content' })}
+                  className="text-sm text-muted-foreground mb-4 cursor-pointer" 
+                  onClick={() => setEditingField({ id: entry.id, field: 'date' })}
                 >
-                  {entry.content}
+                  {entry.date}
                 </p>
               )}
-              
-            {index < entries.length - 1 && <Separator className="my-8 bg-border/50" />}
-          </article>
-        ))}
+
+              {editingField?.id === entry.id && editingField?.field === 'content' ? (
+                  <Textarea
+                    value={entry.content}
+                    onChange={(e) => handleInputChange(e, entry.id, 'content')}
+                    onBlur={handleInputBlur}
+                    onKeyDown={handleInputKeyDown}
+                    autoFocus
+                    className="text-muted-foreground leading-relaxed w-full"
+                  />
+                ) : (
+                  <p 
+                    className="text-muted-foreground leading-relaxed cursor-pointer" 
+                    onClick={() => setEditingField({ id: entry.id, field: 'content' })}
+                  >
+                    {entry.content}
+                  </p>
+                )}
+                
+              {index < entries.length - 1 && <Separator className="my-8 bg-border/50" />}
+            </article>
+          ))
+        ) : (
+          <div className="flex flex-col items-center justify-center text-center text-muted-foreground py-16">
+            <BookText className="mx-auto h-12 w-12" />
+            <h3 className="mt-4 text-lg font-semibold">No Journal Entries</h3>
+            <p className="mt-2 text-sm">Start your journaling journey today.</p>
+          </div>
+        )}
       </div>
     </div>
   );

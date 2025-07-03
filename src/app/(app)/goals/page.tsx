@@ -42,7 +42,8 @@ export default function GoalsPage() {
       </header>
       
       <div className="space-y-8 mt-7">
-        {goals.map((goal) => (
+        {goals.length > 0 ? (
+          goals.map((goal) => (
             <div key={goal.id} className="">
               <div className="mb-2">
                 <h3 className="font-semibold text-lg cursor-pointer" onClick={() => setEditingField({ id: goal.id, field: 'title' })}>
@@ -98,7 +99,14 @@ export default function GoalsPage() {
                 </div>
               </div>
             </div>
-          ))}
+          ))
+        ) : (
+          <div className="flex flex-col items-center justify-center text-center text-muted-foreground py-16">
+            <Target className="mx-auto h-12 w-12" />
+            <h3 className="mt-4 text-lg font-semibold">No Goals Found</h3>
+            <p className="mt-2 text-sm">You haven't set any goals yet.</p>
+          </div>
+        )}
       </div>
     </div>
   );

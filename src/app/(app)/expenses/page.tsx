@@ -76,22 +76,34 @@ export default function ExpensesPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {expenses.map((expense) => (
-              <TableRow key={expense.id}>
-                <TableCell className="font-medium cursor-pointer" onClick={() => setEditingCell({ id: expense.id, column: 'item' })}>
-                  {renderCell(expense, 'item')}
-                </TableCell>
-                <TableCell className="hidden sm:table-cell cursor-pointer" onClick={() => setEditingCell({ id: expense.id, column: 'category' })}>
-                  {renderCell(expense, 'category')}
-                </TableCell>
-                <TableCell className="cursor-pointer" onClick={() => setEditingCell({ id: expense.id, column: 'date' })}>
-                  {renderCell(expense, 'date')}
-                </TableCell>
-                <TableCell className="text-right font-semibold cursor-pointer" onClick={() => setEditingCell({ id: expense.id, column: 'amount' })}>
-                   {renderCell(expense, 'amount')}
+            {expenses.length > 0 ? (
+              expenses.map((expense) => (
+                <TableRow key={expense.id}>
+                  <TableCell className="font-medium cursor-pointer" onClick={() => setEditingCell({ id: expense.id, column: 'item' })}>
+                    {renderCell(expense, 'item')}
+                  </TableCell>
+                  <TableCell className="hidden sm:table-cell cursor-pointer" onClick={() => setEditingCell({ id: expense.id, column: 'category' })}>
+                    {renderCell(expense, 'category')}
+                  </TableCell>
+                  <TableCell className="cursor-pointer" onClick={() => setEditingCell({ id: expense.id, column: 'date' })}>
+                    {renderCell(expense, 'date')}
+                  </TableCell>
+                  <TableCell className="text-right font-semibold cursor-pointer" onClick={() => setEditingCell({ id: expense.id, column: 'amount' })}>
+                    {renderCell(expense, 'amount')}
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={4} className="h-48 text-center text-muted-foreground">
+                  <div className="flex flex-col items-center gap-2">
+                    <HandCoins className="h-12 w-12" />
+                    <h3 className="font-semibold">No expenses found</h3>
+                    <p className="text-sm">Track your first expense from the chat.</p>
+                  </div>
                 </TableCell>
               </TableRow>
-            ))}
+            )}
           </TableBody>
         </Table>
       </div>
