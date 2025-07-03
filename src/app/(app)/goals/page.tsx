@@ -7,50 +7,18 @@ import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Slider } from '@/components/ui/slider';
-
-const initialGoals = [
-  {
-    id: '1',
-    title: 'Read 3 books this month',
-    description: 'Expand knowledge on product management and design.',
-    progress: 33,
-    status: '1/3 books read',
-  },
-  {
-    id: '2',
-    title: 'Save $1,000 for vacation',
-    description: 'Contribute to the travel fund for the trip to Italy.',
-    progress: 75,
-    status: '$750 saved',
-  },
-  {
-    id: '3',
-    title: 'Go to the gym 12 times',
-    description: 'Focus on strength training and cardio.',
-    progress: 50,
-    status: '6/12 sessions completed',
-  },
-   {
-    id: '4',
-    title: 'Complete the side project',
-    description: 'Launch the MVP of the new app by end of Q4.',
-    progress: 20,
-    status: 'Design phase complete',
-  },
-];
-
-type Goal = typeof initialGoals[0];
+import { useGoalsContext, type Goal } from '@/context/goals-context';
 
 export default function GoalsPage() {
-  const [goals, setGoals] = useState(initialGoals);
+  const { goals, updateGoal } = useGoalsContext();
   const [editingField, setEditingField] = useState<{ id: string; field: keyof Goal | 'progress' } | null>(null);
   
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, id: string, field: 'title' | 'description') => {
-    setGoals(goals.map(goal => (goal.id === id ? { ...goal, [field]: e.target.value } : goal)));
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, id: string, field: 'title' | 'description' | 'status') => {
+    updateGoal(id, { [field]: e.target.value });
   };
 
   const handleSliderChange = (id: string, value: number[]) => {
-      setGoals(goals.map(goal => (goal.id === id ? { ...goal, progress: value[0] } : goal)));
+      updateGoal(id, { progress: value[0] });
   }
   
   const handleInputBlur = () => {
@@ -99,20 +67,35 @@ export default function GoalsPage() {
                   ) : goal.description}
                 </p>
               </div>
-              <div className="flex flex-col gap-2 cursor-pointer" onClick={() => setEditingField({ id: goal.id, field: 'progress' })}>
-                {editingField?.id === goal.id && editingField?.field === 'progress' ? (
-                    <div onMouseLeave={() => setEditingField(null)}>
-                        <Slider
-                            defaultValue={[goal.progress]}
-                            max={100}
-                            step={1}
-                            onValueChange={(value) => handleSliderChange(goal.id, value)}
+              <div className="flex flex-col gap-2">
+                <div className="cursor-pointer" onClick={() => setEditingField({ id: goal.id, field: 'progress' })}>
+                    {editingField?.id === goal.id && editingField?.field === 'progress' ? (
+                        <div onMouseLeave={() => setEditingField(null)}>
+                            <Slider
+                                defaultValue={[goal.progress]}
+                                max={100}
+                                step={1}
+                                onValueChange={(value) => handleSliderChange(goal.id, value)}
+                            />
+                        </div>
+                    ) : (
+                        <Progress value={goal.progress} className="h-2" />
+                    )}
+                </div>
+                <div className="text-sm text-muted-foreground cursor-pointer" onClick={() => setEditingField({ id: goal.id, field: 'status' })}>
+                    {editingField?.id === goal.id && editingField?.field === 'status' ? (
+                        <Input
+                            value={goal.status}
+                            onChange={(e) => handleInputChange(e, goal.id, 'status')}
+                            onBlur={handleInputBlur}
+                            onKeyDown={handleInputKeyDown}
+                            autoFocus
+                            className="h-7 text-sm"
                         />
-                    </div>
-                ) : (
-                    <Progress value={goal.progress} className="h-2" />
-                )}
-                <span className="text-sm text-muted-foreground">{goal.status}</span>
+                    ) : (
+                       <span className="text-sm text-muted-foreground">{goal.status}</span>
+                    )}
+                </div>
               </div>
             </div>
           ))}

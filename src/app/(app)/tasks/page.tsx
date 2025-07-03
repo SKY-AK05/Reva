@@ -15,46 +15,7 @@ import {
 } from "@/components/ui/table";
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-
-const initialTasks = [
-  {
-    id: '1',
-    description: 'Buy groceries for the week',
-    dueDate: '2024-10-25',
-    priority: 'high',
-    completed: false,
-  },
-  {
-    id: '2',
-    description: 'Finish the Q3 report for work',
-    dueDate: '2024-10-26',
-    priority: 'high',
-    completed: false,
-  },
-  {
-    id: '3',
-    description: 'Schedule dentist appointment',
-    dueDate: '2024-10-28',
-    priority: 'medium',
-    completed: true,
-  },
-  {
-    id: '4',
-    description: 'Call mom',
-    dueDate: '2024-10-24',
-    priority: 'low',
-    completed: false,
-  },
-  {
-    id: '5',
-    description: 'Renew gym membership',
-    dueDate: '2024-11-01',
-    priority: 'medium',
-    completed: false,
-  },
-];
-
-type Task = typeof initialTasks[0];
+import { useTasksContext, type Task } from '@/context/tasks-context';
 
 const priorityVariant = {
   high: 'destructive',
@@ -63,25 +24,19 @@ const priorityVariant = {
 };
 
 export default function TasksPage() {
-  const [tasks, setTasks] = useState(initialTasks);
-  const [editingCell, setEditingCell] = useState<{ id: string; column: keyof Task } | null>(null);
+  const { tasks, updateTask, toggleTaskCompletion } = useTasksContext();
+  const [editingCell, setEditingCell] = useState<{ id: string; column: keyof Omit<Task, 'completed'> } | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, id: string, column: 'description' | 'dueDate') => {
-    const newTasks = tasks.map(task => {
-      if (task.id === id) {
-        return { ...task, [column]: e.target.value };
-      }
-      return task;
-    });
-    setTasks(newTasks);
+    updateTask(id, { [column]: e.target.value });
   };
 
   const handleCheckedChange = (id: string, checked: boolean) => {
-     setTasks(tasks.map(task => (task.id === id ? { ...task, completed: checked } : task)));
+     toggleTaskCompletion(id, !!checked);
   }
 
   const handlePriorityChange = (id: string, priority: string) => {
-      setTasks(tasks.map(task => (task.id === id ? { ...task, priority } : task)));
+      updateTask(id, { priority: priority as Task['priority'] });
       setEditingCell(null);
   }
 
@@ -140,6 +95,7 @@ export default function TasksPage() {
                 <TableCell className="cursor-pointer" onClick={() => setEditingCell({ id: task.id, column: 'dueDate' })}>
                   {editingCell?.id === task.id && editingCell?.column === 'dueDate' ? (
                     <Input
+                      type="date"
                       value={task.dueDate}
                       onChange={(e) => handleInputChange(e, task.id, 'dueDate')}
                       onBlur={handleInputBlur}

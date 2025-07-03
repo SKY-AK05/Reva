@@ -11,60 +11,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from '@/components/ui/input';
-
-const initialExpenses = [
-  {
-    id: '1',
-    item: 'Coffee',
-    category: 'Food',
-    date: '2024-10-24',
-    amount: 250.0,
-  },
-  {
-    id: '2',
-    item: 'Lunch with team',
-    category: 'Food',
-    date: '2024-10-23',
-    amount: 1250.0,
-  },
-  {
-    id: '3',
-    item: 'Monthly subscription',
-    category: 'Software',
-    date: '2024-10-22',
-    amount: 999.0,
-  },
-  {
-    id: '4',
-    item: 'Groceries',
-    category: 'Home',
-    date: '2024-10-21',
-    amount: 3500.0,
-  },
-  {
-    id: '5',
-    item: 'Movie tickets',
-    category: 'Entertainment',
-    date: '2024-10-20',
-    amount: 800.0,
-  },
-];
-
-type Expense = typeof initialExpenses[0];
+import { useExpensesContext, type Expense } from '@/context/expenses-context';
 
 export default function ExpensesPage() {
-  const [expenses, setExpenses] = useState(initialExpenses);
+  const { expenses, updateExpense } = useExpensesContext();
   const [editingCell, setEditingCell] = useState<{ id: string; column: keyof Expense } | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, id: string, column: keyof Expense) => {
-    const newExpenses = expenses.map(exp => {
-      if (exp.id === id) {
-        const value = column === 'amount' ? parseFloat(e.target.value) || 0 : e.target.value;
-        return { ...exp, [column]: value };
-      }
-      return exp;
-    });
-    setExpenses(newExpenses);
+    const value = column === 'amount' ? parseFloat(e.target.value) || 0 : e.target.value;
+    updateExpense(id, { [column]: value });
   };
 
   const handleInputBlur = () => {
@@ -81,7 +36,7 @@ export default function ExpensesPage() {
     if (editingCell?.id === expense.id && editingCell?.column === column) {
       return (
         <Input
-          type={column === 'amount' ? 'number' : 'text'}
+          type={column === 'amount' ? 'number' : column === 'date' ? 'date' : 'text'}
           value={expense[column] as string | number}
           onChange={(e) => handleInputChange(e, expense.id, column)}
           onBlur={handleInputBlur}

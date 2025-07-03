@@ -5,36 +5,14 @@ import { useState } from 'react';
 import { Bell } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-
-const initialReminders = [
-  {
-    id: '1',
-    title: 'Follow up with a client',
-    time: '2024-10-25 10:00 AM',
-    notes: 'Discuss the new proposal.',
-  },
-  {
-    id: '2',
-    title: 'Pay credit card bill',
-    time: '2024-10-26 05:00 PM',
-    notes: 'Due tomorrow.',
-  },
-  {
-    id: '3',
-    title: 'Team meeting',
-    time: '2024-10-28 11:30 AM',
-    notes: 'Project sync-up in Room 3.',
-  },
-];
-
-type Reminder = typeof initialReminders[0];
+import { useRemindersContext, type Reminder } from '@/context/reminders-context';
 
 export default function RemindersPage() {
-  const [reminders, setReminders] = useState(initialReminders);
+  const { reminders, updateReminder } = useRemindersContext();
   const [editingField, setEditingField] = useState<{ id: string; field: keyof Reminder } | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, id: string, field: keyof Reminder) => {
-    setReminders(reminders.map(rem => (rem.id === id ? { ...rem, [field]: e.target.value } : rem)));
+    updateReminder(id, { [field]: e.target.value });
   };
   
   const handleInputBlur = () => {
