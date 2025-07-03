@@ -35,6 +35,7 @@ import { useNotesContext } from '@/context/notes-context';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { useChatContext } from '@/context/chat-context';
 
 interface AppHeaderProps {
   showGridLines: boolean;
@@ -48,6 +49,7 @@ export default function AppHeader({
   const { theme, setTheme } = useTheme();
   const { notes, activeNote, setActiveNoteById, addNewNote } =
     useNotesContext();
+  const { clearChat } = useChatContext();
   const router = useRouter();
   const pathname = usePathname();
   const [user, setUser] = useState<any>(null);
@@ -62,6 +64,13 @@ export default function AppHeader({
     addNewNote();
     if (pathname !== '/notes') {
       router.push('/notes');
+    }
+  };
+
+  const handleNewChat = async () => {
+    await clearChat();
+    if (pathname !== '/chat') {
+      router.push('/chat');
     }
   };
 
@@ -122,13 +131,11 @@ export default function AppHeader({
         <Button
           variant="outline"
           size="sm"
-          asChild
+          onClick={handleNewChat}
           className="border-border/80 hover:bg-accent flex items-center gap-2"
         >
-          <Link href="/chat">
-            <MessageSquare className="h-4 w-4" />
-            <span>New Chat</span>
-          </Link>
+          <MessageSquare className="h-4 w-4" />
+          <span>New Chat</span>
         </Button>
       )}
 

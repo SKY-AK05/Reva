@@ -44,3 +44,22 @@ export async function addChatMessage(message: { userId: string, sender: 'user' |
         console.error('Error adding chat message:', error);
     }
 }
+
+export async function clearChatHistory(): Promise<void> {
+    const supabase = createServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        console.error("No user found, cannot clear chat history.");
+        return;
+    }
+
+    const { error } = await supabase
+        .from('chat_messages')
+        .delete()
+        .eq('user_id', user.id);
+
+    if (error) {
+        console.error('Error clearing chat history:', error);
+    }
+}

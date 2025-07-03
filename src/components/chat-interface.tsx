@@ -10,7 +10,8 @@ import { SendHorizonal, Bot } from 'lucide-react';
 import { processUserChat } from '@/app/(app)/chat/actions';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { getChatMessages, type ChatMessage } from '@/services/chat';
+import type { ChatMessage } from '@/services/chat';
+import { useChatContext } from '@/context/chat-context';
 
 const quickStartSuggestions = [
   "Add task: Finish the Q4 report by Friday",
@@ -20,22 +21,11 @@ const quickStartSuggestions = [
 ];
 
 export default function ChatInterface() {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const { messages, setMessages, loading: isFetchingHistory } = useChatContext();
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isFetchingHistory, setIsFetchingHistory] = useState(true);
   const scrollViewportRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    const fetchMessages = async () => {
-      setIsFetchingHistory(true);
-      const initialMessages = await getChatMessages();
-      setMessages(initialMessages);
-      setIsFetchingHistory(false);
-    };
-    fetchMessages();
-  }, []);
 
   useEffect(() => {
     if (!isFetchingHistory) {
