@@ -18,7 +18,7 @@ export async function getTasks(): Promise<Task[]> {
     console.error('Error fetching tasks:', error);
     return [];
   }
-  return data as Task[];
+  return data.map(t => ({...t, dueDate: t.due_date})) as Task[];
 }
 
 export async function addTask(task: Partial<Omit<Task, 'id' | 'completed'>> & { userId: string, description: string }): Promise<Task | null> {
@@ -38,19 +38,22 @@ export async function addTask(task: Partial<Omit<Task, 'id' | 'completed'>> & { 
         console.error('Error adding task:', error);
         return null;
     }
-    return data as Task;
+    return {...data, dueDate: data.due_date } as Task;
 }
 
 
 export async function updateTask(id: string, updates: Partial<Omit<Task, 'id' | 'completed'>>): Promise<Task | null> {
     const supabase = createServerClient();
+    // Supabase uses snake_case for column names
+    const updatesForDb: {[key: string]: any} = {};
+    if (updates.description) updatesForDb.description = updates.description;
+    if (updates.dueDate) updatesForDb.due_date = updates.dueDate;
+    if (updates.priority) updatesForDb.priority = updates.priority;
+
+
     const { data, error } = await supabase
         .from('tasks')
-        .update({
-            description: updates.description,
-            due_date: updates.dueDate,
-            priority: updates.priority
-        })
+        .update(updatesForDb)
         .eq('id', id)
         .select()
         .single();
@@ -59,7 +62,7 @@ export async function updateTask(id: string, updates: Partial<Omit<Task, 'id' | 
         console.error('Error updating task:', error);
         return null;
     }
-    return data as Task;
+    return {...data, dueDate: data.due_date } as Task;
 }
 
 export async function toggleTask(id: string, completed: boolean): Promise<Task | null> {
@@ -75,5 +78,5 @@ export async function toggleTask(id: string, completed: boolean): Promise<Task |
         console.error('Error toggling task:', error);
         return null;
     }
-    return data as Task;
+    return {...data, dueDate: data.due_date } as Task;
 }

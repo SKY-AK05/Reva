@@ -19,7 +19,7 @@ import { useGoalsContext } from '@/context/goals-context';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function ChatInterface() {
-  const { messages, setMessages, loading: isFetchingHistory } = useChatContext();
+  const { messages, setMessages, lastItemContext, setLastItemContext, loading: isFetchingHistory } = useChatContext();
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollViewportRef = useRef<HTMLDivElement>(null);
@@ -61,15 +61,24 @@ export default function ChatInterface() {
     setIsLoading(true);
 
     try {
-      const botResponseText = await processUserChat(messageText);
+      const result = await processUserChat(messageText, lastItemContext);
+      
       const botMessage: ChatMessage = {
         id: crypto.randomUUID(),
         sender: 'bot',
-        text: botResponseText,
+        text: result.botResponse,
         created_at: new Date().toISOString(),
         user_id: '',
       };
       setMessages(prev => [...prev, botMessage]);
+
+      // Update context for the next turn
+      if (result.newItemContext) {
+        setLastItemContext(result.newItemContext);
+      } else {
+        setLastItemContext(null); // Clear context if the turn didn't result in a new item
+      }
+
     } catch (error) {
       console.error(error);
       const errorMessage: ChatMessage = {
