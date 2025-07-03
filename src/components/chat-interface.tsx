@@ -57,12 +57,19 @@ export default function ChatInterface() {
       user_id: '',
     };
     
+    // The history is the state of messages *before* adding the new one.
+    const historyForAi = messages.slice(-10); // last 5 turns (10 messages)
+    const formattedHistory = historyForAi.map(msg => ({
+        sender: msg.sender,
+        text: msg.text,
+    }));
+
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
 
     try {
-      const result = await processUserChat(messageText, lastItemContext);
+      const result = await processUserChat(messageText, lastItemContext, formattedHistory);
       
       const botMessage: ChatMessage = {
         id: crypto.randomUUID(),

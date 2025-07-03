@@ -192,14 +192,19 @@ const generalChat = ai.defineTool(
 
 // Main flow definition
 
-export type ProcessCommandInput = z.infer<typeof ProcessCommandInputSchema>;
+const ChatHistoryItemSchema = z.object({
+  role: z.enum(['user', 'bot']),
+  content: z.string(),
+});
+
 const ProcessCommandInputSchema = z.object({
   chatInput: z.string(),
   contextItem: z.object({ id: z.string(), type: z.enum(['task', 'reminder', 'expense']) }).optional(),
+  chatHistory: z.array(ChatHistoryItemSchema).optional().describe('The last few turns of the conversation.'),
 });
+export type ProcessCommandInput = z.infer<typeof ProcessCommandInputSchema>;
 
 
-export type ProcessCommandOutput = z.infer<typeof ProcessCommandOutputSchema>;
 const ProcessCommandOutputSchema = z.object({
   botResponse: z.string(),
   newItemContext: z
@@ -210,26 +215,39 @@ const ProcessCommandOutputSchema = z.object({
     .optional(),
   updatedItemType: z.enum(['task', 'reminder', 'expense']).optional(),
 });
+export type ProcessCommandOutput = z.infer<typeof ProcessCommandOutputSchema>;
+
 
 const prompt = ai.definePrompt({
   name: 'commandProcessor',
   tools: [createTask, updateTask, createReminder, updateReminder, trackExpenses, generalChat],
   input: { schema: ProcessCommandInputSchema.extend({ currentDate: z.string() }) },
-  prompt: `You are Reva, a friendly and intelligent personal assistant. Your goal is to understand the user's request and use the available tools to help them.
+  prompt: `You are Reva, a friendly and intelligent personal assistant. Your goal is to understand the user's NEWEST request by using the context from the conversation history.
 
 Current date and time for reference: {{{currentDate}}}.
+
+---
+**Conversation History (Oldest to Newest):**
+{{#if chatHistory}}
+  {{#each chatHistory}}
+{{this.role}}: {{this.content}}
+  {{/each}}
+{{else}}
+(No conversation history yet. This is the first message.)
+{{/if}}
+---
 
 {{#if contextItem}}
 The user was just interacting with a {{contextItem.type}} (ID: {{contextItem.id}}). If their new message seems to be modifying that item (e.g., using words like "change it", "update that", "actually, make it..."), you MUST use the appropriate 'update' tool.
 {{/if}}
 
-User's request: {{{chatInput}}}
+**User's NEW Request:** {{{chatInput}}}
 
-Analyze the request and choose the best tool.
-- For creating new items, extract or infer all required information.
+Analyze the NEW request based on the history and choose the best tool.
+- For creating new items, extract or infer all required information. If the user provides info over several messages, combine it from the history.
 - **Title/Description:** If a 'title' for a reminder or 'description' for a task is not explicitly stated, create a short, sensible one from the user's request. For example, for "remind me to call my girlfriend about the tickets," a good title would be "Call girlfriend about tickets."
 - **Dates/Times:** Always use the current date ({{{currentDate}}}) as a reference to resolve relative times like "tomorrow" or "in 2 hours."
-- **Clarification:** Only use the 'generalChat' tool to ask for clarification if the user's intent is completely unclear or if critical information (like a time for a reminder or an amount for an expense) is impossible to determine. Do not ask for information you can reasonably infer.
+- **Clarification:** Only use the 'generalChat' tool to ask for clarification if the user's intent is completely unclear or if critical information (like a time for a reminder or an amount for an expense) is impossible to determine. Do not ask for information you can reasonably infer from the conversation.
 - For updates, use the provided context ID.
 - For simple greetings or conversation, use the 'generalChat' tool.`,
 });

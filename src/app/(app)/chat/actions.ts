@@ -9,7 +9,8 @@ import { revalidatePath } from "next/cache";
 
 export async function processUserChat(
     chatInput: string,
-    contextItem: { id: string, type: 'task' | 'reminder' | 'expense' } | null
+    contextItem: { id: string, type: 'task' | 'reminder' | 'expense' } | null,
+    chatHistory: { sender: 'user' | 'bot'; text: string }[]
 ): Promise<ProcessCommandOutput> {
     const supabase = createServerClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -22,10 +23,17 @@ export async function processUserChat(
     // await addChatMessage({ userId: user.id, sender: 'user', text: chatInput });
 
     let result: ProcessCommandOutput;
+    
+    const formattedHistory = chatHistory.map(msg => ({
+        role: msg.sender,
+        content: msg.text,
+    }));
+
     try {
         result = await processCommand({ 
             chatInput, 
-            contextItem: contextItem || undefined 
+            contextItem: contextItem || undefined,
+            chatHistory: formattedHistory,
         });
 
     } catch (e: any) {
