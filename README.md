@@ -228,29 +228,29 @@ USING (auth.uid() = (storage.foldername(name))[1]::uuid)
 WITH CHECK (bucket_id = 'avatars');
 ```
 
-#### Bucket: `notes_images`
+#### Bucket: `notes-images`
 1.  Navigate to the **Storage** section in your Supabase dashboard.
 2.  Click **Create a new bucket**.
-3.  Name the bucket `notes_images` and make it a **Public** bucket.
+3.  Name the bucket `notes-images` and make it a **Public** bucket.
 4.  Run the following SQL policies to control who can manage note images:
 ```sql
 -- Allow users to view their own note images
 CREATE POLICY "Users can view their own note images"
 ON storage.objects FOR SELECT
-USING (bucket_id = 'notes_images' AND auth.uid() = (storage.foldername(name))[1]::uuid);
+USING (bucket_id = 'notes-images' AND auth.uid() = (storage.foldername(name))[1]::uuid);
 
 -- Allow users to upload images to their folder
 CREATE POLICY "Users can upload their own note images"
 ON storage.objects FOR INSERT
 TO authenticated
-WITH CHECK (bucket_id = 'notes_images' AND auth.uid() = (storage.foldername(name))[1]::uuid);
+WITH CHECK (bucket_id = 'notes-images' AND auth.uid() = (storage.foldername(name))[1]::uuid);
 
 -- Allow users to update their own images
 CREATE POLICY "Users can update their own note images"
 ON storage.objects FOR UPDATE
 TO authenticated
 USING (auth.uid() = (storage.foldername(name))[1]::uuid)
-WITH CHECK (bucket_id = 'notes_images');
+WITH CHECK (bucket_id = 'notes-images');
 
 -- Allow users to delete their own images
 CREATE POLICY "Users can delete their own note images"
@@ -259,3 +259,5 @@ TO authenticated
 USING (auth.uid() = (storage.foldername(name))[1]::uuid);
 ```
 # Reva
+
+```

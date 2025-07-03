@@ -33,7 +33,7 @@ export async function uploadImage(formData: FormData): Promise<string | null> {
   const filePath = `${user.id}/${fileName}`; 
 
   const { error: uploadError } = await supabase.storage
-    .from('notes_images')
+    .from('notes-images')
     .upload(filePath, file);
 
   if (uploadError) {
@@ -41,6 +41,6 @@ export async function uploadImage(formData: FormData): Promise<string | null> {
     return null;
   }
 
-  const { data } = supabase.storage.from('notes_images').getPublicUrl(filePath);
+  const { data } = supabase.storage.from('notes-images').getPublicUrl(filePath);
   return data.publicUrl;
 }
