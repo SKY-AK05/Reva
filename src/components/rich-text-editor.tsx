@@ -11,6 +11,7 @@ import {
   type AiActionType,
 } from './formatting-toolbar';
 import { uploadImage } from '@/app/(app)/notes/actions';
+import { Plugin, PluginKey } from 'prosemirror-state';
 
 interface RichTextEditorProps {
   content: string;
@@ -42,8 +43,31 @@ const RichTextEditor = ({
       StarterKit.configure({
         heading: { levels: [1, 2] },
       }),
-      Image,
+      Image.configure({
+        allowBase64: true,
+      }),
       Dropcursor,
+      new Plugin({
+        key: new PluginKey('handle-drag'),
+        props: {
+            handleDOMEvents: {
+                dragenter: (view, event) => {
+                    if (event.dataTransfer?.files.length) {
+                       view.dom.classList.add('is-dragging');
+                    }
+                    return false;
+                },
+                dragleave: (view, event) => {
+                    view.dom.classList.remove('is-dragging');
+                    return false;
+                },
+                drop: (view, event) => {
+                    view.dom.classList.remove('is-dragging');
+                    return false;
+                }
+            }
+        }
+      })
     ],
     content: content,
     onUpdate: ({ editor }) => {

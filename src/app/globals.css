@@ -118,6 +118,19 @@
   .prose td {
     @apply px-2 py-1 align-top;
   }
+
+  .ProseMirror-focused {
+    @apply outline-none;
+  }
+  .prose > .ProseMirror.is-dragging {
+    @apply bg-primary/10 outline-2 outline-dashed outline-primary rounded-lg;
+  }
+  .prose img {
+    @apply cursor-pointer;
+  }
+  .prose img.ProseMirror-selectednode {
+    @apply ring-4 ring-primary rounded-sm;
+  }
 }
 
 @layer utilities {
