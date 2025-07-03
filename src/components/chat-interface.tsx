@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
@@ -5,13 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { SendHorizonal, CheckSquare, DollarSign, Bell, Target, Bot } from 'lucide-react';
+import { SendHorizonal, Bot } from 'lucide-react';
 import { processUserChat } from '@/app/(app)/chat/actions';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { getChatMessages, type ChatMessage } from '@/services/chat';
-import { createClient } from '@/lib/supabase/client';
 
 const quickStartSuggestions = [
   "Add task: Finish the Q4 report by Friday",
@@ -23,43 +22,26 @@ const quickStartSuggestions = [
 export default function ChatInterface() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingHistory, setIsFetchingHistory] = useState(true);
   const scrollViewportRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const fetchMessages = async () => {
+      setIsFetchingHistory(true);
       const initialMessages = await getChatMessages();
       setMessages(initialMessages);
-      setIsLoading(false);
+      setIsFetchingHistory(false);
     };
     fetchMessages();
   }, []);
-  
-  // Realtime subscription for new messages
-  useEffect(() => {
-    const supabase = createClient();
-    const channel = supabase
-      .channel('chat-messages-channel')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'chat_messages' },
-        (payload) => {
-          setMessages((prevMessages) => [...prevMessages, payload.new as ChatMessage]);
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
 
   useEffect(() => {
-    if (!isLoading) {
+    if (!isFetchingHistory) {
       inputRef.current?.focus();
     }
-  }, [isLoading]);
+  }, [isFetchingHistory]);
 
   useEffect(() => {
     scrollViewportRef.current?.scrollTo({ top: scrollViewportRef.current.scrollHeight, behavior: 'smooth' });
@@ -82,7 +64,14 @@ export default function ChatInterface() {
 
     try {
       const botResponseText = await processUserChat(messageText);
-      // The realtime subscription will add the user and bot messages from the DB
+      const botMessage: ChatMessage = {
+        id: crypto.randomUUID(),
+        sender: 'bot',
+        text: botResponseText,
+        created_at: new Date().toISOString(),
+        user_id: '',
+      };
+      setMessages(prev => [...prev, botMessage]);
     } catch (error) {
       console.error(error);
       const errorMessage: ChatMessage = {
@@ -149,7 +138,7 @@ export default function ChatInterface() {
                 </div>
               </div>
             ))}
-             {isLoading && messages[messages.length - 1]?.sender === 'user' && (
+             {isLoading && (
               <div className="w-full flex justify-start">
                   <div className="max-w-xl p-4 rounded-2xl bg-muted">
                     <div className="flex items-center space-x-1 py-1">
@@ -162,7 +151,7 @@ export default function ChatInterface() {
             )}
           </div>
         ) : (
-          !isLoading && welcomeScreen
+          !isFetchingHistory && welcomeScreen
         )}
       </ScrollArea>
       
@@ -175,10 +164,10 @@ export default function ChatInterface() {
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Start a conversation with Reva..."
                   className="w-full rounded-xl p-4 pr-14 h-14 bg-background text-base border-border/50 focus:border-primary transition-colors"
-                  disabled={isLoading}
+                  disabled={isLoading || isFetchingHistory}
                   autoComplete="off"
               />
-              <Button type="submit" size="icon" disabled={isLoading || !input.trim()} className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full h-10 w-10 bg-primary hover:bg-primary/90">
+              <Button type="submit" size="icon" disabled={isLoading || isFetchingHistory || !input.trim()} className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full h-10 w-10 bg-primary hover:bg-primary/90">
                   <SendHorizonal className="h-5 w-5" />
                   <span className="sr-only">Send</span>
               </Button>
