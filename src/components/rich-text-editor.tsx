@@ -2,7 +2,7 @@
 
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import Image from '@tiptap/extension-image';
+import TiptapImage from '@tiptap/extension-image';
 import Dropcursor from '@tiptap/extension-dropcursor';
 import { useState, useCallback, useRef, useEffect } from 'react';
 import {
@@ -18,6 +18,14 @@ interface RichTextEditorProps {
   onChange: (richText: string) => void;
   onAiAction: (selectedText: string) => void;
 }
+
+// Define a custom image extension that wraps the image in a resizable container
+const Image = TiptapImage.extend({
+  renderHTML({ HTMLAttributes }) {
+    // Wrap the image in a resizable div
+    return ['div', { class: 'resizable-image-container' }, ['img', HTMLAttributes]];
+  },
+});
 
 const RichTextEditor = ({
   content,

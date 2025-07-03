@@ -123,13 +123,39 @@
     @apply outline-none;
   }
   .prose > .ProseMirror.is-dragging {
-    @apply bg-primary/10 outline-2 outline-dashed outline-primary rounded-lg;
+    @apply bg-primary/20 outline-4 outline-dashed outline-primary rounded-2xl;
   }
+
+  /* --- Image Styles in Editor --- */
   .prose img {
     @apply cursor-pointer;
   }
   .prose img.ProseMirror-selectednode {
     @apply ring-4 ring-primary rounded-sm;
+  }
+
+  /* Container for our resizable image */
+  .resizable-image-container {
+    display: inline-block;
+    resize: both;
+    overflow: hidden;
+    position: relative;
+    line-height: 0;
+    min-width: 80px;
+    min-height: 80px;
+  }
+
+  /* The actual image fills its resizable container */
+  .resizable-image-container img {
+    width: 100%;
+    height: 100%;
+    cursor: move;
+  }
+
+  /* When Tiptap selects our node, we add a blue outline to the container */
+  .prose .resizable-image-container.ProseMirror-selectednode {
+    outline: 3px solid hsl(var(--primary));
+    border-radius: 2px;
   }
 }
 
