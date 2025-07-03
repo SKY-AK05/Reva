@@ -192,10 +192,8 @@ export default function ChatInterface() {
                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 shrink-0 mt-1">
                   <Bot className="h-5 w-5 text-primary" />
                 </div>
-                <div className="flex items-center space-x-1 pt-3">
-                  <span className="h-2 w-2 bg-muted-foreground rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                  <span className="h-2 w-2 bg-muted-foreground rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                  <span className="h-2 w-2 bg-muted-foreground rounded-full animate-bounce"></span>
+                <div className="pt-3">
+                  <div className="loader"></div>
                 </div>
               </div>
             )}
