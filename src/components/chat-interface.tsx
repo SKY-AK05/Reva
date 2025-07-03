@@ -138,17 +138,6 @@ export default function ChatInterface() {
                 </div>
               </div>
             ))}
-             {isLoading && (
-              <div className="w-full flex justify-start">
-                  <div className="max-w-xl p-4 rounded-2xl bg-muted">
-                    <div className="flex items-center space-x-1 py-1">
-                          <span className="h-2 w-2 animate-bounce rounded-full bg-foreground [animation-delay:-0.3s]"></span>
-                          <span className="h-2 w-2 animate-bounce rounded-full bg-foreground [animation-delay:-0.15s]"></span>
-                          <span className="h-2 w-2 animate-bounce rounded-full bg-foreground"></span>
-                      </div>
-                  </div>
-              </div>
-            )}
           </div>
         ) : (
           !isFetchingHistory && welcomeScreen
