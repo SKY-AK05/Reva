@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -48,7 +49,7 @@ export default function ExpensesPage() {
       );
     }
     if (column === 'amount') {
-      return `₹${Number(expense.amount).toFixed(2)}`;
+      return `$${Number(expense.amount).toFixed(2)}`;
     }
     return expense[column];
   };

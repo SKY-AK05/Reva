@@ -6,19 +6,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { SendHorizonal, Bot } from 'lucide-react';
+import { SendHorizonal, Bot, CheckSquare, DollarSign, Bell, Target } from 'lucide-react';
 import { processUserChat } from '@/app/(app)/chat/actions';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type { ChatMessage } from '@/services/chat';
 import { useChatContext } from '@/context/chat-context';
-
-const quickStartSuggestions = [
-  "Add task: Finish the Q4 report by Friday",
-  "Track expense: 500 for coffee today",
-  "Remind me to call John tomorrow at 10am",
-  "What are some tips for staying productive?",
-];
+import { useTasksContext } from '@/context/tasks-context';
+import { useExpensesContext } from '@/context/expenses-context';
+import { useRemindersContext } from '@/context/reminders-context';
+import { useGoalsContext } from '@/context/goals-context';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function ChatInterface() {
   const { messages, setMessages, loading: isFetchingHistory } = useChatContext();
@@ -26,6 +24,16 @@ export default function ChatInterface() {
   const [isLoading, setIsLoading] = useState(false);
   const scrollViewportRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const { tasks } = useTasksContext();
+  const { expenses } = useExpensesContext();
+  const { reminders } = useRemindersContext();
+  const { goals } = useGoalsContext();
+
+  const totalTasks = tasks.filter(t => !t.completed).length;
+  const totalExpenses = expenses.reduce((sum, expense) => sum + Number(expense.amount), 0);
+  const upcomingReminders = reminders.length;
+  const goalsInProgress = goals.filter(g => g.progress < 100).length;
 
   useEffect(() => {
     if (!isFetchingHistory) {
@@ -83,22 +91,58 @@ export default function ChatInterface() {
   }
 
   const welcomeScreen = (
-    <div className="flex h-full flex-col items-center justify-center p-4 text-center">
-      <div className="space-y-4 max-w-2xl w-full">
-        <Bot className="w-16 h-16 mx-auto text-primary" />
-        <h1 className="text-4xl font-headline font-bold tracking-tight">How can I help you today?</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-8">
-          {quickStartSuggestions.map((suggestion, i) => (
-             <Button
-              key={i}
-              variant="outline"
-              className="w-full h-auto justify-start text-left font-normal p-4 whitespace-normal"
-              onClick={() => handleSendMessage(suggestion)}
-            >
-              {suggestion}
-            </Button>
-          ))}
-        </div>
+    <div className="flex flex-1 flex-col items-center justify-center p-4 text-center">
+      <div className="space-y-4">
+        <span className="text-6xl" role="img" aria-label="waving hand">👋</span>
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight font-headline">Welcome to Reva!</h1>
+        <p className="text-muted-foreground text-lg">
+          Just start typing to create tasks, track expenses, set reminders, and more.
+        </p>
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12 w-full max-w-4xl">
+        <Card className="bg-secondary/50">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Tasks</CardTitle>
+            <CheckSquare className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{totalTasks}</div>
+            <p className="text-xs text-muted-foreground">Active</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-secondary/50">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Expenses</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">${totalExpenses.toFixed(2)}</div>
+             <p className="text-xs text-muted-foreground">This month</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-secondary/50">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Reminders</CardTitle>
+            <Bell className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{upcomingReminders}</div>
+            <p className="text-xs text-muted-foreground">Upcoming</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-secondary/50">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Goals</CardTitle>
+            <Target className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{goalsInProgress}</div>
+            <p className="text-xs text-muted-foreground">in Progress</p>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

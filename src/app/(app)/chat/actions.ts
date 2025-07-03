@@ -1,3 +1,4 @@
+
 "use server";
 
 import { createServerClient } from "@/lib/supabase/server";
@@ -121,7 +122,7 @@ export async function processUserChat(chatInput: string): Promise<string> {
                         date: result.date || new Date().toISOString().split('T')[0],
                         userId: user.id,
                     });
-                    const currencySymbol = result.currency?.toLowerCase().includes('dollar') ? '$' : '₹';
+                    const currencySymbol = result.currency?.toLowerCase().includes('rupees') ? '₹' : '$';
                     botResponseText = `Expense tracked!\n\n**Item:** ${expense.description}\n**Amount:** ${currencySymbol}${expense.amount.toFixed(2)}\n**Category:** ${expense.category || 'N/A'}`;
                     if(result.date) botResponseText += `\n**Date:** ${result.date}`;
                 } else {
@@ -135,7 +136,7 @@ export async function processUserChat(chatInput: string): Promise<string> {
                     }));
                     await addExpenses(expensesToAdd);
                     
-                    const currencySymbol = result.currency?.toLowerCase().includes('dollar') ? '$' : '₹';
+                    const currencySymbol = result.currency?.toLowerCase().includes('rupees') ? '₹' : '$';
                     const totalAmount = result.expenses.reduce((sum, item) => sum + item.amount, 0);
 
                     botResponseText = "Okay, I've recorded your expenses:\n\n";

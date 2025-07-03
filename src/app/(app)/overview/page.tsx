@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,7 +25,7 @@ export default function OverviewPage() {
 
   const overviewCards = [
     { title: 'Active Tasks', value: tasks.filter(t => !t.completed).length, icon: CheckSquare, colorClass: 'text-chart-1' },
-    { title: 'Total Expenses', value: `₹${totalExpenses.toFixed(2)}`, icon: DollarSign, colorClass: 'text-chart-2' },
+    { title: 'Total Expenses', value: `$${totalExpenses.toFixed(2)}`, icon: DollarSign, colorClass: 'text-chart-2' },
     { title: 'Upcoming Reminders', value: reminders.length, icon: Bell, colorClass: 'text-chart-3' },
     { title: 'Active Goals', value: goals.filter(g => g.progress < 100).length, icon: Target, colorClass: 'text-chart-4' },
   ];
@@ -122,7 +123,7 @@ export default function OverviewPage() {
                                     <Wallet className="h-4 w-4 text-chart-2" />
                                 </div>
                                 <p className="flex-1 text-sm font-medium truncate">{expense.item}</p>
-                                <span className="text-sm font-semibold">₹{Number(expense.amount).toFixed(2)}</span>
+                                <span className="text-sm font-semibold">${Number(expense.amount).toFixed(2)}</span>
                             </li>
                         ))}
                     </ul>
