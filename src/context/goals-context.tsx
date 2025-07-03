@@ -1,67 +1,68 @@
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
+import { getGoals, addGoal, updateGoal as updateGoalInDb } from '@/services/goals';
 
 export interface Goal {
   id: string;
   title: string;
-  description: string;
+  description: string | null;
   progress: number;
-  status: string;
+  status: string | null;
 }
 
 interface GoalsContextType {
   goals: Goal[];
-  updateGoal: (id: string, updates: Partial<Omit<Goal, 'id'>>) => void;
+  addGoal: (newGoal: Omit<Goal, 'id'>) => Promise<void>;
+  updateGoal: (id: string, updates: Partial<Omit<Goal, 'id'>>) => Promise<void>;
+  loading: boolean;
 }
 
 const GoalsContext = createContext<GoalsContextType | undefined>(undefined);
 
-const initialGoals: Goal[] = [
-  {
-    id: '1',
-    title: 'Read 3 books this month',
-    description: 'Expand knowledge on product management and design.',
-    progress: 33,
-    status: '1/3 books read',
-  },
-  {
-    id: '2',
-    title: 'Save $1,000 for vacation',
-    description: 'Contribute to the travel fund for the trip to Italy.',
-    progress: 75,
-    status: '$750 saved',
-  },
-  {
-    id: '3',
-    title: 'Go to the gym 12 times',
-    description: 'Focus on strength training and cardio.',
-    progress: 50,
-    status: '6/12 sessions completed',
-  },
-   {
-    id: '4',
-    title: 'Complete the side project',
-    description: 'Launch the MVP of the new app by end of Q4.',
-    progress: 20,
-    status: 'Design phase complete',
-  },
-];
-
 export const GoalsContextProvider = ({ children }: { children: ReactNode }) => {
-  const [goals, setGoals] = useState<Goal[]>(initialGoals);
+  const [goals, setGoals] = useState<Goal[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const updateGoal = useCallback((id: string, updates: Partial<Omit<Goal, 'id'>>) => {
+  useEffect(() => {
+    const fetchGoals = async () => {
+      setLoading(true);
+      const fetchedGoals = await getGoals();
+      setGoals(fetchedGoals);
+      setLoading(false);
+    };
+    fetchGoals();
+  }, []);
+
+  const handleAddGoal = useCallback(async (newGoal: Omit<Goal, 'id'>) => {
+    const addedGoal = await addGoal(newGoal);
+    if (addedGoal) {
+      setGoals(prev => [...prev, addedGoal]);
+    }
+  }, []);
+
+  const handleUpdateGoal = useCallback(async (id: string, updates: Partial<Omit<Goal, 'id'>>) => {
+    // Optimistic update
     setGoals(prevGoals =>
       prevGoals.map(goal =>
         goal.id === id ? { ...goal, ...updates } : goal
       )
     );
+    try {
+      await updateGoalInDb(id, updates);
+    } catch (error) {
+      console.error("Failed to update goal, rolling back", error);
+      // On error, refetch to get the source of truth
+      const fetchedGoals = await getGoals();
+      setGoals(fetchedGoals);
+    }
   }, []);
   
   const value = {
     goals,
-    updateGoal,
+    addGoal: handleAddGoal,
+    updateGoal: handleUpdateGoal,
+    loading,
   };
 
   return <GoalsContext.Provider value={value}>{children}</GoalsContext.Provider>;

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -16,6 +15,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useTasksContext, type Task } from '@/context/tasks-context';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const priorityVariant = {
   high: 'destructive',
@@ -24,7 +24,7 @@ const priorityVariant = {
 };
 
 export default function TasksPage() {
-  const { tasks, updateTask, toggleTaskCompletion } = useTasksContext();
+  const { tasks, updateTask, toggleTaskCompletion, loading } = useTasksContext();
   const [editingCell, setEditingCell] = useState<{ id: string; column: keyof Omit<Task, 'completed'> } | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, id: string, column: 'description' | 'dueDate') => {
@@ -73,7 +73,16 @@ export default function TasksPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {tasks.length > 0 ? (
+            {loading ? (
+              [...Array(5)].map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell><Skeleton className="h-5 w-5" /></TableCell>
+                  <TableCell><Skeleton className="h-5 w-full" /></TableCell>
+                  <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                  <TableCell className="flex justify-end"><Skeleton className="h-6 w-16" /></TableCell>
+                </TableRow>
+              ))
+            ) : tasks.length > 0 ? (
               tasks.map((task) => (
                 <TableRow key={task.id} data-state={task.completed ? 'completed' : ''} className="data-[state=completed]:text-muted-foreground data-[state=completed]:line-through">
                   <TableCell>
@@ -82,9 +91,8 @@ export default function TasksPage() {
                   <TableCell className="font-medium cursor-pointer" onClick={() => setEditingCell({ id: task.id, column: 'description' })}>
                     {editingCell?.id === task.id && editingCell?.column === 'description' ? (
                       <Input
-                        value={task.description}
-                        onChange={(e) => handleInputChange(e, task.id, 'description')}
-                        onBlur={handleInputBlur}
+                        defaultValue={task.description}
+                        onBlur={(e) => { handleInputChange(e, task.id, 'description'); handleInputBlur(); }}
                         onKeyDown={handleInputKeyDown}
                         autoFocus
                         className="h-8"
@@ -97,9 +105,8 @@ export default function TasksPage() {
                     {editingCell?.id === task.id && editingCell?.column === 'dueDate' ? (
                       <Input
                         type="date"
-                        value={task.dueDate}
-                        onChange={(e) => handleInputChange(e, task.id, 'dueDate')}
-                        onBlur={handleInputBlur}
+                        defaultValue={task.dueDate || ''}
+                        onBlur={(e) => { handleInputChange(e, task.id, 'dueDate'); handleInputBlur(); }}
                         onKeyDown={handleInputKeyDown}
                         autoFocus
                         className="h-8"

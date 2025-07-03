@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -8,9 +7,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Slider } from '@/components/ui/slider';
 import { useGoalsContext, type Goal } from '@/context/goals-context';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function GoalsPage() {
-  const { goals, updateGoal } = useGoalsContext();
+  const { goals, updateGoal, loading } = useGoalsContext();
   const [editingField, setEditingField] = useState<{ id: string; field: keyof Goal | 'progress' } | null>(null);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, id: string, field: 'title' | 'description' | 'status') => {
@@ -25,8 +25,8 @@ export default function GoalsPage() {
     setEditingField(null);
   };
   
-  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !(e.target as HTMLElement).matches('textarea')) {
       setEditingField(null);
     }
   };
@@ -42,17 +42,25 @@ export default function GoalsPage() {
       </header>
       
       <div className="space-y-8 mt-7">
-        {goals.length > 0 ? (
+        {loading ? (
+            [...Array(3)].map((_, i) => (
+                <div key={i} className="space-y-3">
+                    <Skeleton className="h-6 w-3/4" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-1/2" />
+                    <Skeleton className="h-2 w-full" />
+                </div>
+            ))
+        ) : goals.length > 0 ? (
           goals.map((goal) => (
             <div key={goal.id} className="">
               <div className="mb-2">
                 <h3 className="font-semibold text-lg cursor-pointer" onClick={() => setEditingField({ id: goal.id, field: 'title' })}>
                   {editingField?.id === goal.id && editingField?.field === 'title' ? (
                      <Input
-                        value={goal.title}
-                        onChange={(e) => handleInputChange(e, goal.id, 'title')}
-                        onBlur={handleInputBlur}
-                        onKeyDown={handleInputKeyDown}
+                        defaultValue={goal.title}
+                        onBlur={(e) => { handleInputChange(e, goal.id, 'title'); handleInputBlur(); }}
+                        onKeyDown={(e) => { if(e.key === 'Enter') { handleInputChange(e as any, goal.id, 'title'); handleInputBlur(); } }}
                         autoFocus
                       />
                   ) : goal.title}
@@ -60,9 +68,8 @@ export default function GoalsPage() {
                 <p className="text-sm text-muted-foreground cursor-pointer" onClick={() => setEditingField({ id: goal.id, field: 'description' })}>
                   {editingField?.id === goal.id && editingField?.field === 'description' ? (
                      <Textarea
-                        value={goal.description}
-                        onChange={(e) => handleInputChange(e, goal.id, 'description')}
-                        onBlur={handleInputBlur}
+                        defaultValue={goal.description || ''}
+                        onBlur={(e) => { handleInputChange(e, goal.id, 'description'); handleInputBlur(); }}
                         autoFocus
                       />
                   ) : goal.description}
@@ -86,10 +93,9 @@ export default function GoalsPage() {
                 <div className="text-sm text-muted-foreground cursor-pointer" onClick={() => setEditingField({ id: goal.id, field: 'status' })}>
                     {editingField?.id === goal.id && editingField?.field === 'status' ? (
                         <Input
-                            value={goal.status}
-                            onChange={(e) => handleInputChange(e, goal.id, 'status')}
-                            onBlur={handleInputBlur}
-                            onKeyDown={handleInputKeyDown}
+                            defaultValue={goal.status || ''}
+                            onBlur={(e) => { handleInputChange(e, goal.id, 'status'); handleInputBlur(); }}
+                            onKeyDown={(e) => { if(e.key === 'Enter') { handleInputChange(e as any, goal.id, 'status'); handleInputBlur(); } }}
                             autoFocus
                             className="h-7 text-sm"
                         />

@@ -1,84 +1,73 @@
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
+import { getTasks, addTask, updateTask as updateTaskInDb, toggleTask as toggleTaskInDb } from '@/services/tasks';
 
 export interface Task {
   id: string;
   description: string;
-  dueDate: string;
+  dueDate: string | null;
   priority: 'high' | 'medium' | 'low';
   completed: boolean;
 }
 
 interface TasksContextType {
   tasks: Task[];
-  updateTask: (id: string, updates: Partial<Omit<Task, 'id' | 'completed'>>) => void;
-  toggleTaskCompletion: (id: string, completed: boolean) => void;
+  addTask: (newTask: Omit<Task, 'id' | 'completed'>) => Promise<void>;
+  updateTask: (id: string, updates: Partial<Omit<Task, 'id' | 'completed'>>) => Promise<void>;
+  toggleTaskCompletion: (id: string, completed: boolean) => Promise<void>;
+  loading: boolean;
 }
 
 const TasksContext = createContext<TasksContextType | undefined>(undefined);
 
-const initialTasks: Task[] = [
-  {
-    id: '1',
-    description: 'Buy groceries for the week',
-    dueDate: '2024-10-25',
-    priority: 'high',
-    completed: false,
-  },
-  {
-    id: '2',
-    description: 'Finish the Q3 report for work',
-    dueDate: '2024-10-26',
-    priority: 'high',
-    completed: false,
-  },
-  {
-    id: '3',
-    description: 'Schedule dentist appointment',
-    dueDate: '2024-10-28',
-    priority: 'medium',
-    completed: true,
-  },
-  {
-    id: '4',
-    description: 'Call mom',
-    dueDate: '2024-10-24',
-    priority: 'low',
-    completed: false,
-  },
-  {
-    id: '5',
-    description: 'Renew gym membership',
-    dueDate: '2024-11-01',
-    priority: 'medium',
-    completed: false,
-  },
-];
-
 export const TasksContextProvider = ({ children }: { children: ReactNode }) => {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const updateTask = useCallback((id: string, updates: Partial<Omit<Task, 'id' | 'completed'>>) => {
-    setTasks(prevTasks =>
-      prevTasks.map(task =>
-        task.id === id ? { ...task, ...updates } : task
-      )
-    );
+  useEffect(() => {
+    const fetchTasks = async () => {
+      setLoading(true);
+      const fetchedTasks = await getTasks();
+      setTasks(fetchedTasks);
+      setLoading(false);
+    };
+    fetchTasks();
   }, []);
 
-  const toggleTaskCompletion = useCallback((id: string, completed: boolean) => {
+  const handleAddTask = useCallback(async (newTask: Omit<Task, 'id' | 'completed'>) => {
+    const addedTask = await addTask(newTask);
+    if(addedTask) {
+        setTasks(prev => [...prev, addedTask]);
+    }
+  }, []);
+
+  const handleUpdateTask = useCallback(async (id: string, updates: Partial<Omit<Task, 'id' | 'completed'>>) => {
+    const updatedTask = await updateTaskInDb(id, updates);
+    if (updatedTask) {
+        setTasks(prevTasks =>
+            prevTasks.map(task =>
+                task.id === id ? updatedTask : task
+            )
+        );
+    }
+  }, []);
+
+  const handleToggleTaskCompletion = useCallback(async (id: string, completed: boolean) => {
     setTasks(prevTasks =>
       prevTasks.map(task =>
         task.id === id ? { ...task, completed } : task
       )
     );
+    await toggleTaskInDb(id, completed);
   }, []);
   
   const value = {
     tasks,
-    updateTask,
-    toggleTaskCompletion,
+    addTask: handleAddTask,
+    updateTask: handleUpdateTask,
+    toggleTaskCompletion: handleToggleTaskCompletion,
+    loading,
   };
 
   return <TasksContext.Provider value={value}>{children}</TasksContext.Provider>;

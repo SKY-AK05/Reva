@@ -12,9 +12,10 @@ import {
 } from "@/components/ui/table";
 import { Input } from '@/components/ui/input';
 import { useExpensesContext, type Expense } from '@/context/expenses-context';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ExpensesPage() {
-  const { expenses, updateExpense } = useExpensesContext();
+  const { expenses, updateExpense, loading } = useExpensesContext();
   const [editingCell, setEditingCell] = useState<{ id: string; column: keyof Expense } | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, id: string, column: keyof Expense) => {
@@ -37,7 +38,7 @@ export default function ExpensesPage() {
       return (
         <Input
           type={column === 'amount' ? 'number' : column === 'date' ? 'date' : 'text'}
-          value={expense[column] as string | number}
+          defaultValue={expense[column] as string | number}
           onChange={(e) => handleInputChange(e, expense.id, column)}
           onBlur={handleInputBlur}
           onKeyDown={handleInputKeyDown}
@@ -47,11 +48,10 @@ export default function ExpensesPage() {
       );
     }
     if (column === 'amount') {
-      return `₹${expense.amount.toFixed(2)}`;
+      return `₹${Number(expense.amount).toFixed(2)}`;
     }
     return expense[column];
   };
-
 
   return (
     <div className="flex flex-1 flex-col p-6 sm:p-8 lg:p-12 notebook-lines">
@@ -76,7 +76,16 @@ export default function ExpensesPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {expenses.length > 0 ? (
+            {loading ? (
+              [...Array(5)].map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell><Skeleton className="h-5 w-32" /></TableCell>
+                  <TableCell className="hidden sm:table-cell"><Skeleton className="h-5 w-24" /></TableCell>
+                  <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                  <TableCell className="text-right"><Skeleton className="h-5 w-16 ml-auto" /></TableCell>
+                </TableRow>
+              ))
+            ) : expenses.length > 0 ? (
               expenses.map((expense) => (
                 <TableRow key={expense.id}>
                   <TableCell className="font-medium cursor-pointer" onClick={() => setEditingCell({ id: expense.id, column: 'item' })}>
@@ -107,7 +116,6 @@ export default function ExpensesPage() {
           </TableBody>
         </Table>
       </div>
-
     </div>
   );
 }

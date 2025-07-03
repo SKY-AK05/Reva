@@ -5,36 +5,15 @@ import { BookText } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-
-const initialEntries = [
-  {
-    id: '1',
-    date: 'October 24, 2024',
-    title: 'A breakthrough idea',
-    content: 'Had a fantastic idea for a new feature today. It involves using machine learning to predict user intent and proactively suggest actions. This could be a game-changer for the app...',
-  },
-  {
-    id: '2',
-    date: 'October 23, 2024',
-    title: 'Reflections on the week',
-    content: 'This week was productive but challenging. Managed to close out the main deliverables for the Q3 report. Feeling a bit drained but accomplished. Need to remember to take a proper break this weekend.',
-  },
-  {
-    id: '3',
-    date: 'October 21, 2024',
-    title: 'Random thought',
-    content: 'Why do we call it a "building" when it\'s already built?',
-  },
-];
-
-type Entry = typeof initialEntries[0];
+import { useJournalContext, type JournalEntry } from '@/context/journal-context';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function JournalPage() {
-  const [entries, setEntries] = useState(initialEntries);
-  const [editingField, setEditingField] = useState<{ id: string; field: keyof Entry } | null>(null);
+  const { entries, updateEntry, loading } = useJournalContext();
+  const [editingField, setEditingField] = useState<{ id: string; field: keyof JournalEntry } | null>(null);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, id: string, field: keyof Entry) => {
-    setEntries(entries.map(entry => (entry.id === id ? { ...entry, [field]: e.target.value } : entry)));
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, id: string, field: keyof JournalEntry) => {
+    updateEntry(id, { [field]: e.target.value });
   };
   
   const handleInputBlur = () => {
@@ -58,15 +37,23 @@ export default function JournalPage() {
       </header>
 
       <div className="space-y-8 mt-7">
-        {entries.length > 0 ? (
+        {loading ? (
+          [...Array(3)].map((_, i) => (
+            <article key={i} className="space-y-3">
+              <Skeleton className="h-8 w-1/2" />
+              <Skeleton className="h-4 w-1/4" />
+              <Skeleton className="h-16 w-full" />
+              {i < 2 && <Separator className="my-8 bg-border/50" />}
+            </article>
+          ))
+        ) : entries.length > 0 ? (
           entries.map((entry, index) => (
             <article key={entry.id}>
               {editingField?.id === entry.id && editingField?.field === 'title' ? (
                   <Input
-                    value={entry.title}
-                    onChange={(e) => handleInputChange(e, entry.id, 'title')}
-                    onBlur={handleInputBlur}
-                    onKeyDown={handleInputKeyDown}
+                    defaultValue={entry.title}
+                    onBlur={(e) => { handleInputChange(e, entry.id, 'title'); handleInputBlur(); }}
+                    onKeyDown={(e) => { if(e.key === 'Enter') { handleInputChange(e as any, entry.id, 'title'); handleInputBlur(); } }}
                     autoFocus
                     className="text-2xl font-semibold tracking-tight h-auto mb-1"
                   />
@@ -81,10 +68,10 @@ export default function JournalPage() {
 
               {editingField?.id === entry.id && editingField?.field === 'date' ? (
                 <Input
-                    value={entry.date}
-                    onChange={(e) => handleInputChange(e, entry.id, 'date')}
-                    onBlur={handleInputBlur}
-                    onKeyDown={handleInputKeyDown}
+                    type="date"
+                    defaultValue={entry.date}
+                    onBlur={(e) => { handleInputChange(e, entry.id, 'date'); handleInputBlur(); }}
+                    onKeyDown={(e) => { if(e.key === 'Enter') { handleInputChange(e as any, entry.id, 'date'); handleInputBlur(); } }}
                     autoFocus
                     className="text-sm text-muted-foreground h-auto mb-4"
                   />
@@ -93,22 +80,21 @@ export default function JournalPage() {
                   className="text-sm text-muted-foreground mb-4 cursor-pointer" 
                   onClick={() => setEditingField({ id: entry.id, field: 'date' })}
                 >
-                  {entry.date}
+                  {new Date(entry.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}
                 </p>
               )}
 
               {editingField?.id === entry.id && editingField?.field === 'content' ? (
                   <Textarea
-                    value={entry.content}
-                    onChange={(e) => handleInputChange(e, entry.id, 'content')}
-                    onBlur={handleInputBlur}
+                    defaultValue={entry.content || ''}
+                    onBlur={(e) => { handleInputChange(e, entry.id, 'content'); handleInputBlur(); }}
                     onKeyDown={handleInputKeyDown}
                     autoFocus
-                    className="text-muted-foreground leading-relaxed w-full"
+                    className="text-muted-foreground leading-relaxed w-full min-h-[10rem]"
                   />
                 ) : (
                   <p 
-                    className="text-muted-foreground leading-relaxed cursor-pointer" 
+                    className="text-muted-foreground leading-relaxed cursor-pointer whitespace-pre-wrap" 
                     onClick={() => setEditingField({ id: entry.id, field: 'content' })}
                   >
                     {entry.content}

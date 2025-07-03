@@ -1,56 +1,66 @@
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
+import { getReminders, addReminder, updateReminder as updateReminderInDb } from '@/services/reminders';
 
 export interface Reminder {
   id: string;
   title: string;
   time: string;
-  notes: string;
+  notes: string | null;
 }
 
 interface RemindersContextType {
   reminders: Reminder[];
-  updateReminder: (id: string, updates: Partial<Omit<Reminder, 'id'>>) => void;
+  addReminder: (newReminder: Omit<Reminder, 'id'>) => Promise<void>;
+  updateReminder: (id: string, updates: Partial<Omit<Reminder, 'id'>>) => Promise<void>;
+  loading: boolean;
 }
 
 const RemindersContext = createContext<RemindersContextType | undefined>(undefined);
 
-const initialReminders: Reminder[] = [
-  {
-    id: '1',
-    title: 'Follow up with a client',
-    time: '2024-10-25 10:00 AM',
-    notes: 'Discuss the new proposal.',
-  },
-  {
-    id: '2',
-    title: 'Pay credit card bill',
-    time: '2024-10-26 05:00 PM',
-    notes: 'Due tomorrow.',
-  },
-  {
-    id: '3',
-    title: 'Team meeting',
-    time: '2024-10-28 11:30 AM',
-    notes: 'Project sync-up in Room 3.',
-  },
-];
-
 export const RemindersContextProvider = ({ children }: { children: ReactNode }) => {
-  const [reminders, setReminders] = useState<Reminder[]>(initialReminders);
+  const [reminders, setReminders] = useState<Reminder[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const updateReminder = useCallback((id: string, updates: Partial<Omit<Reminder, 'id'>>) => {
+  useEffect(() => {
+    const fetchReminders = async () => {
+      setLoading(true);
+      const fetchedReminders = await getReminders();
+      setReminders(fetchedReminders);
+      setLoading(false);
+    };
+    fetchReminders();
+  }, []);
+
+
+  const handleAddReminder = useCallback(async (newReminder: Omit<Reminder, 'id'>) => {
+    const addedReminder = await addReminder(newReminder);
+    if (addedReminder) {
+      setReminders(prev => [...prev, addedReminder]);
+    }
+  }, []);
+
+  const handleUpdateReminder = useCallback(async (id: string, updates: Partial<Omit<Reminder, 'id'>>) => {
     setReminders(prevReminders =>
       prevReminders.map(rem =>
         rem.id === id ? { ...rem, ...updates } : rem
       )
     );
+    try {
+      await updateReminderInDb(id, updates);
+    } catch(e) {
+      console.error("Failed to update reminder", e);
+      const fetchedReminders = await getReminders();
+      setReminders(fetchedReminders);
+    }
   }, []);
   
   const value = {
     reminders,
-    updateReminder,
+    addReminder: handleAddReminder,
+    updateReminder: handleUpdateReminder,
+    loading,
   };
 
   return <RemindersContext.Provider value={value}>{children}</RemindersContext.Provider>;

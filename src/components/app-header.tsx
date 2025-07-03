@@ -34,7 +34,7 @@ import { cn } from '@/lib/utils';
 import { useNotesContext } from '@/context/notes-context';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabaseClient';
+import { createClient } from '@/lib/supabase/client';
 
 interface AppHeaderProps {
   showGridLines: boolean;
@@ -51,6 +51,7 @@ export default function AppHeader({
   const router = useRouter();
   const pathname = usePathname();
   const [user, setUser] = useState<any>(null);
+  const supabase = createClient();
 
   const handleSelectNote = (noteId: string) => {
     setActiveNoteById(noteId);
@@ -59,7 +60,6 @@ export default function AppHeader({
 
   const handleAddNewNote = () => {
     addNewNote();
-    // This ensures we are on the notes page to see the new note.
     if (pathname !== '/notes') {
       router.push('/notes');
     }
@@ -74,16 +74,18 @@ export default function AppHeader({
 
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
+      if (event === 'SIGNED_OUT') {
+        router.refresh();
+      }
     });
     
     return () => {
       listener?.subscription.unsubscribe();
     };
-  }, []);
+  }, [supabase, router]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    setUser(null);
     router.push('/login');
   };
 

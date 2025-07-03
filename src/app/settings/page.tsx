@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabaseClient';
+import { createClient } from '@/lib/supabase/client';
 import { Key, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,9 +10,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useRouter } from 'next/navigation';
 
 export default function SettingsPage() {
   const { toast } = useToast();
+  const router = useRouter();
+  const supabase = createClient();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState('');
@@ -28,12 +31,14 @@ export default function SettingsPage() {
         setName(user.user_metadata?.name || '');
         setEmail(user.email || '');
         setAvatarUrl(user.user_metadata?.avatar_url || null);
+      } else {
+        router.push('/login');
       }
       setLoading(false);
     };
 
     fetchUser();
-  }, []);
+  }, [supabase, router]);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,8 +55,11 @@ export default function SettingsPage() {
         description: error.message,
       });
     } else {
-      // Also update the user state to reflect the change immediately
-      setUser(data.user);
+      if (data.user) {
+        setUser(data.user);
+        setAvatarUrl(data.user.user_metadata?.avatar_url || null);
+        setName(data.user.user_metadata?.name || '');
+      }
       toast({
         title: 'Profile updated',
         description: 'Your profile has been successfully updated.',
@@ -72,7 +80,7 @@ export default function SettingsPage() {
 
       const file = event.target.files[0];
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}.${fileExt}`;
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
       const filePath = `avatars/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
@@ -86,7 +94,7 @@ export default function SettingsPage() {
       const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
       const publicUrl = data.publicUrl;
 
-      const { error: updateUserError } = await supabase.auth.updateUser({
+      const { data: { user: updatedUser }, error: updateUserError } = await supabase.auth.updateUser({
         data: { avatar_url: publicUrl },
       });
 
@@ -94,7 +102,10 @@ export default function SettingsPage() {
         throw updateUserError;
       }
       
-      setAvatarUrl(publicUrl);
+      if(updatedUser) {
+        setAvatarUrl(updatedUser.user_metadata?.avatar_url || null);
+      }
+
       toast({
         title: 'Avatar updated!',
         description: 'Your new avatar has been saved.',

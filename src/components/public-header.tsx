@@ -5,37 +5,34 @@ import { Button } from '@/components/ui/button';
 import RevaLogo from '@/components/reva-logo';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabaseClient';
+import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import { Sun, Laptop, Moon, LogOut, Settings, HelpCircle } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { LogOut, Settings, HelpCircle } from 'lucide-react';
 
 export default function PublicHeader() {
-  const [loggedIn, setLoggedIn] = useState(false);
   const [user, setUser] = useState<any>(null);
-  const [theme, setTheme] = useState('light');
   const router = useRouter();
+  const supabase = createClient();
 
   useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      if (_event === 'SIGNED_IN') {
+        router.refresh();
+      }
+    });
+
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setLoggedIn(!!session);
       setUser(session?.user ?? null);
     });
-    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
-      setLoggedIn(!!session);
-      setUser(session?.user ?? null);
-    });
-    return () => {
-      listener?.subscription.unsubscribe();
-    };
-  }, []);
+
+    return () => subscription.unsubscribe();
+  }, [router, supabase]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    setLoggedIn(false);
-    setUser(null);
     router.push('/');
   };
 
@@ -48,58 +45,42 @@ export default function PublicHeader() {
             <span className="font-semibold">Reva</span>
           </Link>
           <nav className="hidden md:flex items-center gap-4 text-sm font-medium text-muted-foreground">
-            <Link href="#features" className="hover:text-foreground">
+            <Link href="/#features" className="hover:text-foreground">
               Features
             </Link>
-            <Link href="#pricing" className="hover:text-foreground">
+            <Link href="/#pricing" className="hover:text-foreground">
               Pricing
             </Link>
           </nav>
         </div>
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          {!loggedIn ? (
-            <>
-              <Button variant="ghost" asChild>
-                <Link href="/login">Sign in</Link>
-              </Button>
-              <Button
-                className="bg-black text-white hover:bg-gray-800 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90"
-                asChild
-              >
-                <Link href="/signup">Sign up</Link>
-              </Button>
-            </>
-          ) : (
+          {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-9 w-9 rounded-full">
                   <Avatar className="h-9 w-9">
                     <AvatarImage
-                      src={user?.user_metadata?.avatar_url || undefined}
-                      alt={user?.user_metadata?.name || user?.email || 'User'}
+                      src={user.user_metadata?.avatar_url || undefined}
+                      alt={user.user_metadata?.name || user.email || 'User'}
                     />
-                    <AvatarFallback>{user?.user_metadata?.name ? user.user_metadata.name[0].toUpperCase() : (user?.email?.[0]?.toUpperCase() ?? 'U')}</AvatarFallback>
+                    <AvatarFallback>{user.user_metadata?.name?.[0] ?? user.email?.[0] ?? 'U'}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-64" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    {user?.user_metadata?.name ? (
-                      <>
-                        <p className="text-sm font-medium leading-none">{user.user_metadata.name}</p>
-                        <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
-                      </>
-                    ) : (
-                      <>
-                        <p className="text-sm font-medium leading-none">{user?.email}</p>
-                        <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
-                      </>
-                    )}
+                    <p className="text-sm font-medium leading-none">{user.user_metadata.name || user.email}</p>
+                    {user.user_metadata.name && <p className="text-xs leading-none text-muted-foreground">{user.email}</p>}
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/chat">
+                    <span>Go to App</span>
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/settings">
                     <Settings className="mr-2 h-4 w-4" />
@@ -117,6 +98,18 @@ export default function PublicHeader() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+          ) : (
+            <>
+              <Button variant="ghost" asChild>
+                <Link href="/login">Sign in</Link>
+              </Button>
+              <Button
+                className="bg-black text-white hover:bg-gray-800 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90"
+                asChild
+              >
+                <Link href="/signup">Sign up</Link>
+              </Button>
+            </>
           )}
         </div>
       </div>

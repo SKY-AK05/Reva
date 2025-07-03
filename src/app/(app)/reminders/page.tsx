@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -6,9 +5,10 @@ import { Bell } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useRemindersContext, type Reminder } from '@/context/reminders-context';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function RemindersPage() {
-  const { reminders, updateReminder } = useRemindersContext();
+  const { reminders, updateReminder, loading } = useRemindersContext();
   const [editingField, setEditingField] = useState<{ id: string; field: keyof Reminder } | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, id: string, field: keyof Reminder) => {
@@ -28,6 +28,16 @@ export default function RemindersPage() {
   const isEditing = (id: string, field: keyof Reminder) => {
     return editingField?.id === id && editingField?.field === field;
   };
+  
+  const formatReminderTime = (time: string) => {
+      return new Date(time).toLocaleString(undefined, {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit'
+      });
+  }
 
   return (
     <div className="flex flex-1 flex-col p-6 sm:p-8 lg:p-12 notebook-lines-journal">
@@ -42,7 +52,18 @@ export default function RemindersPage() {
       <div className="space-y-6 mt-7">
         <h2 className="text-xl font-semibold">Upcoming</h2>
         <div className="space-y-2">
-          {reminders.length > 0 ? (
+          {loading ? (
+             [...Array(3)].map((_, i) => (
+                <div key={i} className="flex items-start gap-4 p-4 -mx-4">
+                    <Skeleton className="h-9 w-9 rounded-full shrink-0 mt-1" />
+                    <div className="flex-1 space-y-2">
+                        <Skeleton className="h-5 w-3/4" />
+                        <Skeleton className="h-4 w-1/2" />
+                    </div>
+                    <Skeleton className="h-5 w-24 shrink-0" />
+                </div>
+             ))
+          ) : reminders.length > 0 ? (
             reminders.map((reminder) => (
               <div key={reminder.id} className="flex items-start gap-4 p-4 -mx-4 rounded-lg hover:bg-secondary/50 transition-colors">
                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 shrink-0 mt-1">
@@ -53,10 +74,9 @@ export default function RemindersPage() {
                     <div className="font-semibold cursor-pointer" onClick={() => setEditingField({ id: reminder.id, field: 'title' })}>
                       {isEditing(reminder.id, 'title') ? (
                         <Input
-                            value={reminder.title}
-                            onChange={(e) => handleInputChange(e, reminder.id, 'title')}
-                            onBlur={handleInputBlur}
-                            onKeyDown={handleInputKeyDown}
+                            defaultValue={reminder.title}
+                            onBlur={(e) => { handleInputChange(e, reminder.id, 'title'); handleInputBlur(); }}
+                            onKeyDown={(e) => { if(e.key === 'Enter') { handleInputChange(e as any, reminder.id, 'title'); handleInputBlur(); } }}
                             autoFocus
                             className="font-semibold h-8"
                           />
@@ -68,10 +88,8 @@ export default function RemindersPage() {
                     <div className="text-sm text-muted-foreground mt-1 cursor-pointer" onClick={() => setEditingField({ id: reminder.id, field: 'notes' })}>
                       {isEditing(reminder.id, 'notes') ? (
                         <Textarea
-                            value={reminder.notes}
-                            onChange={(e) => handleInputChange(e, reminder.id, 'notes')}
-                            onBlur={handleInputBlur}
-                            onKeyDown={handleInputKeyDown}
+                            defaultValue={reminder.notes || ''}
+                            onBlur={(e) => { handleInputChange(e, reminder.id, 'notes'); handleInputBlur(); }}
                             autoFocus
                             className="text-sm text-muted-foreground min-h-0"
                           />
@@ -84,15 +102,15 @@ export default function RemindersPage() {
                   <div className="text-sm text-muted-foreground cursor-pointer shrink-0" onClick={() => setEditingField({ id: reminder.id, field: 'time' })}>
                     {isEditing(reminder.id, 'time') ? (
                       <Input
-                        value={reminder.time}
-                        onChange={(e) => handleInputChange(e, reminder.id, 'time')}
-                        onBlur={handleInputBlur}
-                        onKeyDown={handleInputKeyDown}
+                        type="datetime-local"
+                        defaultValue={reminder.time.substring(0, 16)}
+                        onBlur={(e) => { handleInputChange(e, reminder.id, 'time'); handleInputBlur(); }}
+                        onKeyDown={(e) => { if(e.key === 'Enter') { handleInputChange(e as any, reminder.id, 'time'); handleInputBlur(); } }}
                         autoFocus
                         className="text-sm text-muted-foreground h-8"
                       />
                     ) : (
-                      <p className="leading-tight">{reminder.time}</p>
+                      <p className="leading-tight">{formatReminderTime(reminder.time)}</p>
                     )}
                   </div>
                 </div>
