@@ -237,11 +237,11 @@ export async function processCommand(input: ProcessCommandInput): Promise<Proces
     currentDate: new Date().toISOString(),
   });
 
-  const toolResponse = llmResponse.toolCalls();
+  const toolResponse = llmResponse.toolCalls;
 
-  if (!toolResponse.length) {
+  if (!toolResponse || !toolResponse.length) {
     return {
-      botResponse: llmResponse.text(),
+      botResponse: llmResponse.text,
     };
   }
 
