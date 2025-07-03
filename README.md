@@ -162,27 +162,7 @@ USING (auth.uid() = user_id)
 WITH CHECK (auth.uid() = user_id);
 ```
 
-### Step 6: `chat_messages` Table
-Stores the user's chat history with the AI.
-```sql
-CREATE TABLE chat_messages (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-    sender TEXT NOT NULL, -- 'user' or 'bot'
-    text TEXT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
-ALTER TABLE chat_messages ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Users can manage their own chat messages"
-ON chat_messages FOR ALL
-USING (auth.uid() = user_id)
-WITH CHECK (auth.uid() = user_id);
-```
-
-
-### Step 7: `training_memory` Table
+### Step 6: `training_memory` Table
 Logs chat interactions for future fine-tuning.
 ```sql
 CREATE TABLE training_memory (
@@ -201,7 +181,7 @@ TO authenticated
 WITH CHECK (true);
 ```
 
-### Step 8: Supabase Storage for Avatars
+### Step 7: Supabase Storage for Avatars
 The settings page allows users to upload a profile picture. This requires creating a "bucket" in Supabase Storage.
 
 1.  Navigate to the **Storage** section in your Supabase dashboard.

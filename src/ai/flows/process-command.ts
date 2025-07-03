@@ -192,14 +192,14 @@ const generalChat = ai.defineTool(
 
 // Main flow definition
 
-type ProcessCommandInput = z.infer<typeof ProcessCommandInputSchema>;
+export type ProcessCommandInput = z.infer<typeof ProcessCommandInputSchema>;
 const ProcessCommandInputSchema = z.object({
   chatInput: z.string(),
   contextItem: z.object({ id: z.string(), type: z.enum(['task', 'reminder', 'expense']) }).optional(),
 });
 
 
-type ProcessCommandOutput = z.infer<typeof ProcessCommandOutputSchema>;
+export type ProcessCommandOutput = z.infer<typeof ProcessCommandOutputSchema>;
 const ProcessCommandOutputSchema = z.object({
   botResponse: z.string(),
   newItemContext: z
@@ -208,6 +208,7 @@ const ProcessCommandOutputSchema = z.object({
       type: z.enum(['task', 'reminder', 'expense']),
     })
     .optional(),
+  updatedItemType: z.enum(['task', 'reminder', 'expense']).optional(),
 });
 
 const prompt = ai.definePrompt({
@@ -258,7 +259,7 @@ export async function processCommand(input: ProcessCommandInput): Promise<Proces
     };
   }
   if (call.tool === 'updateTask') {
-    return { botResponse: "OK, I've updated that task for you." };
+    return { botResponse: "OK, I've updated that task for you.", updatedItemType: 'task' };
   }
   if (call.tool === 'createReminder') {
      const output = toolOutput as z.infer<typeof createReminder.outputSchema>;
@@ -270,7 +271,7 @@ export async function processCommand(input: ProcessCommandInput): Promise<Proces
     };
   }
   if (call.tool === 'updateReminder') {
-    return { botResponse: "OK, I've updated that reminder." };
+    return { botResponse: "OK, I've updated that reminder.", updatedItemType: 'reminder' };
   }
   if (call.tool === 'trackExpenses') {
       const output = toolOutput as z.infer<typeof trackExpenses.outputSchema>;

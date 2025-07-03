@@ -3,7 +3,8 @@
 
 import { createServerClient } from "@/lib/supabase/server";
 import { processCommand, type ProcessCommandOutput } from "@/ai/flows/process-command";
-import { addChatMessage } from "@/services/chat";
+// Chat messages are no longer persisted
+// import { addChatMessage } from "@/services/chat";
 import { revalidatePath } from "next/cache";
 
 export async function processUserChat(
@@ -17,7 +18,8 @@ export async function processUserChat(
         return { botResponse: "Please log in to continue." };
     }
 
-    await addChatMessage({ userId: user.id, sender: 'user', text: chatInput });
+    // Chat messages are no longer persisted to the database.
+    // await addChatMessage({ userId: user.id, sender: 'user', text: chatInput });
 
     let result: ProcessCommandOutput;
     try {
@@ -35,14 +37,19 @@ export async function processUserChat(
         }
     }
 
-    await addChatMessage({ userId: user.id, sender: 'bot', text: result.botResponse });
+    // Chat messages are no longer persisted to the database.
+    // await addChatMessage({ userId: user.id, sender: 'bot', text: result.botResponse });
 
     // Revalidate paths to ensure fresh data on other pages
-    if (result.newItemContext) {
-        if (result.newItemContext.type === 'task') revalidatePath('/tasks');
-        if (result.newItemContext.type === 'reminder') revalidatePath('/reminders');
-        if (result.newItemContext.type === 'expense') revalidatePath('/expenses');
+    const revalidateAll = () => {
+        revalidatePath('/tasks');
+        revalidatePath('/reminders');
+        revalidatePath('/expenses');
         revalidatePath('/overview');
+    };
+
+    if (result.newItemContext || result.updatedItemType) {
+        revalidateAll();
     }
 
     return result;
