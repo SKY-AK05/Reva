@@ -6,6 +6,44 @@ To get started, take a look at src/app/page.tsx.
 
 ## Development Notes
 
+## How the AI Works (Tool-Based Flow)
+
+The application has been upgraded to use a more sophisticated AI architecture powered by **Genkit Tools**. This allows for more natural, conversational interactions where the AI can understand context and differentiate between creating new items and updating existing ones.
+
+### The Core Idea: Giving the AI Tools
+
+Instead of relying on simple keywords, we provide the AI model with a set of "tools" it can choose to use. These tools are just regular TypeScript functions that the AI can call to perform actions, like `createTask` or `updateReminder`.
+
+The central AI "brain" is the `processCommand` flow located in `src/ai/flows/process-command.ts`. This flow decides which tool to use based on your request and the current context.
+
+### Example Flow: Updating a Reminder
+
+Let's walk through the example from your plan:
+
+**1. User creates a reminder:**
+> **You:** "Remind me to call mom at 10am"
+
+*   The `processCommand` flow sees the intent to create a reminder.
+*   It calls the `createReminder` tool.
+*   The tool saves the new reminder to the `reminders` table in the database.
+*   The application receives the new reminder's ID (e.g., `abc-123`) and keeps it in memory for the next conversation turn.
+*   The AI responds: `Reminder set for "Call mom" at 10:00 AM.`
+
+**2. User asks to modify the reminder:**
+> **You:** "Actually, change it to 8am"
+
+*   The chat interface sends your new message **along with the context** from the previous turn (the reminder ID `abc-123`).
+*   The `processCommand` flow receives this input. Its prompt is specifically designed to handle this:
+    *   It sees the instruction "change it".
+    *   It sees the context that the last interaction was about reminder `abc-123`.
+    *   It correctly deduces that "it" refers to the reminder and that the intent is to *update*, not create.
+*   The AI model chooses to use the `updateReminder` tool, passing it the ID `abc-123` and the new time, `8am`.
+*   The `updateReminder` tool function executes, updating the correct row in the `reminders` database table.
+*   The AI responds: `OK, I've updated that reminder.`
+
+This tool-based approach makes the assistant much more powerful and intuitive, allowing for the kind of fluid, contextual conversations you expect from a smart assistant.
+
+
 ## Database Setup (Manual)
 
 This application is designed to be connected to a database to persist user data. The following guide outlines the necessary tables and security policies for a PostgreSQL-based service like Supabase.
