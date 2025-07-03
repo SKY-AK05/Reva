@@ -15,6 +15,10 @@ const TrackExpenseFromChatInputSchema = z.object({
 });
 export type TrackExpenseFromChatInput = z.infer<typeof TrackExpenseFromChatInputSchema>;
 
+const PromptInputSchema = TrackExpenseFromChatInputSchema.extend({
+    currentDate: z.string(),
+});
+
 const ExpenseItemSchema = z.object({
     description: z.string().describe("The description or name of the expense item."),
     amount: z.number().describe("The amount of the expense item."),
@@ -45,13 +49,14 @@ export async function trackExpenseFromChat(
 
 const prompt = ai.definePrompt({
   name: 'trackExpenseFromChatPrompt',
-  input: {schema: TrackExpenseFromChatInputSchema},
+  input: {schema: PromptInputSchema},
   output: {schema: TrackExpenseFromChatOutputSchema},
   prompt: `You are a personal finance assistant. Your task is to extract one or more expense items from user chat input.
 
 The user may provide multiple expense details in a single message. You need to identify each individual item, its amount, and category.
 
-- If a date is mentioned (e.g. "today", "yesterday", "Oct 23"), apply it to all expenses and format it as YYYY-MM-DD. If not, default to today's date: ${new Date().toISOString().split('T')[0]}.
+- The current date is {{{currentDate}}}.
+- If a date is mentioned (e.g. "today", "yesterday", "Oct 23"), apply it to all expenses and format it as YYYY-MM-DD. If not, default to today's date: {{{currentDate}}}.
 - If a currency is mentioned (e.g., dollars, rupees, €, $), identify and return it in the currency field.
 - For each item, infer a likely category (e.g., Food, Drink, Transport, Entertainment).
 - If any crucial information for an item is missing (like the amount for a specified item), set needsClarification to true and provide a clarificationPrompt asking for the missing details.
@@ -68,7 +73,10 @@ const trackExpenseFromChatFlow = ai.defineFlow(
     outputSchema: TrackExpenseFromChatOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const {output} = await prompt({
+        ...input,
+        currentDate: new Date().toISOString().split('T')[0]
+    });
     return output!;
   }
 );

@@ -16,6 +16,10 @@ const CreateReminderFromChatInputSchema = z.object({
 });
 export type CreateReminderFromChatInput = z.infer<typeof CreateReminderFromChatInputSchema>;
 
+const PromptInputSchema = CreateReminderFromChatInputSchema.extend({
+  currentDate: z.string(),
+});
+
 const CreateReminderFromChatOutputSchema = z.object({
   reminderDescription: z.string().describe('The description of what to be reminded of.'),
   remindAt: z.string().describe('The date and time for the reminder in full ISO 8601 format (YYYY-MM-DDTHH:mm:ss.sssZ).'),
@@ -28,13 +32,13 @@ export async function createReminderFromChat(input: CreateReminderFromChatInput)
 
 const prompt = ai.definePrompt({
   name: 'createReminderFromChatPrompt',
-  input: {schema: CreateReminderFromChatInputSchema},
+  input: {schema: PromptInputSchema},
   output: {schema: CreateReminderFromChatOutputSchema},
   prompt: `You are a reminder assistant. Extract the reminder description and the exact date and time from the following user input.
 
 - If the user provides a relative time (e.g., "in 5 minutes", "tomorrow at 3pm"), calculate the absolute ISO 8601 timestamp.
 - If the user does not specify a time, default to 9:00 AM on the specified day. If no day is specified, default to tomorrow at 9:00 AM.
-- The current date and time for reference is ${new Date().toISOString()}.
+- The current date and time for reference is {{{currentDate}}}.
 
 User Input: {{{chatInput}}}
 
@@ -49,7 +53,10 @@ const createReminderFromChatFlow = ai.defineFlow(
     outputSchema: CreateReminderFromChatOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const {output} = await prompt({
+        ...input,
+        currentDate: new Date().toISOString(),
+    });
     return output!;
   }
 );

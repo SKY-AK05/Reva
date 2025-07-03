@@ -16,6 +16,10 @@ const CreateTaskFromChatInputSchema = z.object({
 });
 export type CreateTaskFromChatInput = z.infer<typeof CreateTaskFromChatInputSchema>;
 
+const PromptInputSchema = CreateTaskFromChatInputSchema.extend({
+    currentDate: z.string(),
+});
+
 const CreateTaskFromChatOutputSchema = z.object({
   taskDescription: z.string().describe('The description of the task.'),
   dueDate: z.string().describe('The due date of the task in ISO format (YYYY-MM-DD).'),
@@ -29,9 +33,12 @@ export async function createTaskFromChat(input: CreateTaskFromChatInput): Promis
 
 const createTaskFromChatPrompt = ai.definePrompt({
   name: 'createTaskFromChatPrompt',
-  input: {schema: CreateTaskFromChatInputSchema},
+  input: {schema: PromptInputSchema},
   output: {schema: CreateTaskFromChatOutputSchema},
-  prompt: `You are a task management assistant. Extract the task description, due date, and priority from the following user input. If the user did not specify a due date, set it to today.
+  prompt: `You are a task management assistant. Extract the task description, due date, and priority from the following user input.
+- The current date is {{{currentDate}}}.
+- If the user does not specify a due date, set it to today ({{{currentDate}}}).
+- If a relative date is given (e.g. "tomorrow"), calculate it based on the current date.
 
 User Input: {{{chatInput}}}
 
@@ -46,7 +53,10 @@ const createTaskFromChatFlow = ai.defineFlow(
     outputSchema: CreateTaskFromChatOutputSchema,
   },
   async input => {
-    const {output} = await createTaskFromChatPrompt(input);
+    const {output} = await createTaskFromChatPrompt({
+        ...input,
+        currentDate: new Date().toISOString().split('T')[0]
+    });
     return output!;
   }
 );
