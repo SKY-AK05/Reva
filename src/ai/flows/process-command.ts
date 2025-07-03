@@ -192,13 +192,14 @@ const generalChat = ai.defineTool(
 
 // Main flow definition
 
+type ProcessCommandInput = z.infer<typeof ProcessCommandInputSchema>;
 const ProcessCommandInputSchema = z.object({
   chatInput: z.string(),
   contextItem: z.object({ id: z.string(), type: z.enum(['task', 'reminder', 'expense']) }).optional(),
 });
-export type ProcessCommandInput = z.infer<typeof ProcessCommandInputSchema>;
 
 
+type ProcessCommandOutput = z.infer<typeof ProcessCommandOutputSchema>;
 const ProcessCommandOutputSchema = z.object({
   botResponse: z.string(),
   newItemContext: z
@@ -208,7 +209,6 @@ const ProcessCommandOutputSchema = z.object({
     })
     .optional(),
 });
-export type ProcessCommandOutput = z.infer<typeof ProcessCommandOutputSchema>;
 
 const prompt = ai.definePrompt({
   name: 'commandProcessor',
