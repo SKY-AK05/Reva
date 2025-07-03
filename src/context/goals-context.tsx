@@ -1,7 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
-import { getGoals, addGoal, updateGoal as updateGoalInDb } from '@/services/goals';
+import { getGoals, updateGoal as updateGoalInDb } from '@/services/goals';
+import { createClient } from '@/lib/supabase/client';
 
 export interface Goal {
   id: string;
@@ -13,7 +14,6 @@ export interface Goal {
 
 interface GoalsContextType {
   goals: Goal[];
-  addGoal: (newGoal: Omit<Goal, 'id'>) => Promise<void>;
   updateGoal: (id: string, updates: Partial<Omit<Goal, 'id'>>) => Promise<void>;
   loading: boolean;
 }
@@ -24,43 +24,41 @@ export const GoalsContextProvider = ({ children }: { children: ReactNode }) => {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchGoals = async () => {
-      setLoading(true);
-      const fetchedGoals = await getGoals();
-      setGoals(fetchedGoals);
+  const fetchGoals = useCallback(async () => {
+    const fetchedGoals = await getGoals();
+    setGoals(fetchedGoals);
+    if (loading) {
       setLoading(false);
-    };
-    fetchGoals();
-  }, []);
-
-  const handleAddGoal = useCallback(async (newGoal: Omit<Goal, 'id'>) => {
-    const addedGoal = await addGoal(newGoal);
-    if (addedGoal) {
-      setGoals(prev => [...prev, addedGoal]);
     }
-  }, []);
+  }, [loading]);
+
+  useEffect(() => {
+    fetchGoals();
+
+    const client = createClient();
+    const channel = client
+      .channel('public:goals')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'goals' },
+        () => {
+          fetchGoals();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      client.removeChannel(channel);
+    };
+  }, [fetchGoals]);
 
   const handleUpdateGoal = useCallback(async (id: string, updates: Partial<Omit<Goal, 'id'>>) => {
-    // Optimistic update
-    setGoals(prevGoals =>
-      prevGoals.map(goal =>
-        goal.id === id ? { ...goal, ...updates } : goal
-      )
-    );
-    try {
-      await updateGoalInDb(id, updates);
-    } catch (error) {
-      console.error("Failed to update goal, rolling back", error);
-      // On error, refetch to get the source of truth
-      const fetchedGoals = await getGoals();
-      setGoals(fetchedGoals);
-    }
+    // The realtime listener will handle the UI update.
+    await updateGoalInDb(id, updates);
   }, []);
   
   const value = {
     goals,
-    addGoal: handleAddGoal,
     updateGoal: handleUpdateGoal,
     loading,
   };

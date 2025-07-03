@@ -1,8 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
-import { getJournalEntries, addJournalEntry, updateJournalEntry as updateEntryInDb } from '@/services/journal';
-import { v4 as uuidv4 } from 'uuid';
+import { getJournalEntries, updateJournalEntry as updateEntryInDb } from '@/services/journal';
+import { createClient } from '@/lib/supabase/client';
 
 export interface JournalEntry {
   id: string;
@@ -13,7 +13,6 @@ export interface JournalEntry {
 
 interface JournalContextType {
   entries: JournalEntry[];
-  addEntry: (newEntry: Omit<JournalEntry, 'id'>) => Promise<void>;
   updateEntry: (id: string, updates: Partial<Omit<JournalEntry, 'id'>>) => Promise<void>;
   loading: boolean;
 }
@@ -24,42 +23,41 @@ export const JournalContextProvider = ({ children }: { children: ReactNode }) =>
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchEntries = async () => {
-      setLoading(true);
-      const fetchedEntries = await getJournalEntries();
-      setEntries(fetchedEntries);
-      setLoading(false);
-    };
-    fetchEntries();
-  }, []);
-
-  const handleAddEntry = useCallback(async (newEntry: Omit<JournalEntry, 'id'>) => {
-    const addedEntry = await addJournalEntry(newEntry);
-    if(addedEntry) {
-      setEntries(prev => [addedEntry, ...prev]);
+  const fetchEntries = useCallback(async () => {
+    const fetchedEntries = await getJournalEntries();
+    setEntries(fetchedEntries);
+    if(loading) {
+        setLoading(false);
     }
-  }, []);
+  }, [loading]);
+
+  useEffect(() => {
+    fetchEntries();
+
+    const client = createClient();
+    const channel = client
+      .channel('public:journal_entries')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'journal_entries' },
+        () => {
+          fetchEntries();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      client.removeChannel(channel);
+    };
+  }, [fetchEntries]);
 
   const handleUpdateEntry = useCallback(async (id: string, updates: Partial<Omit<JournalEntry, 'id'>>) => {
-     // Optimistic update
-    setEntries(prevEntries =>
-      prevEntries.map(entry =>
-        entry.id === id ? { ...entry, ...updates } : entry
-      )
-    );
-    try {
-      await updateEntryInDb(id, updates);
-    } catch (error) {
-       console.error("Failed to update entry, rolling back", error);
-       const fetchedEntries = await getJournalEntries();
-       setEntries(fetchedEntries);
-    }
+     // The realtime listener will handle the UI update.
+    await updateEntryInDb(id, updates);
   }, []);
   
   const value = {
     entries,
-    addEntry: handleAddEntry,
     updateEntry: handleUpdateEntry,
     loading,
   };

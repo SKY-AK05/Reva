@@ -1,7 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
-import { getReminders, addReminder, updateReminder as updateReminderInDb } from '@/services/reminders';
+import { getReminders, updateReminder as updateReminderInDb } from '@/services/reminders';
+import { createClient } from '@/lib/supabase/client';
 
 export interface Reminder {
   id: string;
@@ -12,7 +13,6 @@ export interface Reminder {
 
 interface RemindersContextType {
   reminders: Reminder[];
-  addReminder: (newReminder: Omit<Reminder, 'id'>) => Promise<void>;
   updateReminder: (id: string, updates: Partial<Omit<Reminder, 'id'>>) => Promise<void>;
   loading: boolean;
 }
@@ -23,42 +23,42 @@ export const RemindersContextProvider = ({ children }: { children: ReactNode }) 
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchReminders = async () => {
-      setLoading(true);
-      const fetchedReminders = await getReminders();
-      setReminders(fetchedReminders);
+  const fetchReminders = useCallback(async () => {
+    const fetchedReminders = await getReminders();
+    setReminders(fetchedReminders);
+    if (loading) {
       setLoading(false);
-    };
-    fetchReminders();
-  }, []);
-
-
-  const handleAddReminder = useCallback(async (newReminder: Omit<Reminder, 'id'>) => {
-    const addedReminder = await addReminder(newReminder);
-    if (addedReminder) {
-      setReminders(prev => [...prev, addedReminder]);
     }
-  }, []);
+  }, [loading]);
+
+  useEffect(() => {
+    fetchReminders();
+
+    const client = createClient();
+    const channel = client
+      .channel('public:reminders')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'reminders' },
+        () => {
+          fetchReminders();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      client.removeChannel(channel);
+    };
+  }, [fetchReminders]);
+
 
   const handleUpdateReminder = useCallback(async (id: string, updates: Partial<Omit<Reminder, 'id'>>) => {
-    setReminders(prevReminders =>
-      prevReminders.map(rem =>
-        rem.id === id ? { ...rem, ...updates } : rem
-      )
-    );
-    try {
-      await updateReminderInDb(id, updates);
-    } catch(e) {
-      console.error("Failed to update reminder", e);
-      const fetchedReminders = await getReminders();
-      setReminders(fetchedReminders);
-    }
+    // The realtime listener will handle the UI update.
+    await updateReminderInDb(id, updates);
   }, []);
   
   const value = {
     reminders,
-    addReminder: handleAddReminder,
     updateReminder: handleUpdateReminder,
     loading,
   };

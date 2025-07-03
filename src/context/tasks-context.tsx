@@ -1,7 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
-import { getTasks, addTask, updateTask as updateTaskInDb, toggleTask as toggleTaskInDb } from '@/services/tasks';
+import { getTasks, updateTask as updateTaskInDb, toggleTask as toggleTaskInDb } from '@/services/tasks';
+import { createClient } from '@/lib/supabase/client';
 
 export interface Task {
   id: string;
@@ -13,7 +14,6 @@ export interface Task {
 
 interface TasksContextType {
   tasks: Task[];
-  addTask: (newTask: Omit<Task, 'id' | 'completed'>) => Promise<void>;
   updateTask: (id: string, updates: Partial<Omit<Task, 'id' | 'completed'>>) => Promise<void>;
   toggleTaskCompletion: (id: string, completed: boolean) => Promise<void>;
   loading: boolean;
@@ -25,46 +25,46 @@ export const TasksContextProvider = ({ children }: { children: ReactNode }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchTasks = async () => {
-      setLoading(true);
-      const fetchedTasks = await getTasks();
-      setTasks(fetchedTasks);
+  const fetchTasks = useCallback(async () => {
+    const fetchedTasks = await getTasks();
+    setTasks(fetchedTasks);
+    if (loading) {
       setLoading(false);
-    };
-    fetchTasks();
-  }, []);
-
-  const handleAddTask = useCallback(async (newTask: Omit<Task, 'id' | 'completed'>) => {
-    const addedTask = await addTask(newTask);
-    if(addedTask) {
-        setTasks(prev => [...prev, addedTask]);
     }
-  }, []);
+  }, [loading]);
+
+  useEffect(() => {
+    fetchTasks();
+
+    const client = createClient();
+    const channel = client
+      .channel('public:tasks')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'tasks' },
+        () => {
+          fetchTasks();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      client.removeChannel(channel);
+    };
+  }, [fetchTasks]);
 
   const handleUpdateTask = useCallback(async (id: string, updates: Partial<Omit<Task, 'id' | 'completed'>>) => {
-    const updatedTask = await updateTaskInDb(id, updates);
-    if (updatedTask) {
-        setTasks(prevTasks =>
-            prevTasks.map(task =>
-                task.id === id ? updatedTask : task
-            )
-        );
-    }
+    // The realtime listener will handle the UI update after this call succeeds.
+    await updateTaskInDb(id, updates);
   }, []);
 
   const handleToggleTaskCompletion = useCallback(async (id: string, completed: boolean) => {
-    setTasks(prevTasks =>
-      prevTasks.map(task =>
-        task.id === id ? { ...task, completed } : task
-      )
-    );
+    // The realtime listener will handle the UI update.
     await toggleTaskInDb(id, completed);
   }, []);
   
   const value = {
     tasks,
-    addTask: handleAddTask,
     updateTask: handleUpdateTask,
     toggleTaskCompletion: handleToggleTaskCompletion,
     loading,
