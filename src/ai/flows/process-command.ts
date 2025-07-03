@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview The central AI command processing flow for Reva.
@@ -191,14 +192,14 @@ const generalChat = ai.defineTool(
 
 // Main flow definition
 
-export const ProcessCommandInputSchema = z.object({
+const ProcessCommandInputSchema = z.object({
   chatInput: z.string(),
   contextItem: z.object({ id: z.string(), type: z.enum(['task', 'reminder', 'expense']) }).optional(),
 });
 export type ProcessCommandInput = z.infer<typeof ProcessCommandInputSchema>;
 
 
-export const ProcessCommandOutputSchema = z.object({
+const ProcessCommandOutputSchema = z.object({
   botResponse: z.string(),
   newItemContext: z
     .object({
