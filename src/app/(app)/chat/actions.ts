@@ -2,7 +2,7 @@
 "use server";
 
 import { createServerClient } from "@/lib/supabase/server";
-import { processCommand, type ProcessCommandOutput } from "@/ai/flows/process-command";
+import { processCommand, type ProcessCommandOutput, type ProcessCommandInput } from "@/ai/flows/process-command";
 // Chat messages are no longer persisted
 // import { addChatMessage } from "@/services/chat";
 import { revalidatePath } from "next/cache";
@@ -14,7 +14,8 @@ export async function processUserChat(
     chatInput: string,
     contextItem: { id: string, type: 'task' | 'reminder' | 'expense' | 'goal' | 'journalEntry' } | null,
     chatHistory: { sender: 'user' | 'bot'; text: string }[],
-    tone: z.infer<typeof ToneSchema>
+    tone: z.infer<typeof ToneSchema>,
+    pendingAction: ProcessCommandInput['pendingAction']
 ): Promise<ProcessCommandOutput> {
     const supabase = createServerClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -39,6 +40,7 @@ export async function processUserChat(
             contextItem: contextItem || undefined,
             chatHistory: formattedHistory,
             tone,
+            pendingAction: pendingAction || undefined,
         });
 
     } catch (e: any) {

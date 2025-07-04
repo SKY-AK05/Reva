@@ -21,6 +21,33 @@ export async function getGoals(): Promise<Goal[]> {
   return data as Goal[];
 }
 
+export async function findSimilarGoal(title: string): Promise<Goal | null> {
+    const supabase = createServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+
+    // Create a search query from the title, using ILIKE for case-insensitivity
+    const searchTerms = title.split(' ').filter(term => term.length > 2); // Ignore short words
+    if (searchTerms.length === 0) return null;
+    const searchQuery = '%' + searchTerms.join('%') + '%';
+
+    const { data, error } = await supabase
+        .from('goals')
+        .select('*')
+        .eq('user_id', user.id)
+        .neq('status', 'Completed') // Only check against active goals
+        .ilike('title', searchQuery)
+        .limit(1)
+        .single();
+    
+    if (error && error.code !== 'PGRST116') { // Ignore 'No rows found' error
+        console.error('Error finding similar goal:', error);
+        return null;
+    }
+
+    return data as Goal | null;
+}
+
 export async function addGoal(goal: Omit<Goal, 'id'> & { userId: string }): Promise<Goal | null> {
     const supabase = createServerClient();
     const { data, error } = await supabase

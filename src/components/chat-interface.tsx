@@ -8,6 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { SendHorizonal, Bot, CheckSquare, DollarSign, Bell, Target } from 'lucide-react';
 import { processUserChat } from '@/app/(app)/chat/actions';
+import type { ProcessCommandInput } from '@/ai/flows/process-command';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type { ChatMessage } from '@/services/chat';
@@ -25,6 +26,7 @@ export default function ChatInterface() {
   const { tone } = useToneContext();
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [pendingAction, setPendingAction] = useState<ProcessCommandInput['pendingAction']>(null);
   const scrollViewportRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -71,7 +73,7 @@ export default function ChatInterface() {
     setIsLoading(true);
 
     try {
-      const result = await processUserChat(messageText, lastItemContext, formattedHistory, tone);
+      const result = await processUserChat(messageText, lastItemContext, formattedHistory, tone, pendingAction);
       
       const botMessage: ChatMessage = {
         id: crypto.randomUUID(),
@@ -85,9 +87,13 @@ export default function ChatInterface() {
       // Update context for the next turn
       if (result.newItemContext) {
         setLastItemContext(result.newItemContext);
-      } else {
-        setLastItemContext(null); // Clear context if the turn didn't result in a new item
+      } else if (!result.pendingAction) { // Don't clear context if we're in a follow-up action
+        setLastItemContext(null); 
       }
+
+      // Handle pending actions for the next turn
+      setPendingAction(result.pendingAction || null);
+
 
     } catch (error) {
       console.error(error);
