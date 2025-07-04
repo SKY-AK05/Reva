@@ -39,14 +39,14 @@ export default function ChatInterface() {
   const goalsInProgress = goals.filter(g => g.progress < 100).length;
 
   useEffect(() => {
-    if (!isFetchingHistory) {
+    // Scroll to the bottom of the chat on new messages
+    scrollViewportRef.current?.scrollTo({ top: scrollViewportRef.current.scrollHeight, behavior: 'smooth' });
+
+    // Refocus the input field when it's ready for input
+    if (!isLoading && !isFetchingHistory) {
       inputRef.current?.focus();
     }
-  }, [isFetchingHistory]);
-
-  useEffect(() => {
-    scrollViewportRef.current?.scrollTo({ top: scrollViewportRef.current.scrollHeight, behavior: 'smooth' });
-  }, [messages, isLoading]);
+  }, [messages, isLoading, isFetchingHistory]);
 
   const handleSendMessage = async (messageText: string) => {
     if (!messageText.trim() || isLoading) return;
