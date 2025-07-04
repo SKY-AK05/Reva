@@ -19,7 +19,8 @@ export default function AppLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Pinned state
+  const [isSidebarHovered, setIsSidebarHovered] = useState(false); // Hover state
   const [showGridLines, setShowGridLines] = useState(true);
   const pathname = usePathname();
 
@@ -30,6 +31,8 @@ export default function AppLayout({
   const toggleGridLines = () => {
     setShowGridLines((prev) => !prev);
   }
+
+  const showExpandedView = isSidebarOpen || isSidebarHovered;
 
   return (
     <ToneContextProvider>
@@ -44,11 +47,14 @@ export default function AppLayout({
                       <div
                         className={cn(
                           'hidden md:flex flex-col border-r border-border/80 transition-all duration-300',
-                          isSidebarOpen ? 'w-72' : 'w-20'
+                          showExpandedView ? 'w-72' : 'w-20'
                         )}
+                        onMouseEnter={() => setIsSidebarHovered(true)}
+                        onMouseLeave={() => setIsSidebarHovered(false)}
                       >
                         <AppSidebar
-                          isCollapsed={!isSidebarOpen}
+                          isCollapsed={!showExpandedView}
+                          isPinned={isSidebarOpen}
                           onToggleSidebar={toggleSidebar}
                         />
                       </div>

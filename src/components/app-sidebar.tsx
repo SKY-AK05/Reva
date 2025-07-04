@@ -13,6 +13,7 @@ import {
   BookText,
   PanelLeft,
   StickyNote,
+  PanelRight,
 } from 'lucide-react';
 import RevaLogo from './reva-logo';
 import { Button } from './ui/button';
@@ -27,9 +28,11 @@ import {
 export default function AppSidebar({
   isCollapsed,
   onToggleSidebar,
+  isPinned,
 }: {
   isCollapsed?: boolean;
   onToggleSidebar?: () => void;
+  isPinned?: boolean;
 }) {
   const pathname = usePathname();
 
@@ -112,22 +115,7 @@ export default function AppSidebar({
         </div>
         <div className="border-t p-2">
           {onToggleSidebar &&
-            (isCollapsed ? (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full justify-center"
-                    onClick={onToggleSidebar}
-                  >
-                    <PanelLeft className="h-5 w-5" />
-                    <span className="sr-only">Expand Sidebar</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="right">Expand Sidebar</TooltipContent>
-              </Tooltip>
-            ) : (
+            (isPinned ? (
               <Button
                 variant="ghost"
                 size="sm"
@@ -136,6 +124,31 @@ export default function AppSidebar({
               >
                 <PanelLeft className="mr-2 h-5 w-5" />
                 Collapse
+              </Button>
+            ) : isCollapsed ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-center"
+                    onClick={onToggleSidebar}
+                  >
+                    <PanelRight className="h-5 w-5" />
+                    <span className="sr-only">Pin Sidebar</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right">Pin Sidebar</TooltipContent>
+              </Tooltip>
+            ) : (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start"
+                onClick={onToggleSidebar}
+              >
+                <PanelRight className="mr-2 h-5 w-5" />
+                Pin Sidebar
               </Button>
             ))}
         </div>
