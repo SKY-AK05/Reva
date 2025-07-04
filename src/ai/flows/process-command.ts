@@ -17,7 +17,7 @@ import {
   updateReminder as updateReminderInDb,
 } from '@/services/reminders';
 import { addExpense, addExpenses } from '@/services/expenses';
-import { addGoal } from '@/services/goals';
+import { addGoal, updateGoal as updateGoalInDb } from '@/services/goals';
 import { addJournalEntry } from '@/services/journal';
 import { generateChatResponse } from './generate-chat-response';
 import { createServerClient } from '@/lib/supabase/server';
@@ -66,6 +66,8 @@ const ExpenseInputSchema = z.object({
 const GoalInputSchema = z.object({
     title: z.string().describe("The title of the user's goal."),
     description: z.string().optional().describe("A brief description of the goal, if provided."),
+    progress: z.number().optional().describe("The completion percentage of the goal (0-100)."),
+    status: z.string().optional().describe("The current status of the goal (e.g., 'In Progress', 'Completed').")
 });
 
 const JournalEntryInputSchema = z.object({
@@ -215,6 +217,20 @@ const createGoal = ai.defineTool({
     return { id: createdGoal.id, title: createdGoal.title };
 });
 
+const updateGoal = ai.defineTool({
+    name: 'updateGoal',
+    description: "Use when a user wants to modify an existing goal, such as updating its progress or status.",
+    inputSchema: z.object({
+        id: z.string().describe("The ID of the goal to update."),
+        updates: GoalInputSchema.partial().describe("The fields to update."),
+    }),
+    outputSchema: z.object({ id: z.string() }),
+}, async ({ id, updates }) => {
+    const updatedGoal = await updateGoalInDb(id, updates);
+    if (!updatedGoal) throw new Error('Failed to update goal.');
+    return { id: updatedGoal.id };
+});
+
 const createJournalEntry = ai.defineTool({
     name: 'createJournalEntry',
     description: "Use when a user wants to write a journal entry, jot down thoughts, or record their feelings.",
@@ -276,12 +292,12 @@ export type ProcessCommandOutput = {
     id: string;
     type: 'task' | 'reminder' | 'expense' | 'goal' | 'journalEntry';
   };
-  updatedItemType?: 'task' | 'reminder' | 'expense';
+  updatedItemType?: 'task' | 'reminder' | 'expense' | 'goal';
 };
 
 const prompt = ai.definePrompt({
   name: 'commandProcessor',
-  tools: [createTask, updateTask, createReminder, updateReminder, trackExpenses, createGoal, createJournalEntry, generalChat],
+  tools: [createTask, updateTask, createReminder, updateReminder, trackExpenses, createGoal, updateGoal, createJournalEntry, generalChat],
   input: { schema: ProcessCommandInputSchema.extend({ currentDate: z.string() }) },
   prompt: `You are Reva, a friendly and intelligent personal assistant. Your goal is to understand the user's NEWEST request by using the context from the conversation history.
 
@@ -308,6 +324,7 @@ The user was just interacting with a {{contextItem.type}} (ID: {{contextItem.id}
 Analyze the NEW request based on the history and choose the best tool.
 - For creating new items (tasks, reminders, goals, journal entries, expenses), extract or infer all required information. If the user provides info over several messages, combine it from the history.
 - **Goals & Journaling:** Actively listen for phrases like "I want to achieve...", "My goal is...", or "I want to write down that..." to use the createGoal or createJournalEntry tools.
+- **Updates:** When updating an item, look for specific changes. For goals, this often involves updating the 'progress' percentage.
 - **Title/Description:** If a 'title' for a reminder/goal or 'description' for a task is not explicitly stated, create a short, sensible one from the user's request. For a journal entry without a title, create one from the content.
 - **Categories:** If the user logs an expense without a category, you MUST infer a logical one (e.g., 'Food & Drink', 'Transport', 'Shopping').
 - **Dates/Times:** Always use the current date ({{{currentDate}}}) as a reference to resolve relative times like "tomorrow" or "in 2 hours."
@@ -316,7 +333,7 @@ Analyze the NEW request based on the history and choose the best tool.
 - For simple greetings or conversation, use the 'generalChat' tool.`,
 });
 
-type Action = 'createTask' | 'updateTask' | 'createReminder' | 'updateReminder' | 'trackExpenses' | 'createGoal' | 'createJournalEntry';
+type Action = 'createTask' | 'updateTask' | 'createReminder' | 'updateReminder' | 'trackExpenses' | 'createGoal' | 'updateGoal' | 'createJournalEntry';
 
 function generateToneResponse(action: Action, data: any, tone: Tone): string {
     const time = action.includes('Reminder') ? new Date(data.time).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : '';
@@ -329,6 +346,7 @@ function generateToneResponse(action: Action, data: any, tone: Tone): string {
             updateReminder: "OK, I've updated that reminder.",
             trackExpenses: `I've logged ${data.count} expense(s) totaling $${data.total.toFixed(2)}.`,
             createGoal: `New goal set: "${data.title}". You can do it!`,
+            updateGoal: "Goal updated. Keep up the great work!",
             createJournalEntry: `Journal entry created: "${data.title}".`,
         },
         GenZ: {
@@ -338,6 +356,7 @@ function generateToneResponse(action: Action, data: any, tone: Tone): string {
             updateReminder: "Updated that reminder for ya. No cap.",
             trackExpenses: `Got it. ${data.count} expense(s) logged. That's $${data.total.toFixed(2)} less for boba. 💅`,
             createGoal: `New goal: "${data.title}". Slay! 💅`,
+            updateGoal: "Goal updated. You're crushing it! 🔥",
             createJournalEntry: `Vibe check... journal entry "${data.title}" saved. ✨`,
         },
         Sarcastic: {
@@ -347,6 +366,7 @@ function generateToneResponse(action: Action, data: any, tone: Tone): string {
             updateReminder: "Right, because the first time wasn't good enough. The reminder is updated.",
             trackExpenses: `Great, ${data.count} more expense(s) totaling $${data.total.toFixed(2)}. Your wallet must be so proud.`,
             createGoal: `A new goal, "${data.title}". How ambitious. I'll be here to watch you... not do it. Probably.`,
+            updateGoal: "Oh, you actually made progress? Color me surprised. The goal is updated.",
             createJournalEntry: `Journal entry "${data.title}" is saved. I'll be sure not to read your secret thoughts. *wink*`,
         },
         Poetic: {
@@ -356,6 +376,7 @@ function generateToneResponse(action: Action, data: any, tone: Tone): string {
             updateReminder: "The echo's time has changed, a new moment to remember. The reminder is updated.",
             trackExpenses: `The flow of coin, noted. ${data.count} item(s) totaling $${data.total.toFixed(2)}, a fleeting moment in your journey's ledger.`,
             createGoal: `An ambition, "${data.title}", takes flight, a star to navigate your journey by. 🌟`,
+            updateGoal: "A step is taken, the path unfolds. The goal breathes with new life.",
             createJournalEntry: `A whisper of thought, "${data.title}", captured now in quiet permanence. ✍️`,
         },
     };
@@ -404,6 +425,8 @@ export async function processCommand(input: ProcessCommandInput): Promise<Proces
   } else if (action === 'createGoal') {
     const goalData = toolOutput as z.infer<typeof createGoal.outputSchema>;
     output.newItemContext = { id: goalData.id, type: 'goal' };
+  } else if (action === 'updateGoal') {
+    output.updatedItemType = 'goal';
   } else if (action === 'createJournalEntry') {
     const journalData = toolOutput as z.infer<typeof createJournalEntry.outputSchema>;
     output.newItemContext = { id: journalData.id, type: 'journalEntry' };
