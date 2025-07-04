@@ -23,34 +23,43 @@ const ExpensesContext = createContext<ExpensesContextType | undefined>(undefined
 export const ExpensesContextProvider = ({ children }: { children: ReactNode }) => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const fetchExpenses = useCallback(async () => {
-    const fetchedExpenses = await getExpenses();
-    setExpenses(fetchedExpenses);
-    if (loading) {
-        setLoading(false);
-    }
-  }, [loading]);
+  const supabase = createClient();
 
   useEffect(() => {
-    fetchExpenses();
+    const fetchInitialExpenses = async () => {
+        setLoading(true);
+        const fetchedExpenses = await getExpenses();
+        setExpenses(fetchedExpenses);
+        setLoading(false);
+    }
+    fetchInitialExpenses();
+  }, []);
 
-    const client = createClient();
-    const channel = client
+  useEffect(() => {
+    const channel = supabase
       .channel('public:expenses')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'expenses' },
-        () => {
-          fetchExpenses();
+        (payload) => {
+          const { eventType, new: newRecord, old: oldRecord } = payload;
+          if (eventType === 'INSERT') {
+            setExpenses(prev => [...prev, newRecord as Expense].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+          }
+          if (eventType === 'UPDATE') {
+            setExpenses(prev => prev.map(e => e.id === (newRecord as Expense).id ? newRecord as Expense : e));
+          }
+          if (eventType === 'DELETE') {
+            setExpenses(prev => prev.filter(e => e.id !== oldRecord.id));
+          }
         }
       )
       .subscribe();
 
     return () => {
-      client.removeChannel(channel);
+      supabase.removeChannel(channel);
     };
-  }, [fetchExpenses]);
+  }, [supabase]);
 
   const handleUpdateExpense = useCallback(async (id: string, updates: Partial<Omit<Expense, 'id'>>) => {
     // The realtime listener will handle the UI update after this call succeeds.

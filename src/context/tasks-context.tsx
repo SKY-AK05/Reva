@@ -24,34 +24,52 @@ const TasksContext = createContext<TasksContextType | undefined>(undefined);
 export const TasksContextProvider = ({ children }: { children: ReactNode }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const fetchTasks = useCallback(async () => {
-    const fetchedTasks = await getTasks();
-    setTasks(fetchedTasks);
-    if (loading) {
-      setLoading(false);
-    }
-  }, [loading]);
+  const supabase = createClient();
 
   useEffect(() => {
-    fetchTasks();
+    const fetchInitialTasks = async () => {
+      setLoading(true);
+      const fetchedTasks = await getTasks();
+      setTasks(fetchedTasks);
+      setLoading(false);
+    };
+    fetchInitialTasks();
+  }, []);
 
-    const client = createClient();
-    const channel = client
+  useEffect(() => {
+    const channel = supabase
       .channel('public:tasks')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'tasks' },
-        () => {
-          fetchTasks();
+        (payload) => {
+          const { eventType, new: newRecord, old: oldRecord } = payload;
+          if (eventType === 'INSERT') {
+            // The service layer ensures the correct shape, so we can cast.
+            const formattedTask = {
+              ...newRecord,
+              dueDate: newRecord.due_date
+            } as Task;
+            setTasks(prev => [formattedTask, ...prev]);
+          }
+          if (eventType === 'UPDATE') {
+             const formattedTask = {
+              ...newRecord,
+              dueDate: newRecord.due_date
+            } as Task;
+            setTasks(prev => prev.map(t => t.id === formattedTask.id ? formattedTask : t));
+          }
+          if (eventType === 'DELETE') {
+            setTasks(prev => prev.filter(t => t.id !== oldRecord.id));
+          }
         }
       )
       .subscribe();
 
     return () => {
-      client.removeChannel(channel);
+      supabase.removeChannel(channel);
     };
-  }, [fetchTasks]);
+  }, [supabase]);
 
   const handleUpdateTask = useCallback(async (id: string, updates: Partial<Omit<Task, 'id' | 'completed'>>) => {
     // The realtime listener will handle the UI update after this call succeeds.

@@ -22,34 +22,43 @@ const RemindersContext = createContext<RemindersContextType | undefined>(undefin
 export const RemindersContextProvider = ({ children }: { children: ReactNode }) => {
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const fetchReminders = useCallback(async () => {
-    const fetchedReminders = await getReminders();
-    setReminders(fetchedReminders);
-    if (loading) {
-      setLoading(false);
-    }
-  }, [loading]);
+  const supabase = createClient();
 
   useEffect(() => {
-    fetchReminders();
+    const fetchInitialReminders = async () => {
+      setLoading(true);
+      const fetchedReminders = await getReminders();
+      setReminders(fetchedReminders);
+      setLoading(false);
+    }
+    fetchInitialReminders();
+  }, []);
 
-    const client = createClient();
-    const channel = client
+  useEffect(() => {
+    const channel = supabase
       .channel('public:reminders')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'reminders' },
-        () => {
-          fetchReminders();
+        (payload) => {
+          const { eventType, new: newRecord, old: oldRecord } = payload;
+           if (eventType === 'INSERT') {
+            setReminders(prev => [...prev, newRecord as Reminder].sort((a,b) => new Date(a.time).getTime() - new Date(b.time).getTime()));
+          }
+          if (eventType === 'UPDATE') {
+            setReminders(prev => prev.map(r => r.id === (newRecord as Reminder).id ? newRecord as Reminder : r));
+          }
+          if (eventType === 'DELETE') {
+            setReminders(prev => prev.filter(r => r.id !== oldRecord.id));
+          }
         }
       )
       .subscribe();
 
     return () => {
-      client.removeChannel(channel);
+      supabase.removeChannel(channel);
     };
-  }, [fetchReminders]);
+  }, [supabase]);
 
 
   const handleUpdateReminder = useCallback(async (id: string, updates: Partial<Omit<Reminder, 'id'>>) => {

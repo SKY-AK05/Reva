@@ -22,34 +22,43 @@ const JournalContext = createContext<JournalContextType | undefined>(undefined);
 export const JournalContextProvider = ({ children }: { children: ReactNode }) => {
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const fetchEntries = useCallback(async () => {
-    const fetchedEntries = await getJournalEntries();
-    setEntries(fetchedEntries);
-    if(loading) {
-        setLoading(false);
-    }
-  }, [loading]);
+  const supabase = createClient();
 
   useEffect(() => {
-    fetchEntries();
+    const fetchInitialEntries = async () => {
+      setLoading(true);
+      const fetchedEntries = await getJournalEntries();
+      setEntries(fetchedEntries);
+      setLoading(false);
+    }
+    fetchInitialEntries();
+  }, []);
 
-    const client = createClient();
-    const channel = client
+  useEffect(() => {
+    const channel = supabase
       .channel('public:journal_entries')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'journal_entries' },
-        () => {
-          fetchEntries();
+        (payload) => {
+          const { eventType, new: newRecord, old: oldRecord } = payload;
+          if (eventType === 'INSERT') {
+            setEntries(prev => [...prev, newRecord as JournalEntry].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+          }
+          if (eventType === 'UPDATE') {
+            setEntries(prev => prev.map(e => e.id === (newRecord as JournalEntry).id ? newRecord as JournalEntry : e));
+          }
+          if (eventType === 'DELETE') {
+            setEntries(prev => prev.filter(e => e.id !== oldRecord.id));
+          }
         }
       )
       .subscribe();
 
     return () => {
-      client.removeChannel(channel);
+      supabase.removeChannel(channel);
     };
-  }, [fetchEntries]);
+  }, [supabase]);
 
   const handleUpdateEntry = useCallback(async (id: string, updates: Partial<Omit<JournalEntry, 'id'>>) => {
      // The realtime listener will handle the UI update.
