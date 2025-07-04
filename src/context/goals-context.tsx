@@ -25,15 +25,16 @@ export const GoalsContextProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
 
-  useEffect(() => {
-    const fetchInitialGoals = async () => {
-      setLoading(true);
-      const fetchedGoals = await getGoals();
-      setGoals(fetchedGoals);
-      setLoading(false);
-    };
-    fetchInitialGoals();
+  const fetchGoals = useCallback(async () => {
+    const fetchedGoals = await getGoals();
+    setGoals(fetchedGoals);
+    setLoading(false);
   }, []);
+
+  useEffect(() => {
+    setLoading(true);
+    fetchGoals();
+  }, [fetchGoals]);
 
   useEffect(() => {
     const channel = supabase
@@ -41,17 +42,8 @@ export const GoalsContextProvider = ({ children }: { children: ReactNode }) => {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'goals' },
-        (payload) => {
-          const { eventType, new: newRecord, old: oldRecord } = payload;
-           if (eventType === 'INSERT') {
-            setGoals(prev => [...prev, newRecord as Goal].sort((a,b) => (a.title > b.title) ? 1 : -1));
-          }
-          if (eventType === 'UPDATE') {
-            setGoals(prev => prev.map(g => g.id === (newRecord as Goal).id ? newRecord as Goal : g));
-          }
-          if (eventType === 'DELETE') {
-            setGoals(prev => prev.filter(g => g.id !== oldRecord.id));
-          }
+        () => {
+          fetchGoals();
         }
       )
       .subscribe();
@@ -59,7 +51,7 @@ export const GoalsContextProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase]);
+  }, [supabase, fetchGoals]);
 
   const handleUpdateGoal = useCallback(async (id: string, updates: Partial<Omit<Goal, 'id'>>) => {
     // The realtime listener will handle the UI update.

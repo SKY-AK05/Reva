@@ -29,19 +29,24 @@ export const NotesContextProvider = ({ children }: { children: ReactNode }) => {
   const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
   const supabase = createClient();
 
+  const fetchNotes = useCallback(async () => {
+    // setLoading is only true on initial load
+    const fetchedNotes = await getNotes();
+    setNotes(fetchedNotes);
+
+    // If there is no active note, or the active note was deleted, set a new one.
+    if (!activeNoteId || !fetchedNotes.some(n => n.id === activeNoteId)) {
+        setActiveNoteId(fetchedNotes.length > 0 ? fetchedNotes[0].id : null);
+    }
+    
+    setLoading(false);
+  }, [activeNoteId]); // Dependency on activeNoteId is key for re-evaluation
+
   // Initial fetch
   useEffect(() => {
-    const getInitialNotes = async () => {
-        setLoading(true);
-        const fetchedNotes = await getNotes();
-        setNotes(fetchedNotes);
-        if (fetchedNotes.length > 0 && !activeNoteId) {
-          setActiveNoteId(fetchedNotes[0].id);
-        }
-        setLoading(false);
-    }
-    getInitialNotes();
-  }, [activeNoteId]);
+    setLoading(true);
+    fetchNotes();
+  }, [fetchNotes]);
 
   // Realtime listener
   useEffect(() => {
@@ -50,34 +55,9 @@ export const NotesContextProvider = ({ children }: { children: ReactNode }) => {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'notes' },
-        (payload) => {
-            const { eventType, new: newRecord, old: oldRecord } = payload;
-            
-            const formatNote = (record: any): Note => ({
-              id: record.id,
-              title: record.title,
-              content: record.content || '',
-              createdAt: record.created_at,
-            });
-
-            if (eventType === 'INSERT') {
-                const newNote = formatNote(newRecord);
-                setNotes(prevNotes => [newNote, ...prevNotes]);
-            }
-            if (eventType === 'UPDATE') {
-                const updatedNote = formatNote(newRecord);
-                setNotes(prevNotes => prevNotes.map(n => n.id === updatedNote.id ? updatedNote : n));
-            }
-            if (eventType === 'DELETE') {
-                const deletedId = oldRecord.id;
-                setNotes(prevNotes => {
-                    const remainingNotes = prevNotes.filter(n => n.id !== deletedId);
-                    if (activeNoteId === deletedId) {
-                        setActiveNoteId(remainingNotes.length > 0 ? remainingNotes[0].id : null);
-                    }
-                    return remainingNotes;
-                });
-            }
+        () => {
+          // A change occurred, re-fetch all notes to ensure consistency.
+          fetchNotes();
         }
       )
       .subscribe();
@@ -85,7 +65,7 @@ export const NotesContextProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, activeNoteId]);
+  }, [supabase, fetchNotes]);
 
   const activeNote = notes.find(note => note.id === activeNoteId) || null;
 
@@ -102,7 +82,7 @@ export const NotesContextProvider = ({ children }: { children: ReactNode }) => {
       content: '',
       userId: user.id
     };
-    // The DB call will trigger the realtime listener which updates state.
+    // Let the realtime listener handle the state update after this call.
     const newNote = await addNoteToDb(newNoteStub);
     if (newNote) {
       // Set the new note as active immediately.
@@ -113,7 +93,7 @@ export const NotesContextProvider = ({ children }: { children: ReactNode }) => {
   }, [supabase]);
 
   const updateNote = useCallback(async (id: string, updates: Partial<Omit<Note, 'id' | 'createdAt'>>) => {
-    // Optimistic update for responsiveness
+    // Optimistic update for responsiveness on the current note
     setNotes(prevNotes =>
       prevNotes.map(note =>
         note.id === id ? { ...note, ...updates } as Note : note
@@ -124,7 +104,8 @@ export const NotesContextProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const deleteNote = useCallback(async (id: string) => {
-    // The DB call will trigger the realtime listener which will handle state update.
+    // The DB call will trigger the realtime listener which will handle state update
+    // and setting a new active note.
     await deleteNoteFromDb(id);
   }, []);
   

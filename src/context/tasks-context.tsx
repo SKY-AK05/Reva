@@ -26,42 +26,29 @@ export const TasksContextProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
 
-  useEffect(() => {
-    const fetchInitialTasks = async () => {
-      setLoading(true);
-      const fetchedTasks = await getTasks();
-      setTasks(fetchedTasks);
-      setLoading(false);
-    };
-    fetchInitialTasks();
+  const fetchTasks = useCallback(async () => {
+    // setLoading is only true on the initial load to prevent UI flicker on re-fetch.
+    const fetchedTasks = await getTasks();
+    setTasks(fetchedTasks);
+    setLoading(false);
   }, []);
 
+  // Effect for the initial data fetch.
+  useEffect(() => {
+    setLoading(true);
+    fetchTasks();
+  }, [fetchTasks]);
+
+  // Effect for the real-time subscription.
   useEffect(() => {
     const channel = supabase
       .channel('public:tasks')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'tasks' },
-        (payload) => {
-          const { eventType, new: newRecord, old: oldRecord } = payload;
-          if (eventType === 'INSERT') {
-            // The service layer ensures the correct shape, so we can cast.
-            const formattedTask = {
-              ...newRecord,
-              dueDate: newRecord.due_date
-            } as Task;
-            setTasks(prev => [formattedTask, ...prev]);
-          }
-          if (eventType === 'UPDATE') {
-             const formattedTask = {
-              ...newRecord,
-              dueDate: newRecord.due_date
-            } as Task;
-            setTasks(prev => prev.map(t => t.id === formattedTask.id ? formattedTask : t));
-          }
-          if (eventType === 'DELETE') {
-            setTasks(prev => prev.filter(t => t.id !== oldRecord.id));
-          }
+        () => {
+          // When a change is detected, simply re-fetch all tasks.
+          fetchTasks();
         }
       )
       .subscribe();
@@ -69,7 +56,7 @@ export const TasksContextProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase]);
+  }, [supabase, fetchTasks]);
 
   const handleUpdateTask = useCallback(async (id: string, updates: Partial<Omit<Task, 'id' | 'completed'>>) => {
     // The realtime listener will handle the UI update after this call succeeds.

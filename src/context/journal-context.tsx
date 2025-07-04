@@ -24,15 +24,16 @@ export const JournalContextProvider = ({ children }: { children: ReactNode }) =>
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
 
-  useEffect(() => {
-    const fetchInitialEntries = async () => {
-      setLoading(true);
-      const fetchedEntries = await getJournalEntries();
-      setEntries(fetchedEntries);
-      setLoading(false);
-    }
-    fetchInitialEntries();
+  const fetchEntries = useCallback(async () => {
+    const fetchedEntries = await getJournalEntries();
+    setEntries(fetchedEntries);
+    setLoading(false);
   }, []);
+
+  useEffect(() => {
+    setLoading(true);
+    fetchEntries();
+  }, [fetchEntries]);
 
   useEffect(() => {
     const channel = supabase
@@ -40,17 +41,8 @@ export const JournalContextProvider = ({ children }: { children: ReactNode }) =>
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'journal_entries' },
-        (payload) => {
-          const { eventType, new: newRecord, old: oldRecord } = payload;
-          if (eventType === 'INSERT') {
-            setEntries(prev => [...prev, newRecord as JournalEntry].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
-          }
-          if (eventType === 'UPDATE') {
-            setEntries(prev => prev.map(e => e.id === (newRecord as JournalEntry).id ? newRecord as JournalEntry : e));
-          }
-          if (eventType === 'DELETE') {
-            setEntries(prev => prev.filter(e => e.id !== oldRecord.id));
-          }
+        () => {
+          fetchEntries();
         }
       )
       .subscribe();
@@ -58,7 +50,7 @@ export const JournalContextProvider = ({ children }: { children: ReactNode }) =>
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase]);
+  }, [supabase, fetchEntries]);
 
   const handleUpdateEntry = useCallback(async (id: string, updates: Partial<Omit<JournalEntry, 'id'>>) => {
      // The realtime listener will handle the UI update.
