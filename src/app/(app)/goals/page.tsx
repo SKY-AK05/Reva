@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -62,6 +63,7 @@ export default function GoalsPage() {
                         onBlur={(e) => { handleInputChange(e, goal.id, 'title'); handleInputBlur(); }}
                         onKeyDown={(e) => { if(e.key === 'Enter') { handleInputChange(e as any, goal.id, 'title'); handleInputBlur(); } }}
                         autoFocus
+                        className="h-auto p-0 bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-lg font-semibold"
                       />
                   ) : goal.title}
                 </h3>
@@ -71,6 +73,8 @@ export default function GoalsPage() {
                         defaultValue={goal.description || ''}
                         onBlur={(e) => { handleInputChange(e, goal.id, 'description'); handleInputBlur(); }}
                         autoFocus
+                        className="h-auto p-0 bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-sm"
+                        rows={1}
                       />
                   ) : goal.description}
                 </p>
@@ -97,7 +101,7 @@ export default function GoalsPage() {
                             onBlur={(e) => { handleInputChange(e, goal.id, 'status'); handleInputBlur(); }}
                             onKeyDown={(e) => { if(e.key === 'Enter') { handleInputChange(e as any, goal.id, 'status'); handleInputBlur(); } }}
                             autoFocus
-                            className="h-7 text-sm"
+                            className="h-auto p-0 bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-sm"
                         />
                     ) : (
                        <span className="text-sm text-muted-foreground">{goal.status}</span>

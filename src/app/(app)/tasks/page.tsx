@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -95,7 +96,7 @@ export default function TasksPage() {
                         onBlur={(e) => { handleInputChange(e, task.id, 'description'); handleInputBlur(); }}
                         onKeyDown={handleInputKeyDown}
                         autoFocus
-                        className="h-8"
+                        className="h-auto p-0 bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                       />
                     ) : (
                       task.description
@@ -109,7 +110,7 @@ export default function TasksPage() {
                         onBlur={(e) => { handleInputChange(e, task.id, 'dueDate'); handleInputBlur(); }}
                         onKeyDown={handleInputKeyDown}
                         autoFocus
-                        className="h-8"
+                        className="h-auto p-0 bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                       />
                     ) : (
                       task.dueDate

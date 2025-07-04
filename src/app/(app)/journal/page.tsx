@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -55,7 +56,7 @@ export default function JournalPage() {
                     onBlur={(e) => { handleInputChange(e, entry.id, 'title'); handleInputBlur(); }}
                     onKeyDown={(e) => { if(e.key === 'Enter') { handleInputChange(e as any, entry.id, 'title'); handleInputBlur(); } }}
                     autoFocus
-                    className="text-2xl font-semibold tracking-tight h-auto mb-1"
+                    className="text-2xl font-semibold tracking-tight h-auto mb-1 bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0"
                   />
                 ) : (
                   <h2 
@@ -73,7 +74,7 @@ export default function JournalPage() {
                     onBlur={(e) => { handleInputChange(e, entry.id, 'date'); handleInputBlur(); }}
                     onKeyDown={(e) => { if(e.key === 'Enter') { handleInputChange(e as any, entry.id, 'date'); handleInputBlur(); } }}
                     autoFocus
-                    className="text-sm text-muted-foreground h-auto mb-4"
+                    className="text-sm text-muted-foreground h-auto mb-4 bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0"
                   />
               ) : (
                 <p 
@@ -90,7 +91,7 @@ export default function JournalPage() {
                     onBlur={(e) => { handleInputChange(e, entry.id, 'content'); handleInputBlur(); }}
                     onKeyDown={handleInputKeyDown}
                     autoFocus
-                    className="text-muted-foreground leading-relaxed w-full min-h-[10rem]"
+                    className="text-muted-foreground leading-relaxed w-full min-h-[10rem] bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0"
                   />
                 ) : (
                   <p 

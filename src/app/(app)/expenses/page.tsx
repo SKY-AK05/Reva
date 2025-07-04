@@ -44,7 +44,7 @@ export default function ExpensesPage() {
           onBlur={handleInputBlur}
           onKeyDown={handleInputKeyDown}
           autoFocus
-          className="h-8"
+          className="h-auto p-0 bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
         />
       );
     }

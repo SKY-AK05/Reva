@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -78,7 +79,7 @@ export default function RemindersPage() {
                             onBlur={(e) => { handleInputChange(e, reminder.id, 'title'); handleInputBlur(); }}
                             onKeyDown={(e) => { if(e.key === 'Enter') { handleInputChange(e as any, reminder.id, 'title'); handleInputBlur(); } }}
                             autoFocus
-                            className="font-semibold h-8"
+                            className="font-semibold h-auto p-0 bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                           />
                       ) : (
                         <p className="leading-tight">{reminder.title}</p>
@@ -91,7 +92,8 @@ export default function RemindersPage() {
                             defaultValue={reminder.notes || ''}
                             onBlur={(e) => { handleInputChange(e, reminder.id, 'notes'); handleInputBlur(); }}
                             autoFocus
-                            className="text-sm text-muted-foreground min-h-0"
+                            className="text-sm text-muted-foreground min-h-0 h-auto p-0 bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                            rows={1}
                           />
                       ) : (
                         <p className="leading-tight">{reminder.notes}</p>
@@ -107,7 +109,7 @@ export default function RemindersPage() {
                         onBlur={(e) => { handleInputChange(e, reminder.id, 'time'); handleInputBlur(); }}
                         onKeyDown={(e) => { if(e.key === 'Enter') { handleInputChange(e as any, reminder.id, 'time'); handleInputBlur(); } }}
                         autoFocus
-                        className="text-sm text-muted-foreground h-8"
+                        className="text-sm text-muted-foreground h-auto p-0 bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                       />
                     ) : (
                       <p className="leading-tight">{formatReminderTime(reminder.time)}</p>
