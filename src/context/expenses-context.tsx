@@ -25,33 +25,31 @@ export const ExpensesContextProvider = ({ children }: { children: ReactNode }) =
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
 
-  useEffect(() => {
-    const fetchInitialExpenses = async () => {
-        setLoading(true);
-        const fetchedExpenses = await getExpenses();
-        setExpenses(fetchedExpenses);
-        setLoading(false);
-    }
-    fetchInitialExpenses();
+  const fetchExpenses = useCallback(async () => {
+    // setLoading is only true on the initial load to prevent UI flicker on re-fetch.
+    const fetchedExpenses = await getExpenses();
+    setExpenses(fetchedExpenses);
+    setLoading(false);
   }, []);
 
+  // Effect for the initial data fetch.
+  useEffect(() => {
+    setLoading(true);
+    fetchExpenses();
+  }, [fetchExpenses]);
+
+
+  // Effect for the real-time subscription.
   useEffect(() => {
     const channel = supabase
       .channel('public:expenses')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'expenses' },
-        (payload) => {
-          const { eventType, new: newRecord, old: oldRecord } = payload;
-          if (eventType === 'INSERT') {
-            setExpenses(prev => [...prev, newRecord as Expense].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
-          }
-          if (eventType === 'UPDATE') {
-            setExpenses(prev => prev.map(e => e.id === (newRecord as Expense).id ? newRecord as Expense : e));
-          }
-          if (eventType === 'DELETE') {
-            setExpenses(prev => prev.filter(e => e.id !== oldRecord.id));
-          }
+        () => {
+          // When a change is detected, simply re-fetch all expenses.
+          // This is simpler and more robust than client-side reconciliation.
+          fetchExpenses();
         }
       )
       .subscribe();
@@ -59,7 +57,7 @@ export const ExpensesContextProvider = ({ children }: { children: ReactNode }) =
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase]);
+  }, [supabase, fetchExpenses]);
 
   const handleUpdateExpense = useCallback(async (id: string, updates: Partial<Omit<Expense, 'id'>>) => {
     // The realtime listener will handle the UI update after this call succeeds.
