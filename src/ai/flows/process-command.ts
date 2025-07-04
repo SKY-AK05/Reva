@@ -356,7 +356,7 @@ The user was just interacting with a {{contextItem.type}} (ID: {{contextItem.id}
 **User's NEW Request:** {{{chatInput}}}
 
 Analyze the NEW request based on the history and choose the best tool.
-- **Goal Creation Rule**: When a user wants to create a goal, you MUST use the `createGoal` tool. This tool will automatically check for duplicates. Do NOT try to find existing goals yourself.
+- **Goal Creation Rule**: When a user wants to create a goal, you MUST use the 'createGoal' tool. This tool will automatically check for duplicates. Do NOT try to find existing goals yourself.
 - For creating new items (tasks, reminders, goals, journal entries, expenses), extract or infer all required information. If the user provides info over several messages, combine it from the history.
 - **Goals & Journaling:** Actively listen for phrases like "I want to achieve...", "My goal is...", or "I want to write down that..." to use the createGoal or createJournalEntry tools.
 - **Updates:** When updating an item, look for specific changes. For goals, this often involves updating the 'progress' percentage.
