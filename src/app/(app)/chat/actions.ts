@@ -8,11 +8,11 @@ import { processCommand, type ProcessCommandOutput } from "@/ai/flows/process-co
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-const ToneSchema = z.enum(['Neutral', 'GenZ', 'Professional', 'Mindful']);
+const ToneSchema = z.enum(['Neutral', 'GenZ', 'Sarcastic', 'Poetic']);
 
 export async function processUserChat(
     chatInput: string,
-    contextItem: { id: string, type: 'task' | 'reminder' | 'expense' } | null,
+    contextItem: { id: string, type: 'task' | 'reminder' | 'expense' | 'goal' | 'journalEntry' } | null,
     chatHistory: { sender: 'user' | 'bot'; text: string }[],
     tone: z.infer<typeof ToneSchema>
 ): Promise<ProcessCommandOutput> {
@@ -58,6 +58,8 @@ export async function processUserChat(
         revalidatePath('/tasks');
         revalidatePath('/reminders');
         revalidatePath('/expenses');
+        revalidatePath('/goals');
+        revalidatePath('/journal');
         revalidatePath('/overview');
     };
 

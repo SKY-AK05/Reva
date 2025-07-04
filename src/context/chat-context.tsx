@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
 import type { ChatMessage } from '@/services/chat';
 
-type ItemContext = { id: string; type: 'task' | 'reminder' | 'expense' };
+type ItemContext = { id: string; type: 'task' | 'reminder' | 'expense' | 'goal' | 'journalEntry' };
 
 interface ChatContextType {
   messages: ChatMessage[];

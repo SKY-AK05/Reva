@@ -17,6 +17,8 @@ import {
   updateReminder as updateReminderInDb,
 } from '@/services/reminders';
 import { addExpense, addExpenses } from '@/services/expenses';
+import { addGoal } from '@/services/goals';
+import { addJournalEntry } from '@/services/journal';
 import { generateChatResponse } from './generate-chat-response';
 import { createServerClient } from '@/lib/supabase/server';
 
@@ -60,6 +62,17 @@ const ExpenseInputSchema = z.object({
   date: z.string().optional().describe('The date for all expenses, if specified (YYYY-MM-DD). If not specified, use today.'),
   currency: z.string().optional().describe("The currency of the expenses (e.g., USD, EUR, rupees)."),
 });
+
+const GoalInputSchema = z.object({
+    title: z.string().describe("The title of the user's goal."),
+    description: z.string().optional().describe("A brief description of the goal, if provided."),
+});
+
+const JournalEntryInputSchema = z.object({
+    content: z.string().describe("The user's thoughts or entry content for the journal."),
+    title: z.string().optional().describe("The title of the journal entry. If not provided by the user, generate a concise one based on the content."),
+});
+
 
 // Tool definitions
 
@@ -178,6 +191,54 @@ const trackExpenses = ai.defineTool({
     };
 });
 
+const createGoal = ai.defineTool({
+    name: 'createGoal',
+    description: "Use when a user wants to set a new goal, objective, or ambition.",
+    inputSchema: GoalInputSchema,
+    outputSchema: z.object({
+        id: z.string(),
+        title: z.string(),
+    })
+}, async (input) => {
+    const supabase = createServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
+    const createdGoal = await addGoal({
+        title: input.title,
+        description: input.description,
+        userId: user.id,
+        progress: 0,
+        status: 'Not Started'
+    });
+    if (!createdGoal) throw new Error('Failed to create goal in database.');
+    return { id: createdGoal.id, title: createdGoal.title };
+});
+
+const createJournalEntry = ai.defineTool({
+    name: 'createJournalEntry',
+    description: "Use when a user wants to write a journal entry, jot down thoughts, or record their feelings.",
+    inputSchema: JournalEntryInputSchema,
+    outputSchema: z.object({
+        id: z.string(),
+        title: z.string(),
+    })
+}, async (input) => {
+    const supabase = createServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
+    const createdEntry = await addJournalEntry({
+        title: input.title || 'Journal Entry',
+        content: input.content,
+        date: new Date().toISOString().split('T')[0],
+        userId: user.id,
+    });
+    if (!createdEntry) throw new Error('Failed to create journal entry in database.');
+    return { id: createdEntry.id, title: createdEntry.title };
+});
+
+
 const generalChat = ai.defineTool(
   {
     name: 'generalChat',
@@ -203,7 +264,7 @@ const ChatHistoryItemSchema = z.object({
 
 const ProcessCommandInputSchema = z.object({
   chatInput: z.string(),
-  contextItem: z.object({ id: z.string(), type: z.enum(['task', 'reminder', 'expense']) }).optional(),
+  contextItem: z.object({ id: z.string(), type: z.enum(['task', 'reminder', 'expense', 'goal', 'journalEntry']) }).optional(),
   chatHistory: z.array(ChatHistoryItemSchema).optional().describe('The last few turns of the conversation.'),
   tone: ToneSchema.default('Neutral').describe('The desired personality for the response.'),
 });
@@ -213,14 +274,14 @@ export type ProcessCommandOutput = {
   botResponse: string;
   newItemContext?: {
     id: string;
-    type: 'task' | 'reminder' | 'expense';
+    type: 'task' | 'reminder' | 'expense' | 'goal' | 'journalEntry';
   };
   updatedItemType?: 'task' | 'reminder' | 'expense';
 };
 
 const prompt = ai.definePrompt({
   name: 'commandProcessor',
-  tools: [createTask, updateTask, createReminder, updateReminder, trackExpenses, generalChat],
+  tools: [createTask, updateTask, createReminder, updateReminder, trackExpenses, createGoal, createJournalEntry, generalChat],
   input: { schema: ProcessCommandInputSchema.extend({ currentDate: z.string() }) },
   prompt: `You are Reva, a friendly and intelligent personal assistant. Your goal is to understand the user's NEWEST request by using the context from the conversation history.
 
@@ -245,8 +306,9 @@ The user was just interacting with a {{contextItem.type}} (ID: {{contextItem.id}
 **User's NEW Request:** {{{chatInput}}}
 
 Analyze the NEW request based on the history and choose the best tool.
-- For creating new items, extract or infer all required information. If the user provides info over several messages, combine it from the history.
-- **Title/Description:** If a 'title' for a reminder or 'description' for a task is not explicitly stated, create a short, sensible one from the user's request. For example, for "remind me to call my girlfriend about the tickets," a good title would be "Call girlfriend about tickets."
+- For creating new items (tasks, reminders, goals, journal entries, expenses), extract or infer all required information. If the user provides info over several messages, combine it from the history.
+- **Goals & Journaling:** Actively listen for phrases like "I want to achieve...", "My goal is...", or "I want to write down that..." to use the createGoal or createJournalEntry tools.
+- **Title/Description:** If a 'title' for a reminder/goal or 'description' for a task is not explicitly stated, create a short, sensible one from the user's request. For a journal entry without a title, create one from the content.
 - **Categories:** If the user logs an expense without a category, you MUST infer a logical one (e.g., 'Food & Drink', 'Transport', 'Shopping').
 - **Dates/Times:** Always use the current date ({{{currentDate}}}) as a reference to resolve relative times like "tomorrow" or "in 2 hours."
 - **Clarification:** Only use the 'generalChat' tool to ask for clarification if the user's intent is completely unclear or if critical information (like a time for a reminder or an amount for an expense) is impossible to determine. Do not ask for information you can reasonably infer from the conversation.
@@ -254,7 +316,7 @@ Analyze the NEW request based on the history and choose the best tool.
 - For simple greetings or conversation, use the 'generalChat' tool.`,
 });
 
-type Action = 'createTask' | 'updateTask' | 'createReminder' | 'updateReminder' | 'trackExpenses';
+type Action = 'createTask' | 'updateTask' | 'createReminder' | 'updateReminder' | 'trackExpenses' | 'createGoal' | 'createJournalEntry';
 
 function generateToneResponse(action: Action, data: any, tone: Tone): string {
     const time = action.includes('Reminder') ? new Date(data.time).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : '';
@@ -266,6 +328,8 @@ function generateToneResponse(action: Action, data: any, tone: Tone): string {
             createReminder: `Reminder set for "${data.title}" at ${time}.`,
             updateReminder: "OK, I've updated that reminder.",
             trackExpenses: `I've logged ${data.count} expense(s) totaling $${data.total.toFixed(2)}.`,
+            createGoal: `New goal set: "${data.title}". You can do it!`,
+            createJournalEntry: `Journal entry created: "${data.title}".`,
         },
         GenZ: {
             createTask: `Bet. Task locked in: "${data.description}" 📝`,
@@ -273,6 +337,8 @@ function generateToneResponse(action: Action, data: any, tone: Tone): string {
             createReminder: `Yoo, reminder set for "${data.title}" at ${new Date(data.time).toLocaleString(undefined, { timeStyle: 'short' })}. Don't forget! 💀`,
             updateReminder: "Updated that reminder for ya. No cap.",
             trackExpenses: `Got it. ${data.count} expense(s) logged. That's $${data.total.toFixed(2)} less for boba. 💅`,
+            createGoal: `New goal: "${data.title}". Slay! 💅`,
+            createJournalEntry: `Vibe check... journal entry "${data.title}" saved. ✨`,
         },
         Sarcastic: {
             createTask: `Oh, fantastic, another task: "${data.description}". I'll just add that to the infinitely growing list. 🙃`,
@@ -280,6 +346,8 @@ function generateToneResponse(action: Action, data: any, tone: Tone): string {
             createReminder: `A reminder for "${data.title}" at ${time}. I'm sure you'll *totally* remember it this time.`,
             updateReminder: "Right, because the first time wasn't good enough. The reminder is updated.",
             trackExpenses: `Great, ${data.count} more expense(s) totaling $${data.total.toFixed(2)}. Your wallet must be so proud.`,
+            createGoal: `A new goal, "${data.title}". How ambitious. I'll be here to watch you... not do it. Probably.`,
+            createJournalEntry: `Journal entry "${data.title}" is saved. I'll be sure not to read your secret thoughts. *wink*`,
         },
         Poetic: {
             createTask: `A new intention blossoms: "${data.description}". It is now woven into the tapestry of your day. ✨`,
@@ -287,6 +355,8 @@ function generateToneResponse(action: Action, data: any, tone: Tone): string {
             createReminder: `A gentle echo in time for "${data.title}", set for ${time}. May it find you well. 🌿`,
             updateReminder: "The echo's time has changed, a new moment to remember. The reminder is updated.",
             trackExpenses: `The flow of coin, noted. ${data.count} item(s) totaling $${data.total.toFixed(2)}, a fleeting moment in your journey's ledger.`,
+            createGoal: `An ambition, "${data.title}", takes flight, a star to navigate your journey by. 🌟`,
+            createJournalEntry: `A whisper of thought, "${data.title}", captured now in quiet permanence. ✍️`,
         },
     };
 
@@ -331,6 +401,12 @@ export async function processCommand(input: ProcessCommandInput): Promise<Proces
     output.newItemContext = { id: reminderData.id, type: 'reminder' };
   } else if (action === 'updateReminder') {
     output.updatedItemType = 'reminder';
+  } else if (action === 'createGoal') {
+    const goalData = toolOutput as z.infer<typeof createGoal.outputSchema>;
+    output.newItemContext = { id: goalData.id, type: 'goal' };
+  } else if (action === 'createJournalEntry') {
+    const journalData = toolOutput as z.infer<typeof createJournalEntry.outputSchema>;
+    output.newItemContext = { id: journalData.id, type: 'journalEntry' };
   }
   
   return output;
