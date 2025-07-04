@@ -209,19 +209,14 @@ const ProcessCommandInputSchema = z.object({
 });
 export type ProcessCommandInput = z.infer<typeof ProcessCommandInputSchema>;
 
-
-export type ProcessCommandOutput = z.object({
-  botResponse: z.string(),
-  newItemContext: z
-    .object({
-      id: z.string(),
-      type: z.enum(['task', 'reminder', 'expense']),
-    })
-    .optional(),
-  updatedItemType: z.enum(['task', 'reminder', 'expense']).optional(),
-});
-type ProcessCommandOutput = z.infer<typeof ProcessCommandOutput>;
-
+export type ProcessCommandOutput = {
+  botResponse: string;
+  newItemContext?: {
+    id: string;
+    type: 'task' | 'reminder' | 'expense';
+  };
+  updatedItemType?: 'task' | 'reminder' | 'expense';
+};
 
 const prompt = ai.definePrompt({
   name: 'commandProcessor',
