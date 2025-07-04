@@ -3,7 +3,7 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
-export type Tone = 'Neutral' | 'GenZ' | 'Professional' | 'Mindful';
+export type Tone = 'Neutral' | 'GenZ' | 'Sarcastic' | 'Poetic';
 
 interface ToneContextType {
   tone: Tone;
@@ -15,7 +15,7 @@ const ToneContext = createContext<ToneContextType | undefined>(undefined);
 
 export const ToneContextProvider = ({ children }: { children: ReactNode }) => {
   const [tone, setToneState] = useState<Tone>('Neutral');
-  const tones: Tone[] = ['Neutral', 'GenZ', 'Professional', 'Mindful'];
+  const tones: Tone[] = ['Neutral', 'GenZ', 'Sarcastic', 'Poetic'];
 
   useEffect(() => {
     try {

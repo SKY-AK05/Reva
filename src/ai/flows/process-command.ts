@@ -20,7 +20,7 @@ import { addExpense, addExpenses } from '@/services/expenses';
 import { generateChatResponse } from './generate-chat-response';
 import { createServerClient } from '@/lib/supabase/server';
 
-const ToneSchema = z.enum(['Neutral', 'GenZ', 'Professional', 'Mindful']);
+const ToneSchema = z.enum(['Neutral', 'GenZ', 'Sarcastic', 'Poetic']);
 type Tone = z.infer<typeof ToneSchema>;
 
 // Define schemas for our tools
@@ -274,19 +274,19 @@ function generateToneResponse(action: Action, data: any, tone: Tone): string {
             updateReminder: "Updated that reminder for ya. No cap.",
             trackExpenses: `Got it. ${data.count} expense(s) logged. That's $${data.total.toFixed(2)} less for boba. 💅`,
         },
-        Professional: {
-            createTask: `The task "${data.description}" has been successfully created.`,
-            updateTask: "The specified task has been updated as requested.",
-            createReminder: `A reminder has been scheduled for "${data.title}" at ${new Date(data.time).toLocaleString(undefined, { dateStyle: 'full', timeStyle: 'short' })}.`,
-            updateReminder: "The reminder has been successfully updated.",
-            trackExpenses: `Confirmed. ${data.count} expense item(s) have been logged with a total of $${data.total.toFixed(2)}.`,
+        Sarcastic: {
+            createTask: `Oh, fantastic, another task: "${data.description}". I'll just add that to the infinitely growing list. 🙃`,
+            updateTask: "You changed your mind? Shocking. Fine, I've updated the task.",
+            createReminder: `A reminder for "${data.title}" at ${time}. I'm sure you'll *totally* remember it this time.`,
+            updateReminder: "Right, because the first time wasn't good enough. The reminder is updated.",
+            trackExpenses: `Great, ${data.count} more expense(s) totaling $${data.total.toFixed(2)}. Your wallet must be so proud.`,
         },
-        Mindful: {
-            createTask: `I've mindfully noted your intention: "${data.description}". One step at a time. 🙏`,
-            updateTask: "The task has been gently updated, allowing your path to remain clear.",
-            createReminder: `A gentle reminder for "${data.title}" has been set for ${time}. May it bring you peace. 🌿`,
-            updateReminder: "Consider it done. The reminder has been updated with your new intention.",
-            trackExpenses: `Acknowledging your expenses. ${data.count} item(s) totaling $${data.total.toFixed(2)} have been recorded with awareness.`,
+        Poetic: {
+            createTask: `A new intention blossoms: "${data.description}". It is now woven into the tapestry of your day. ✨`,
+            updateTask: "The path has shifted, and so the task transforms. It is done.",
+            createReminder: `A gentle echo in time for "${data.title}", set for ${time}. May it find you well. 🌿`,
+            updateReminder: "The echo's time has changed, a new moment to remember. The reminder is updated.",
+            trackExpenses: `The flow of coin, noted. ${data.count} item(s) totaling $${data.total.toFixed(2)}, a fleeting moment in your journey's ledger.`,
         },
     };
 

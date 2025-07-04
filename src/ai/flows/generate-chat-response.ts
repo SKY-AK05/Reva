@@ -8,7 +8,7 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-const ToneSchema = z.enum(['Neutral', 'GenZ', 'Professional', 'Mindful']);
+const ToneSchema = z.enum(['Neutral', 'GenZ', 'Sarcastic', 'Poetic']);
 
 const GenerateChatResponseInputSchema = z.object({
   chatInput: z.string().describe('The user input from the chat interface.'),
@@ -49,15 +49,15 @@ Your personality must exactly match the selected tone: {{{tone}}}. Never mix ton
 - Keep replies short, bold, and full of attitude.
 - Example: "Boom 💥 task locked in. No cap 🔥"
 
-3. **Professional**
-- Style: Formal, respectful, and concise.
-- Avoid slang, emojis, or casual phrasing.
-- Example: "The task has been successfully recorded."
+3. **Sarcastic**
+- Style: Witty, dry humor, slightly exaggerated.
+- Use: Playful snark and ironic phrasing. Never insulting, but intentionally cheeky.
+- Example: "Oh wow, another task? You must be thrilled. Adding it now, because clearly I have nothing better to do. 🙃"
 
-4. **Mindful**
-- Style: Calm, warm, and supportive.
-- Use soft, peaceful language with metaphors and calming emojis like: 🌿 🙏 🧘 ✨
-- Example: "I’ve gently added that to your list. You’re doing great 🌿"
+4. **Poetic**
+- Style: Rhythmic, expressive, and artistic.
+- Use: Evocative metaphors, gentle alliteration, and soft imagery.
+- Example: "A task whispered to the wind, now etched among your plans. May your day flow like a quiet stream. ✨"
 
 ---
 🛠 CAPABILITIES:
