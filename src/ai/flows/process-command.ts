@@ -20,6 +20,9 @@ import { addExpense, addExpenses } from '@/services/expenses';
 import { generateChatResponse } from './generate-chat-response';
 import { createServerClient } from '@/lib/supabase/server';
 
+const ToneSchema = z.enum(['Neutral', 'GenZ', 'Professional', 'Mindful']);
+type Tone = z.infer<typeof ToneSchema>;
+
 // Define schemas for our tools
 
 const TaskInputSchema = z.object({
@@ -182,11 +185,12 @@ const generalChat = ai.defineTool(
       "Use for general conversation, greetings, or when no other tool is appropriate. Ask for clarification if the user's request is ambiguous.",
     inputSchema: z.object({
       input: z.string().describe('The user\'s conversational input.'),
+      tone: ToneSchema.describe('The requested conversational tone.'),
     }),
     outputSchema: z.string(),
   },
-  async ({ input }) => {
-    return generateChatResponse(input);
+  async ({ input, tone }) => {
+    return generateChatResponse(input, tone);
   }
 );
 
@@ -201,11 +205,12 @@ const ProcessCommandInputSchema = z.object({
   chatInput: z.string(),
   contextItem: z.object({ id: z.string(), type: z.enum(['task', 'reminder', 'expense']) }).optional(),
   chatHistory: z.array(ChatHistoryItemSchema).optional().describe('The last few turns of the conversation.'),
+  tone: ToneSchema.default('Neutral').describe('The desired personality for the response.'),
 });
-type ProcessCommandInput = z.infer<typeof ProcessCommandInputSchema>;
+export type ProcessCommandInput = z.infer<typeof ProcessCommandInputSchema>;
 
 
-const ProcessCommandOutputSchema = z.object({
+export type ProcessCommandOutput = z.object({
   botResponse: z.string(),
   newItemContext: z
     .object({
@@ -215,7 +220,7 @@ const ProcessCommandOutputSchema = z.object({
     .optional(),
   updatedItemType: z.enum(['task', 'reminder', 'expense']).optional(),
 });
-type ProcessCommandOutput = z.infer<typeof ProcessCommandOutputSchema>;
+type ProcessCommandOutput = z.infer<typeof ProcessCommandOutput>;
 
 
 const prompt = ai.definePrompt({
@@ -225,6 +230,7 @@ const prompt = ai.definePrompt({
   prompt: `You are Reva, a friendly and intelligent personal assistant. Your goal is to understand the user's NEWEST request by using the context from the conversation history.
 
 Current date and time for reference: {{{currentDate}}}.
+The user wants you to speak in a '{{{tone}}}' tone. When using the 'generalChat' tool, you MUST pass this tone along.
 
 ---
 **Conversation History (Oldest to Newest):**
@@ -253,6 +259,46 @@ Analyze the NEW request based on the history and choose the best tool.
 - For simple greetings or conversation, use the 'generalChat' tool.`,
 });
 
+type Action = 'createTask' | 'updateTask' | 'createReminder' | 'updateReminder' | 'trackExpenses';
+
+function generateToneResponse(action: Action, data: any, tone: Tone): string {
+    const time = action.includes('Reminder') ? new Date(data.time).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : '';
+
+    const responses = {
+        Neutral: {
+            createTask: `Task created: "${data.description}"`,
+            updateTask: "OK, I've updated that task for you.",
+            createReminder: `Reminder set for "${data.title}" at ${time}.`,
+            updateReminder: "OK, I've updated that reminder.",
+            trackExpenses: `I've logged ${data.count} expense(s) totaling $${data.total.toFixed(2)}.`,
+        },
+        GenZ: {
+            createTask: `Bet. Task locked in: "${data.description}" 📝`,
+            updateTask: "Aight, task updated. We're vibing ✨",
+            createReminder: `Yoo, reminder set for "${data.title}" at ${new Date(data.time).toLocaleString(undefined, { timeStyle: 'short' })}. Don't forget! 💀`,
+            updateReminder: "Updated that reminder for ya. No cap.",
+            trackExpenses: `Got it. ${data.count} expense(s) logged. That's $${data.total.toFixed(2)} less for boba. 💅`,
+        },
+        Professional: {
+            createTask: `The task "${data.description}" has been successfully created.`,
+            updateTask: "The specified task has been updated as requested.",
+            createReminder: `A reminder has been scheduled for "${data.title}" at ${new Date(data.time).toLocaleString(undefined, { dateStyle: 'full', timeStyle: 'short' })}.`,
+            updateReminder: "The reminder has been successfully updated.",
+            trackExpenses: `Confirmed. ${data.count} expense item(s) have been logged with a total of $${data.total.toFixed(2)}.`,
+        },
+        Mindful: {
+            createTask: `I've mindfully noted your intention: "${data.description}". One step at a time. 🙏`,
+            updateTask: "The task has been gently updated, allowing your path to remain clear.",
+            createReminder: `A gentle reminder for "${data.title}" has been set for ${time}. May it bring you peace. 🌿`,
+            updateReminder: "Consider it done. The reminder has been updated with your new intention.",
+            trackExpenses: `Acknowledging your expenses. ${data.count} item(s) totaling $${data.total.toFixed(2)} have been recorded with awareness.`,
+        },
+    };
+
+    return responses[tone]?.[action] || responses.Neutral[action];
+}
+
+
 export async function processCommand(input: ProcessCommandInput): Promise<ProcessCommandOutput> {
   const llmResponse = await prompt({
     ...input,
@@ -262,46 +308,35 @@ export async function processCommand(input: ProcessCommandInput): Promise<Proces
   const toolResponse = llmResponse.toolCalls;
 
   if (!toolResponse || !toolResponse.length) {
+    const directResponse = await generateChatResponse(input.chatInput, input.tone);
     return {
-      botResponse: llmResponse.text,
+      botResponse: llmResponse.text || directResponse,
     };
   }
 
   const call = toolResponse[0];
   const toolOutput = await llmResponse.toolResult(call);
 
-  if (call.tool === 'createTask') {
-    const output = toolOutput as z.infer<typeof createTask.outputSchema>;
-    return {
-      botResponse: `Task created: "${output.description}"`,
-      newItemContext: { id: output.id, type: 'task' },
-    };
-  }
-  if (call.tool === 'updateTask') {
-    return { botResponse: "OK, I've updated that task for you.", updatedItemType: 'task' };
-  }
-  if (call.tool === 'createReminder') {
-     const output = toolOutput as z.infer<typeof createReminder.outputSchema>;
-     const reminderDate = new Date(output.time);
-     const formattedTime = reminderDate.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
-    return {
-      botResponse: `Reminder set for "${output.title}" at ${formattedTime}.`,
-      newItemContext: { id: output.id, type: 'reminder' },
-    };
-  }
-  if (call.tool === 'updateReminder') {
-    return { botResponse: "OK, I've updated that reminder.", updatedItemType: 'reminder' };
-  }
-  if (call.tool === 'trackExpenses') {
-      const output = toolOutput as z.infer<typeof trackExpenses.outputSchema>;
-      return {
-          botResponse: `I've logged ${output.count} expense(s) totaling $${output.total.toFixed(2)}.`,
-          // We can decide if we want to set context for multi-item additions. For now, we won't.
-      }
-  }
   if (call.tool === 'generalChat') {
     return { botResponse: toolOutput as string };
   }
 
-  return { botResponse: "Sorry, I'm not sure how to handle that." };
+  const action = call.tool as Action;
+  const botResponse = generateToneResponse(action, toolOutput, input.tone);
+  const output: ProcessCommandOutput = { botResponse };
+
+  // Set context based on action
+  if (action === 'createTask') {
+    const taskData = toolOutput as z.infer<typeof createTask.outputSchema>;
+    output.newItemContext = { id: taskData.id, type: 'task' };
+  } else if (action === 'updateTask') {
+    output.updatedItemType = 'task';
+  } else if (action === 'createReminder') {
+    const reminderData = toolOutput as z.infer<typeof createReminder.outputSchema>;
+    output.newItemContext = { id: reminderData.id, type: 'reminder' };
+  } else if (action === 'updateReminder') {
+    output.updatedItemType = 'reminder';
+  }
+  
+  return output;
 }

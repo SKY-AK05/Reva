@@ -18,9 +18,11 @@ import { useRemindersContext } from '@/context/reminders-context';
 import { useGoalsContext } from '@/context/goals-context';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import BotTypingMessage from './bot-typing-message';
+import { useToneContext } from '@/context/tone-context';
 
 export default function ChatInterface() {
   const { messages, setMessages, lastItemContext, setLastItemContext, loading: isFetchingHistory } = useChatContext();
+  const { tone } = useToneContext();
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollViewportRef = useRef<HTMLDivElement>(null);
@@ -69,7 +71,7 @@ export default function ChatInterface() {
     setIsLoading(true);
 
     try {
-      const result = await processUserChat(messageText, lastItemContext, formattedHistory);
+      const result = await processUserChat(messageText, lastItemContext, formattedHistory, tone);
       
       const botMessage: ChatMessage = {
         id: crypto.randomUUID(),

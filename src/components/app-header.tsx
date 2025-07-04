@@ -1,42 +1,80 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import {
-  PanelLeft,
-  User,
-  HelpCircle,
-  LogOut,
-  Sun,
-  Moon,
-  Laptop,
-  Grid,
-  StickyNote,
+  Button
+} from '@/components/ui/button';
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger
+} from '@/components/ui/sheet';
+import {
+  Check,
   ChevronDown,
+  Grid,
+  HelpCircle,
+  Laptop,
+  Loader2,
+  LogOut,
   MessageSquare,
+  Moon,
+  PanelLeft,
   Plus,
   Settings,
-  Loader2,
+  Smile,
+  StickyNote,
+  Sun,
+  User,
 } from 'lucide-react';
 import AppSidebar from '@/components/app-sidebar';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage
+} from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Switch } from '@/components/ui/switch';
-import { useTheme } from 'next-themes';
+import {
+  Switch
+} from '@/components/ui/switch';
+import {
+  useTheme
+} from 'next-themes';
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
-import { useNotesContext } from '@/context/notes-context';
-import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
-import { useChatContext } from '@/context/chat-context';
+import {
+  cn
+} from '@/lib/utils';
+import {
+  useNotesContext
+} from '@/context/notes-context';
+import {
+  usePathname,
+  useRouter
+} from 'next/navigation';
+import {
+  useEffect,
+  useState
+} from 'react';
+import {
+  createClient
+} from '@/lib/supabase/client';
+import {
+  useChatContext
+} from '@/context/chat-context';
+import {
+  useToneContext
+} from '@/context/tone-context';
 
 interface AppHeaderProps {
   showGridLines: boolean;
@@ -47,13 +85,29 @@ export default function AppHeader({
   showGridLines,
   onToggleGridLines,
 }: AppHeaderProps) {
-  const { theme, setTheme } = useTheme();
-  const { notes, activeNote, setActiveNoteById, addNewNote, loading: notesLoading } =
-    useNotesContext();
-  const { clearChat } = useChatContext();
+  const {
+    theme,
+    setTheme
+  } = useTheme();
+  const {
+    tone,
+    setTone,
+    tones
+  } = useToneContext();
+  const {
+    notes,
+    activeNote,
+    setActiveNoteById,
+    addNewNote,
+    loading: notesLoading
+  } =
+  useNotesContext();
+  const {
+    clearChat
+  } = useChatContext();
   const router = useRouter();
   const pathname = usePathname();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState < any > (null);
   const [isAddingNote, setIsAddingNote] = useState(false);
   const supabase = createClient();
 
@@ -82,18 +136,24 @@ export default function AppHeader({
 
   useEffect(() => {
     const fetchUser = async () => {
-        const { data: { user } } = await supabase.auth.getUser();
-        setUser(user);
+      const {
+        data: {
+          user
+        }
+      } = await supabase.auth.getUser();
+      setUser(user);
     };
     fetchUser();
 
-    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+    const {
+      data: listener
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
       if (event === 'SIGNED_OUT') {
         router.refresh();
       }
     });
-    
+
     return () => {
       listener?.subscription.unsubscribe();
     };
@@ -243,6 +303,21 @@ export default function AppHeader({
               </div>
             </div>
             <DropdownMenuSeparator />
+            <DropdownMenuSub>
+                <DropdownMenuSubTrigger>
+                    <Smile className="mr-2 h-4 w-4" />
+                    <span>Tone Mode</span>
+                </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                    <DropdownMenuRadioGroup value={tone} onValueChange={(value) => setTone(value as any)}>
+                    {tones.map((t) => (
+                        <DropdownMenuRadioItem key={t} value={t} className="gap-2">
+                            <span>{t}</span>
+                        </DropdownMenuRadioItem>
+                    ))}
+                    </DropdownMenuRadioGroup>
+                </DropdownMenuSubContent>
+            </DropdownMenuSub>
             <DropdownMenuItem
               className="flex items-center justify-between"
               onSelect={(e) => e.preventDefault()}

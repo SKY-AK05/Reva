@@ -6,11 +6,15 @@ import { processCommand, type ProcessCommandOutput } from "@/ai/flows/process-co
 // Chat messages are no longer persisted
 // import { addChatMessage } from "@/services/chat";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
+
+const ToneSchema = z.enum(['Neutral', 'GenZ', 'Professional', 'Mindful']);
 
 export async function processUserChat(
     chatInput: string,
     contextItem: { id: string, type: 'task' | 'reminder' | 'expense' } | null,
-    chatHistory: { sender: 'user' | 'bot'; text: string }[]
+    chatHistory: { sender: 'user' | 'bot'; text: string }[],
+    tone: z.infer<typeof ToneSchema>
 ): Promise<ProcessCommandOutput> {
     const supabase = createServerClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -34,6 +38,7 @@ export async function processUserChat(
             chatInput, 
             contextItem: contextItem || undefined,
             chatHistory: formattedHistory,
+            tone,
         });
 
     } catch (e: any) {
