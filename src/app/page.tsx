@@ -1,3 +1,4 @@
+
 'use client';
 import Image from 'next/image';
 import PublicHeader from '@/components/public-header';
@@ -6,11 +7,6 @@ import ScrollAnimator from '@/components/scroll-animator';
 import { Button } from '@/components/ui/button';
 import {
   BrainCircuit,
-  CheckSquare,
-  DollarSign,
-  Bell,
-  Target,
-  BookText,
   Type,
   Bot,
   Sparkles,
@@ -24,69 +20,28 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
-const styledFeatures = [
-  {
-    title: 'Task Management',
-    description: 'Create, organize, and prioritize your to-dos with simple commands.',
-    bgColor: 'bg-chart-4/10 dark:bg-chart-4/20',
-    image: 'https://placehold.co/400x500.png',
-    width: 400,
-    height: 500,
-    imageHint: 'task list',
-    gridClass: 'xl:row-span-2',
-  },
-  {
-    title: 'Expense Tracking',
-    description: 'Log your spending on the go and never lose track of your budget.',
-    bgColor: 'bg-chart-5/10 dark:bg-chart-5/20',
-    image: 'https://placehold.co/400x250.png',
-    width: 400,
-    height: 250,
-    imageHint: 'money wallet',
-    gridClass: 'md:col-span-1',
-  },
-  {
-    title: 'Goal Setting',
-    description: 'Define your goals and track your progress towards achieving them.',
-    bgColor: 'bg-chart-2/10 dark:bg-chart-2/20',
-    image: 'https://placehold.co/400x250.png',
-    width: 400,
-    height: 250,
-    imageHint: 'target arrow',
-    gridClass: 'md:col-span-1',
-  },
-  {
-    title: 'Smart Reminders',
-    description: 'Set reminders for anything and get notified at the right time.',
-    bgColor: 'bg-chart-3/10 dark:bg-chart-3/20',
-    image: 'https://placehold.co/400x250.png',
-    width: 400,
-    height: 250,
-    imageHint: 'notification bell',
-    gridClass: 'md:col-span-1',
-  },
-  {
-    title: 'Personal Journal',
-    description: 'Capture your thoughts and ideas in a private, secure journal.',
-    bgColor: 'bg-chart-1/10 dark:bg-chart-1/20',
-    image: 'https://placehold.co/600x300.png',
-    width: 600,
-    height: 300,
-    imageHint: 'writing journal',
-    gridClass: 'md:col-span-2 xl:col-span-2',
-  },
-  {
-    title: 'AI-Powered',
-    description: 'Leverage the power of AI to understand and act on your requests.',
-    bgColor: 'bg-accent/10 dark:bg-accent/20',
-    image: 'https://placehold.co/400x250.png',
-    width: 400,
-    height: 250,
-    imageHint: 'ai brain',
-    gridClass: 'md:col-span-1',
-  },
+const simpleFeatures = [
+    {
+        title: 'Conversational Interface',
+        description:
+        'Interact with your life assistant through a natural, chat-based UI. No more complex forms or menus.',
+    },
+    {
+        title: 'Real-time Sync',
+        description:
+        'All your data is synced in real-time across all your modules. Create a task in chat, see it on the tasks page instantly.',
+    },
+    {
+        title: 'AI-Powered',
+        description:
+        'Leverage the power of AI to understand your requests, categorize your expenses, and even help you write notes.',
+    },
+    {
+        title: 'Customizable Tones',
+        description:
+        'Choose from a variety of AI personalities to make your assistant truly your own. From professional to sarcastic.',
+    },
 ];
-
 
 const howItWorks = [
   {
@@ -182,37 +137,34 @@ export default function HomePage() {
 
         {/* Features Section */}
         <ScrollAnimator>
-          <section id="features" className="py-20 md:py-32 bg-secondary">
+          <section id="features" className="py-20 md:py-32">
             <div className="container mx-auto px-4">
-              <div className="text-center">
-                <h2 className="text-3xl md:text-4xl font-headline font-bold">
-                  Everything you need, all in one place.
+              <div className="text-center max-w-3xl mx-auto">
+                <h2 className="text-4xl md:text-5xl font-headline font-bold tracking-tight">
+                  Everything you need, nothing you don't.
                 </h2>
-                <p className="mt-4 max-w-2xl mx-auto text-muted-foreground">
-                  Reva is designed to be your all-in-one life assistant, helping
-                  you stay on top of your day.
+                <p className="mt-4 text-lg text-muted-foreground">
+                  Reva brings all your life management tools into one simple, elegant
+                  interface.
                 </p>
               </div>
-              <div className="mt-12 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 grid-flow-row-dense">
-                {styledFeatures.map((feature) => (
-                  <div key={feature.title} className={cn(
-                      "p-8 rounded-2xl flex flex-col group",
-                      feature.bgColor,
-                      feature.gridClass
-                  )}>
-                    <h3 className="text-2xl font-bold font-headline">{feature.title}</h3>
-                    <p className="mt-2 text-muted-foreground flex-grow">{feature.description}</p>
-                    <div className="mt-6 -mx-4 -mb-4 sm:-mx-8 sm:-mb-8 overflow-hidden rounded-b-xl">
-                      <Image
-                        src={feature.image}
-                        alt={feature.title}
-                        width={feature.width}
-                        height={feature.height}
-                        className="rounded-lg object-cover w-full transition-transform duration-300 ease-in-out group-hover:scale-105"
-                        data-ai-hint={feature.imageHint}
-                      />
-                    </div>
-                  </div>
+              <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                {simpleFeatures.map((feature) => (
+                  <Card
+                    key={feature.title}
+                    className="bg-card/50 p-6 text-left border-white/10"
+                  >
+                    <CardHeader className="p-0">
+                      <CardTitle className="text-xl font-bold font-headline">
+                        {feature.title}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-0 pt-4">
+                      <p className="text-muted-foreground leading-relaxed">
+                        {feature.description}
+                      </p>
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
             </div>
