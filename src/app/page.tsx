@@ -1,4 +1,3 @@
-
 'use client';
 import Image from 'next/image';
 import PublicHeader from '@/components/public-header';
@@ -133,6 +132,36 @@ export default function HomePage() {
               </div>
             </div>
           </section>
+        </ScrollAnimator>
+
+        {/* How It Works Visual Section */}
+        <ScrollAnimator>
+            <section className="pb-20 md:pb-32">
+                <div className="container mx-auto px-4">
+                    <div className="text-center max-w-3xl mx-auto">
+                        <h2 className="text-4xl md:text-5xl font-headline font-bold tracking-tight">
+                            See Reva in Action
+                        </h2>
+                        <p className="mt-4 text-lg text-muted-foreground">
+                            A quick glimpse into how Reva helps you manage your day with ease. Later, this will be a video.
+                        </p>
+                    </div>
+                    <div className="mt-16 relative">
+                         <div className="relative mx-auto border-foreground/20 bg-background/50 border-[8px] rounded-t-xl w-full max-w-5xl h-auto shadow-2xl">
+                            <div className="rounded-lg overflow-hidden">
+                                <Image
+                                    src="/assets/chatss.png"
+                                    alt="Reva App Screenshot"
+                                    width={1200}
+                                    height={750}
+                                    className="w-full h-auto"
+                                    data-ai-hint="app screenshot"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </ScrollAnimator>
 
         {/* Features Section */}
