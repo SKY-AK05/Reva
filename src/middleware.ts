@@ -47,11 +47,6 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/chat', request.url))
   }
   
-  // If user is logged in and tries to access the root, redirect to chat
-  if (user && pathname === '/') {
-    return NextResponse.redirect(new URL('/chat', request.url));
-  }
-  
   // For all other cases, return the potentially modified response, which handles session refreshing.
   return response
 }
