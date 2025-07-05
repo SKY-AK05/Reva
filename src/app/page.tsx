@@ -1,3 +1,4 @@
+
 'use client';
 import Image from 'next/image';
 import PublicHeader from '@/components/public-header';
@@ -147,8 +148,8 @@ export default function HomePage() {
                         </p>
                     </div>
                     <div className="mt-16 relative">
-                         <div className="relative mx-auto border-foreground/20 bg-background/50 border-[8px] rounded-t-xl w-full max-w-5xl h-auto shadow-2xl">
-                            <div className="rounded-lg overflow-hidden">
+                         <div className="relative mx-auto border-foreground/20 bg-background/50 border-[8px] rounded-t-2xl w-full max-w-5xl h-auto shadow-2xl">
+                            <div className="rounded-t-lg overflow-hidden">
                                 <Image
                                     src="/assets/chatss.png"
                                     alt="Reva App Screenshot"
