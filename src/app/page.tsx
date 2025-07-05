@@ -1,3 +1,4 @@
+
 'use client';
 import Image from 'next/image';
 import PublicHeader from '@/components/public-header';
@@ -112,23 +113,47 @@ export default function HomePage() {
         {/* Hero Section */}
         <ScrollAnimator>
           <section className="py-20 md:py-32">
-            <div className="container mx-auto px-4 text-center">
-              <h1 className="text-4xl md:text-6xl font-headline font-bold tracking-tight">
-                Your Personal AI Assistant <br /> to Streamline Your Life
-              </h1>
-              <p className="mt-6 max-w-2xl mx-auto text-lg text-muted-foreground">
-                Reva helps you manage tasks, track expenses, and stay organized
-                with intelligent chat-based assistance. Focus on what matters, let
-                Reva handle the rest.
-              </p>
-              <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Button
-                  size="lg"
-                  className="w-full sm:w-auto bg-black text-white hover:bg-gray-800 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90"
-                  onClick={handleGetStarted}
-                >
-                  Get Started for Free
-                </Button>
+            <div className="container mx-auto px-4">
+              <div className="grid md:grid-cols-2 gap-12 items-center">
+                <div className="text-center md:text-left">
+                    <h1 className="text-4xl md:text-6xl font-headline font-bold tracking-tight">
+                        Your Personal AI Assistant <br /> to Streamline Your Life
+                    </h1>
+                    <p className="mt-6 max-w-xl mx-auto md:mx-0 text-lg text-muted-foreground">
+                        Reva helps you manage tasks, track expenses, and stay organized
+                        with intelligent chat-based assistance. Focus on what matters, let
+                        Reva handle the rest.
+                    </p>
+                    <div className="mt-8 flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4">
+                        <Button
+                            size="lg"
+                            className="w-full sm:w-auto bg-black text-white hover:bg-gray-800 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90"
+                            onClick={handleGetStarted}
+                        >
+                            Get Started for Free
+                        </Button>
+                    </div>
+                </div>
+                <div className="relative mx-auto w-full max-w-2xl h-auto shadow-2xl rounded-2xl">
+                    <Image
+                        src="/assets/chat_Dark.png"
+                        alt="Reva App Screenshot (Light Theme)"
+                        width={1200}
+                        height={750}
+                        className="w-full h-auto block dark:hidden rounded-2xl"
+                        data-ai-hint="app screenshot light"
+                        priority
+                    />
+                    <Image
+                        src="/assets/Chat_Light.png"
+                        alt="Reva App Screenshot (Dark Theme)"
+                        width={1200}
+                        height={750}
+                        className="w-full h-auto hidden dark:block rounded-2xl"
+                        data-ai-hint="app screenshot dark"
+                        priority
+                    />
+                </div>
               </div>
             </div>
           </section>
