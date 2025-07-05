@@ -148,16 +148,17 @@ export default function HomePage() {
                         </p>
                     </div>
                     <div className="mt-16 relative">
-                         <div className="relative mx-auto border-foreground/20 bg-background/50 border-[8px] rounded-t-2xl w-full max-w-5xl h-auto shadow-2xl">
-                            <div className="rounded-t-lg overflow-hidden">
+                         <div className="relative mx-auto border-foreground/20 bg-background/50 border-t-[8px] border-x-[8px] rounded-t-2xl w-full max-w-5xl h-auto shadow-2xl">
+                            <div className="rounded-t-lg overflow-hidden relative">
                                 <Image
                                     src="/assets/chatss.png"
                                     alt="Reva App Screenshot"
                                     width={1200}
                                     height={750}
-                                    className="w-full h-auto"
+                                    className="w-full h-auto block"
                                     data-ai-hint="app screenshot"
                                 />
+                                <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-background to-transparent pointer-events-none" />
                             </div>
                         </div>
                     </div>
