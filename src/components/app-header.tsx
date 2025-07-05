@@ -13,6 +13,7 @@ import {
   ChevronDown,
   Grid,
   HelpCircle,
+  Home,
   Laptop,
   Loader2,
   LogOut,
@@ -333,6 +334,12 @@ export default function AppHeader({
               />
             </DropdownMenuItem>
             <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link href="/">
+                <Home className="mr-2 h-4 w-4" />
+                <span>Home</span>
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link href="/settings">
                 <Settings className="mr-2 h-4 w-4" />
