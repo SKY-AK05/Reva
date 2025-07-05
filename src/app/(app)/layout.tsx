@@ -43,7 +43,7 @@ export default function AppLayout({
               <GoalsContextProvider>
                 <RemindersContextProvider>
                   <JournalContextProvider>
-                    <div className="bg-background text-foreground flex w-full h-screen overflow-hidden">
+                    <div className="bg-background bg-noise text-foreground flex w-full h-screen overflow-hidden">
                       <div
                         className={cn(
                           'hidden md:flex flex-col border-r border-border/80 transition-all duration-300',
