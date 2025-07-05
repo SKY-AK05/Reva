@@ -147,15 +147,25 @@ export default function HomePage() {
                         </p>
                     </div>
                     <div className="mt-16 relative">
-                         <div className="relative mx-auto rounded-t-2xl w-full max-w-5xl h-auto shadow-2xl">
-                            <div className="rounded-t-lg overflow-hidden relative">
+                         <div className="relative mx-auto w-full max-w-5xl h-auto shadow-2xl">
+                            <div className="rounded-t-2xl overflow-hidden relative">
                                 <Image
-                                    src="/assets/chatss.png"
-                                    alt="Reva App Screenshot"
+                                    src="/assets/chat_Dark.png"
+                                    alt="Reva App Screenshot (Light Theme)"
                                     width={1200}
                                     height={750}
-                                    className="w-full h-auto block"
-                                    data-ai-hint="app screenshot"
+                                    className="w-full h-auto block dark:hidden rounded-t-2xl"
+                                    data-ai-hint="app screenshot light"
+                                    priority
+                                />
+                                <Image
+                                    src="/assets/Chat_Light.png"
+                                    alt="Reva App Screenshot (Dark Theme)"
+                                    width={1200}
+                                    height={750}
+                                    className="w-full h-auto hidden dark:block rounded-t-2xl"
+                                    data-ai-hint="app screenshot dark"
+                                    priority
                                 />
                                 <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-background to-transparent pointer-events-none" />
                             </div>
