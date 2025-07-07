@@ -4,77 +4,57 @@
 
 @layer base {
   :root {
-    --background: 43 56% 94%; /* Cream: #F8F3E6 */
-    --foreground: 356 4% 16%; /* Dark: #2C2627 */
-
-    --card: 43 56% 94%;
-    --card-foreground: 356 4% 16%;
-
-    --popover: 43 56% 94%;
-    --popover-foreground: 356 4% 16%;
-
-    --primary: 352 63% 45%; /* Red: #BC2C3D */
-    --primary-foreground: 43 56% 94%;
-
-    --secondary: 26 61% 83%; /* Tan: #EFD2BC */
-    --secondary-foreground: 356 4% 16%;
-
-    --muted: 26 61% 83%;
-    --muted-foreground: 356 4% 40%;
-
-    --accent: 352 63% 45%;
-    --accent-foreground: 43 56% 94%;
-
-    --destructive: 352 63% 45%;
-    --destructive-foreground: 43 56% 94%;
-
-    --border: 26 61% 78%;
-    --input: 26 61% 78%;
-    --ring: 352 63% 45%;
-    
-    --chart-1: 352 63% 45%; /* Red */
-    --chart-2: 26 61% 70%; /* Darker Tan */
-    --chart-3: 356 4% 30%; /* Gray */
-    --chart-4: 352 63% 65%; /* Lighter Red */
-    --chart-5: 26 61% 83%; /* Light Tan */
-
+    --background: 39 44% 93%;
+    --foreground: 0 4% 15%;
+    --card: 39 44% 93%;
+    --card-foreground: 0 4% 15%;
+    --popover: 39 44% 93%;
+    --popover-foreground: 0 4% 15%;
+    --primary: 23 52% 52%;
+    --primary-foreground: 39 44% 93%;
+    --secondary: 39 44% 88%;
+    --secondary-foreground: 0 4% 15%;
+    --muted: 39 44% 88%;
+    --muted-foreground: 0 4% 40%;
+    --accent: 23 52% 52%;
+    --accent-foreground: 39 44% 93%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 39 44% 83%;
+    --input: 39 44% 83%;
+    --ring: 23 52% 52%;
+    --chart-1: 23 52% 52%;
+    --chart-2: 39 44% 75%;
+    --chart-3: 0 4% 30%;
+    --chart-4: 23 52% 65%;
+    --chart-5: 39 44% 83%;
     --radius: 1rem;
   }
-
   .dark {
-    --background: 356 4% 16%; /* Dark: #2C2627 */
-    --foreground: 43 56% 94%; /* Cream: #F8F3E6 */
-    
-    --card: 356 4% 20%;
-    --card-foreground: 43 56% 94%;
-    
-    --popover: 356 4% 16%;
-    --popover-foreground: 43 56% 94%;
-    
-    --primary: 352 63% 55%; /* Brighter Red for dark mode */
-    --primary-foreground: 356 4% 10%;
-    
-    --secondary: 356 4% 25%;
-    --secondary-foreground: 43 56% 94%;
-    
-    --muted: 356 4% 25%;
-    --muted-foreground: 26 61% 83%; /* Tan */
-    
-    --accent: 352 63% 55%;
-    --accent-foreground: 356 4% 10%;
-    
-    --destructive: 352 63% 45%;
-    --destructive-foreground: 43 56% 94%;
-    
-    --border: 356 4% 25%;
-    --input: 356 4% 25%;
-    --ring: 352 63% 55%;
-
-    --chart-1: 352 63% 55%; /* Brighter Red */
-    --chart-2: 26 61% 83%; /* Tan */
-    --chart-3: 43 56% 94%; /* Cream */
-    --chart-4: 352 63% 45%; /* Original Red */
-    --chart-5: 26 61% 65%; /* Darker Tan */
+    --background: 0 4% 15%;
+    --foreground: 39 44% 93%;
+    --card: 0 4% 17%;
+    --card-foreground: 39 44% 93%;
+    --popover: 0 4% 15%;
+    --popover-foreground: 39 44% 93%;
+    --primary: 23 52% 62%;
+    --primary-foreground: 0 4% 10%;
+    --secondary: 0 4% 20%;
+    --secondary-foreground: 39 44% 93%;
+    --muted: 0 4% 20%;
+    --muted-foreground: 39 44% 83%;
+    --accent: 23 52% 62%;
+    --accent-foreground: 0 4% 10%;
+    --destructive: 0 63% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 4% 20%;
+    --input: 0 4% 20%;
+    --ring: 23 52% 62%;
+    --chart-1: 23 52% 62%;
+    --chart-2: 39 44% 83%;
+    --chart-3: 39 44% 93%;
+    --chart-4: 23 52% 52%;
+    --chart-5: 0 4% 30%;
   }
 }
 
