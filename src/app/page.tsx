@@ -1,4 +1,3 @@
-
 'use client';
 import Image from 'next/image';
 import PublicHeader from '@/components/public-header';
@@ -181,7 +180,7 @@ export default function HomePage() {
                         alt="A woman happily using the Reva productivity app on her phone"
                         layout="fill"
                         objectFit="contain"
-                        className="scale-[1.7] lg:-translate-y-28"
+                        className="scale-[1.7] lg:-translate-y-36"
                         data-ai-hint="woman using phone"
                         quality={100}
                     />
