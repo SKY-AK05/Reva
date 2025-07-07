@@ -180,7 +180,7 @@ export default function HomePage() {
                       alt="A woman happily using the Reva productivity app on her phone"
                       layout="fill"
                       objectFit="cover"
-                      className="object-bottom scale-125"
+                      className="scale-150 lg:-translate-y-12"
                       data-ai-hint="woman using phone"
                       quality={100}
                     />
@@ -202,17 +202,30 @@ export default function HomePage() {
                   </CardContent>
                 </Card>
 
-                <Card className="p-6 flex flex-col lg:col-span-2">
+                <Card className="p-6 flex flex-col">
                   <CardHeader className="p-0">
                     <div className="flex items-center gap-3">
                       <StickyNote className="w-7 h-7 text-primary" />
-                      <CardTitle className="text-2xl">Notes & Journal</CardTitle>
+                      <CardTitle className="text-2xl">Notes</CardTitle>
                     </div>
                   </CardHeader>
                   <CardContent className="p-0 pt-4 flex-1">
-                    <p className="text-muted-foreground">Capture meeting minutes and brilliant ideas, or record your thoughts and feelings in a private space.</p>
+                    <p className="text-muted-foreground">Capture meeting minutes and brilliant ideas.</p>
                   </CardContent>
                 </Card>
+
+                <Card className="p-6 flex flex-col">
+                  <CardHeader className="p-0">
+                    <div className="flex items-center gap-3">
+                      <BookText className="w-7 h-7 text-primary" />
+                      <CardTitle className="text-2xl">Journal</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-0 pt-4 flex-1">
+                    <p className="text-muted-foreground">Record your thoughts and feelings in a private space.</p>
+                  </CardContent>
+                </Card>
+
               </div>
             </div>
           </section>
