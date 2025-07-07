@@ -180,7 +180,7 @@ export default function HomePage() {
                       alt="A woman happily using the Reva productivity app on her phone"
                       layout="fill"
                       objectFit="cover"
-                      className="scale-150 lg:-translate-y-12"
+                      className="scale-125 lg:-translate-y-12"
                       data-ai-hint="woman using phone"
                       quality={100}
                     />
