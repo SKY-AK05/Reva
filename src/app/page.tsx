@@ -1,3 +1,4 @@
+
 'use client';
 import Image from 'next/image';
 import PublicHeader from '@/components/public-header';
@@ -158,19 +159,26 @@ export default function HomePage() {
                   </CardContent>
                 </Card>
 
-                <Card className="p-6 flex flex-col">
+                <Card className="p-6 flex flex-col lg:row-span-2">
                   <CardHeader className="p-0">
                     <div className="flex items-center gap-3">
                       <Target className="w-7 h-7 text-primary" />
-                      <CardTitle className="text-2xl">Goals</CardTitle>
+                      <CardTitle className="text-2xl">Goals & Notes</CardTitle>
                     </div>
                   </CardHeader>
                   <CardContent className="p-0 pt-4 flex-1">
-                    <p className="font-semibold text-sm">Launch new website</p>
-                    <div className="w-full bg-secondary rounded-full h-2.5 mt-2">
-                      <div className="bg-primary h-2.5 rounded-full" style={{width: "75%"}}></div>
+                    <p className="text-muted-foreground">Track your ambitions and capture brilliant ideas.</p>
+                    <div className="mt-4">
+                      <p className="font-semibold text-sm">Launch new website</p>
+                      <div className="w-full bg-secondary rounded-full h-2.5 mt-2">
+                        <div className="bg-primary h-2.5 rounded-full" style={{width: "75%"}}></div>
+                      </div>
+                      <p className="text-right text-sm text-muted-foreground mt-1">75%</p>
                     </div>
-                    <p className="text-right text-sm text-muted-foreground mt-1">75%</p>
+                    <div className="mt-4 text-sm bg-secondary/50 p-3 rounded-lg">
+                      <p className="font-semibold">Meeting Summary</p>
+                      <p className="text-muted-foreground">Q3 planning session was a success. Key takeaways are...</p>
+                    </div>
                   </CardContent>
                 </Card>
                 
@@ -178,9 +186,8 @@ export default function HomePage() {
                     <Image
                         src="/assets/women.png"
                         alt="A woman happily using the Reva productivity app on her phone"
-                        layout="fill"
-                        objectFit="contain"
-                        className="scale-[1.7] lg:-translate-y-36"
+                        fill
+                        className="object-contain scale-[1.7] -translate-y-32"
                         data-ai-hint="woman using phone"
                         quality={100}
                     />
@@ -201,19 +208,7 @@ export default function HomePage() {
                     </ul>
                   </CardContent>
                 </Card>
-
-                <Card className="p-6 flex flex-col">
-                  <CardHeader className="p-0">
-                    <div className="flex items-center gap-3">
-                      <StickyNote className="w-7 h-7 text-primary" />
-                      <CardTitle className="text-2xl">Notes</CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="p-0 pt-4 flex-1">
-                    <p className="text-muted-foreground">Capture meeting minutes and brilliant ideas.</p>
-                  </CardContent>
-                </Card>
-
+                
                 <Card className="p-6 flex flex-col">
                   <CardHeader className="p-0">
                     <div className="flex items-center gap-3">
