@@ -27,7 +27,7 @@ export const TasksContextProvider = ({ children }: { children: ReactNode }) => {
   const supabase = createClient();
 
   const fetchTasks = useCallback(async () => {
-    // setLoading is only true on the initial load to prevent UI flicker on re-fetch.
+    setLoading(true);
     const fetchedTasks = await getTasks();
     setTasks(fetchedTasks);
     setLoading(false);
@@ -35,7 +35,6 @@ export const TasksContextProvider = ({ children }: { children: ReactNode }) => {
 
   // Effect for the initial data fetch.
   useEffect(() => {
-    setLoading(true);
     fetchTasks();
   }, [fetchTasks]);
 
@@ -46,9 +45,24 @@ export const TasksContextProvider = ({ children }: { children: ReactNode }) => {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'tasks' },
-        () => {
-          // When a change is detected, simply re-fetch all tasks.
-          fetchTasks();
+        (payload) => {
+          const mapPayloadToTask = (p: any): Task => ({
+            id: p.id,
+            description: p.description,
+            dueDate: p.due_date,
+            priority: p.priority,
+            completed: p.completed,
+          });
+
+          if (payload.eventType === 'INSERT') {
+            setTasks(prev => [mapPayloadToTask(payload.new), ...prev]);
+          }
+          if (payload.eventType === 'UPDATE') {
+            setTasks(prev => prev.map(t => t.id === payload.new.id ? mapPayloadToTask(payload.new) : t));
+          }
+          if (payload.eventType === 'DELETE') {
+            setTasks(prev => prev.filter(t => t.id !== payload.old.id));
+          }
         }
       )
       .subscribe();
@@ -56,7 +70,7 @@ export const TasksContextProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, fetchTasks]);
+  }, [supabase]);
 
   const handleUpdateTask = useCallback(async (id: string, updates: Partial<Omit<Task, 'id' | 'completed'>>) => {
     // The realtime listener will handle the UI update after this call succeeds.

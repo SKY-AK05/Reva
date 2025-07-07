@@ -109,7 +109,7 @@ The application avoids complex state management libraries like Redux, instead op
 
 *   **Context Providers:** Each data type (Tasks, Expenses, Notes, etc.) has its own context provider located in `src/context/`. For example, `TasksContextProvider` is responsible for the global state of tasks.
 *   **Initial Data Fetch:** When a context provider mounts, it performs an initial fetch of its data from the database via a function in `src/services/`.
-*   **Real-time Subscriptions:** The magic happens here. Each context provider subscribes to its corresponding database table using Supabase's `postgres_changes` feature.
+*   **Real-time Subscriptions & Reconciliation:** The magic happens here. Each context provider subscribes to its corresponding database table using Supabase's `postgres_changes` feature. This listener provides a specific payload (`INSERT`, `UPDATE`, `DELETE`) for any change.
     *   **Example (`TasksContext`):**
         ```typescript
         // Subscribes to any INSERT, UPDATE, or DELETE on the 'tasks' table
@@ -118,14 +118,22 @@ The application avoids complex state management libraries like Redux, instead op
           .on(
             'postgres_changes',
             { event: '*', schema: 'public', table: 'tasks' },
-            () => {
-              // When a change is detected, simply re-fetch all tasks
-              fetchTasks();
+            (payload) => {
+              // Instead of re-fetching, we reconcile the change locally
+              if (payload.eventType === 'INSERT') {
+                setTasks(prev => [...prev, payload.new]);
+              }
+              if (payload.eventType === 'UPDATE') {
+                setTasks(prev => prev.map(t => t.id === payload.new.id ? payload.new : t));
+              }
+              if (payload.eventType === 'DELETE') {
+                 setTasks(prev => prev.filter(t => t.id !== payload.old.id));
+              }
             }
           )
           .subscribe();
         ```
-*   **Result:** This architecture ensures that if a user creates a task in the chat, the Tasks page UI updates instantly without requiring a page refresh or complex state synchronization logic.
+*   **Result:** This architecture ensures that if a user creates a task in the chat, the Tasks page UI updates instantly by manipulating the local state, without requiring a network request for a full data refresh. This makes the application feel significantly faster and more responsive.
 
 ### 4.3. AI Architecture: Tool-Based Genkit Flow
 

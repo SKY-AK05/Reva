@@ -25,13 +25,13 @@ export const JournalContextProvider = ({ children }: { children: ReactNode }) =>
   const supabase = createClient();
 
   const fetchEntries = useCallback(async () => {
+    setLoading(true);
     const fetchedEntries = await getJournalEntries();
     setEntries(fetchedEntries);
     setLoading(false);
   }, []);
 
   useEffect(() => {
-    setLoading(true);
     fetchEntries();
   }, [fetchEntries]);
 
@@ -41,8 +41,17 @@ export const JournalContextProvider = ({ children }: { children: ReactNode }) =>
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'journal_entries' },
-        () => {
-          fetchEntries();
+        (payload) => {
+          const newEntry = payload.new as JournalEntry;
+          if (payload.eventType === 'INSERT') {
+            setEntries(prev => [...prev, newEntry].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+          }
+          if (payload.eventType === 'UPDATE') {
+            setEntries(prev => prev.map(e => e.id === newEntry.id ? newEntry : e).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+          }
+          if (payload.eventType === 'DELETE') {
+            setEntries(prev => prev.filter(e => e.id !== payload.old.id));
+          }
         }
       )
       .subscribe();
@@ -50,7 +59,7 @@ export const JournalContextProvider = ({ children }: { children: ReactNode }) =>
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, fetchEntries]);
+  }, [supabase]);
 
   const handleUpdateEntry = useCallback(async (id: string, updates: Partial<Omit<JournalEntry, 'id'>>) => {
      // The realtime listener will handle the UI update.

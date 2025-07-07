@@ -30,7 +30,7 @@ export const NotesContextProvider = ({ children }: { children: ReactNode }) => {
   const supabase = createClient();
 
   const fetchNotes = useCallback(async () => {
-    // setLoading is only true on initial load
+    setLoading(true);
     const fetchedNotes = await getNotes();
     setNotes(fetchedNotes);
 
@@ -40,11 +40,10 @@ export const NotesContextProvider = ({ children }: { children: ReactNode }) => {
     }
     
     setLoading(false);
-  }, [activeNoteId]); // Dependency on activeNoteId is key for re-evaluation
+  }, [activeNoteId]);
 
   // Initial fetch
   useEffect(() => {
-    setLoading(true);
     fetchNotes();
   }, [fetchNotes]);
 
@@ -55,9 +54,30 @@ export const NotesContextProvider = ({ children }: { children: ReactNode }) => {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'notes' },
-        () => {
-          // A change occurred, re-fetch all notes to ensure consistency.
-          fetchNotes();
+        (payload) => {
+          const mapPayloadToNote = (p: any): Note => ({
+            id: p.id,
+            title: p.title,
+            content: p.content || '',
+            createdAt: p.created_at,
+          });
+
+          if (payload.eventType === 'INSERT') {
+            setNotes(prev => [mapPayloadToNote(payload.new), ...prev]);
+          }
+          if (payload.eventType === 'UPDATE') {
+            setNotes(prev => prev.map(n => n.id === payload.new.id ? mapPayloadToNote(payload.new) : n));
+          }
+          if (payload.eventType === 'DELETE') {
+            setNotes(prev => {
+              const newNotes = prev.filter(n => n.id !== payload.old.id);
+              // If the deleted note was active, set a new active note
+              if (activeNoteId === payload.old.id) {
+                setActiveNoteId(newNotes.length > 0 ? newNotes[0].id : null);
+              }
+              return newNotes;
+            });
+          }
         }
       )
       .subscribe();
@@ -65,7 +85,7 @@ export const NotesContextProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, fetchNotes]);
+  }, [supabase, activeNoteId]);
 
   const activeNote = notes.find(note => note.id === activeNoteId) || null;
 

@@ -26,13 +26,13 @@ export const GoalsContextProvider = ({ children }: { children: ReactNode }) => {
   const supabase = createClient();
 
   const fetchGoals = useCallback(async () => {
+    setLoading(true);
     const fetchedGoals = await getGoals();
     setGoals(fetchedGoals);
     setLoading(false);
   }, []);
 
   useEffect(() => {
-    setLoading(true);
     fetchGoals();
   }, [fetchGoals]);
 
@@ -42,8 +42,17 @@ export const GoalsContextProvider = ({ children }: { children: ReactNode }) => {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'goals' },
-        () => {
-          fetchGoals();
+        (payload) => {
+          const newGoal = payload.new as Goal;
+          if (payload.eventType === 'INSERT') {
+            setGoals(prev => [...prev, newGoal]);
+          }
+          if (payload.eventType === 'UPDATE') {
+            setGoals(prev => prev.map(g => g.id === newGoal.id ? newGoal : g));
+          }
+          if (payload.eventType === 'DELETE') {
+            setGoals(prev => prev.filter(g => g.id !== payload.old.id));
+          }
         }
       )
       .subscribe();
@@ -51,7 +60,7 @@ export const GoalsContextProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, fetchGoals]);
+  }, [supabase]);
 
   const handleUpdateGoal = useCallback(async (id: string, updates: Partial<Omit<Goal, 'id'>>) => {
     // The realtime listener will handle the UI update.

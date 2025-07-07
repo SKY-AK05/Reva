@@ -26,7 +26,7 @@ export const ExpensesContextProvider = ({ children }: { children: ReactNode }) =
   const supabase = createClient();
 
   const fetchExpenses = useCallback(async () => {
-    // setLoading is only true on the initial load to prevent UI flicker on re-fetch.
+    setLoading(true);
     const fetchedExpenses = await getExpenses();
     setExpenses(fetchedExpenses);
     setLoading(false);
@@ -34,7 +34,6 @@ export const ExpensesContextProvider = ({ children }: { children: ReactNode }) =
 
   // Effect for the initial data fetch.
   useEffect(() => {
-    setLoading(true);
     fetchExpenses();
   }, [fetchExpenses]);
 
@@ -46,10 +45,17 @@ export const ExpensesContextProvider = ({ children }: { children: ReactNode }) =
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'expenses' },
-        () => {
-          // When a change is detected, simply re-fetch all expenses.
-          // This is simpler and more robust than client-side reconciliation.
-          fetchExpenses();
+        (payload) => {
+          const newExpense = payload.new as Expense;
+          if (payload.eventType === 'INSERT') {
+            setExpenses(prev => [newExpense, ...prev].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+          }
+          if (payload.eventType === 'UPDATE') {
+            setExpenses(prev => prev.map(e => e.id === newExpense.id ? newExpense : e));
+          }
+          if (payload.eventType === 'DELETE') {
+            setExpenses(prev => prev.filter(e => e.id !== payload.old.id));
+          }
         }
       )
       .subscribe();
@@ -57,7 +63,7 @@ export const ExpensesContextProvider = ({ children }: { children: ReactNode }) =
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, fetchExpenses]);
+  }, [supabase]);
 
   const handleUpdateExpense = useCallback(async (id: string, updates: Partial<Omit<Expense, 'id'>>) => {
     // The realtime listener will handle the UI update after this call succeeds.

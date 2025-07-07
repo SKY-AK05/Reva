@@ -25,13 +25,13 @@ export const RemindersContextProvider = ({ children }: { children: ReactNode }) 
   const supabase = createClient();
 
   const fetchReminders = useCallback(async () => {
+    setLoading(true);
     const fetchedReminders = await getReminders();
     setReminders(fetchedReminders);
     setLoading(false);
   }, []);
 
   useEffect(() => {
-    setLoading(true);
     fetchReminders();
   }, [fetchReminders]);
 
@@ -42,8 +42,17 @@ export const RemindersContextProvider = ({ children }: { children: ReactNode }) 
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'reminders' },
-        () => {
-          fetchReminders();
+        (payload) => {
+          const newReminder = payload.new as Reminder;
+          if (payload.eventType === 'INSERT') {
+            setReminders(prev => [...prev, newReminder].sort((a,b) => new Date(a.time).getTime() - new Date(b.time).getTime()));
+          }
+          if (payload.eventType === 'UPDATE') {
+            setReminders(prev => prev.map(r => r.id === newReminder.id ? newReminder : r).sort((a,b) => new Date(a.time).getTime() - new Date(b.time).getTime()));
+          }
+          if (payload.eventType === 'DELETE') {
+            setReminders(prev => prev.filter(r => r.id !== payload.old.id));
+          }
         }
       )
       .subscribe();
@@ -51,7 +60,7 @@ export const RemindersContextProvider = ({ children }: { children: ReactNode }) 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, fetchReminders]);
+  }, [supabase]);
 
 
   const handleUpdateReminder = useCallback(async (id: string, updates: Partial<Omit<Reminder, 'id'>>) => {
