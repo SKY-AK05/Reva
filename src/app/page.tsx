@@ -7,10 +7,12 @@ import ScrollAnimator from '@/components/scroll-animator';
 import { Button } from '@/components/ui/button';
 import {
   BrainCircuit,
-  Type,
-  Bot,
-  Sparkles,
   Check,
+  MessageSquare,
+  CheckSquare,
+  DollarSign,
+  StickyNote,
+  Target,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -19,47 +21,6 @@ import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-
-const simpleFeatures = [
-    {
-        title: 'Conversational Interface',
-        description:
-        'Interact with your life assistant through a natural, chat-based UI. No more complex forms or menus.',
-    },
-    {
-        title: 'Real-time Sync',
-        description:
-        'All your data is synced in real-time across all your modules. Create a task in chat, see it on the tasks page instantly.',
-    },
-    {
-        title: 'AI-Powered',
-        description:
-        'Leverage the power of AI to understand your requests, categorize your expenses, and even help you write notes.',
-    },
-    {
-        title: 'Customizable Tones',
-        description:
-        'Choose from a variety of AI personalities to make your assistant truly your own. From professional to sarcastic.',
-    },
-];
-
-const howItWorks = [
-  {
-    icon: Type,
-    title: '1. Just Type',
-    description: 'Tell Reva what you need in plain English. No complicated forms or menus.'
-  },
-  {
-    icon: Bot,
-    title: '2. AI Understands',
-    description: 'Our smart AI parses your request to understand what you want to do.'
-  },
-  {
-    icon: Sparkles,
-    title: '3. Life Organized',
-    description: 'Reva creates the task, logs the expense, or sets the reminder for you instantly.'
-  }
-];
 
 const testimonials = [
   {
@@ -91,11 +52,14 @@ export default function HomePage() {
     });
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       setLoggedIn(!!session);
+      if (event === 'SIGNED_IN' && window.location.pathname === '/') {
+        router.push('/chat');
+      }
     });
     return () => {
       listener?.subscription.unsubscribe();
     };
-  }, []);
+  }, [router, supabase]);
 
   const handleGetStarted = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -159,107 +123,122 @@ export default function HomePage() {
           </section>
         </ScrollAnimator>
 
-        {/* How It Works Visual Section */}
-        <ScrollAnimator>
-            <section className="pb-20 md:pb-32">
-                <div className="container mx-auto px-4">
-                    <div className="text-center max-w-3xl mx-auto">
-                        <h2 className="text-4xl md:text-5xl font-headline font-bold tracking-tight">
-                            See Reva in Action
-                        </h2>
-                        <p className="mt-4 text-lg text-muted-foreground">
-                            A quick glimpse into how Reva helps you manage your day with ease. Later, this will be a video.
-                        </p>
-                    </div>
-                    <div className="mt-16 relative">
-                         <div className="relative mx-auto w-full max-w-5xl h-auto shadow-2xl">
-                            <div className="rounded-t-2xl overflow-hidden relative">
-                                <Image
-                                    src="/assets/chat_Dark.png"
-                                    alt="Reva App Screenshot (Light Theme)"
-                                    width={1200}
-                                    height={750}
-                                    className="w-full h-auto block dark:hidden rounded-t-2xl"
-                                    data-ai-hint="app screenshot light"
-                                    priority
-                                />
-                                <Image
-                                    src="/assets/Chat_Light.png"
-                                    alt="Reva App Screenshot (Dark Theme)"
-                                    width={1200}
-                                    height={750}
-                                    className="w-full h-auto hidden dark:block rounded-t-2xl"
-                                    data-ai-hint="app screenshot dark"
-                                    priority
-                                />
-                                <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-background to-transparent pointer-events-none" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </ScrollAnimator>
-
-        {/* Features Section */}
+        {/* Bento Grid Features Section */}
         <ScrollAnimator>
           <section id="features" className="py-20 md:py-32">
             <div className="container mx-auto px-4">
               <div className="text-center max-w-3xl mx-auto">
                 <h2 className="text-4xl md:text-5xl font-headline font-bold tracking-tight">
-                  Everything you need, nothing you don't.
+                  A Smarter Way to Organize Your Life
                 </h2>
                 <p className="mt-4 text-lg text-muted-foreground">
-                  Reva brings all your life management tools into one simple, elegant
-                  interface.
+                  Reva integrates all your productivity tools into one intelligent,
+                  conversational interface. Here's how it all comes together.
                 </p>
               </div>
-              <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                {simpleFeatures.map((feature) => (
-                  <Card
-                    key={feature.title}
-                    className="bg-card/50 p-6 text-left border-white/10"
-                  >
-                    <CardHeader className="p-0">
-                      <CardTitle className="text-xl font-bold font-headline">
-                        {feature.title}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-0 pt-4">
-                      <p className="text-muted-foreground leading-relaxed">
-                        {feature.description}
-                      </p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          </section>
-        </ScrollAnimator>
-        
-        {/* How It Works Section */}
-        <ScrollAnimator>
-          <section id="how-it-works" className="py-20 md:py-32">
-            <div className="container mx-auto px-4">
-              <div className="text-center">
-                <h2 className="text-3xl md:text-4xl font-headline font-bold">
-                  Effortless by Design
-                </h2>
-                <p className="mt-4 max-w-2xl mx-auto text-muted-foreground">
-                  Three simple steps to a more organized life.
-                </p>
-              </div>
-              <div className="mt-12 grid gap-8 md:grid-cols-3">
-                {howItWorks.map((step) => (
-                  <div key={step.title} className="text-center">
-                    <div className="flex justify-center mb-4">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-                        <step.icon className="h-6 w-6" />
-                      </div>
-                    </div>
-                    <h3 className="text-lg font-semibold">{step.title}</h3>
-                    <p className="mt-2 text-muted-foreground">{step.description}</p>
+              <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 auto-rows-[22rem]">
+                {/* Chat Card */}
+                <Card className="md:col-span-2 md:row-span-2 p-6 flex flex-col justify-between overflow-hidden bg-secondary/50">
+                  <div>
+                    <MessageSquare className="w-8 h-8 mb-4 text-primary" />
+                    <CardTitle className="text-2xl font-bold font-headline">
+                      Converse, Don't Command
+                    </CardTitle>
+                    <CardDescription className="mt-2 text-base">
+                      Interact with Reva using natural language. Create tasks, log
+                      expenses, or set reminders just by talking. It's that simple.
+                    </CardDescription>
                   </div>
-                ))}
+                  <div className="mt-4 -mb-12 -mr-8">
+                    <Image
+                      src="https://placehold.co/800x500.png"
+                      alt="Chat interface screenshot"
+                      width={800}
+                      height={500}
+                      className="w-full h-auto rounded-tl-lg shadow-2xl"
+                      data-ai-hint="app chat interface"
+                    />
+                  </div>
+                </Card>
+
+                {/* Tasks Card */}
+                <Card className="p-6 flex flex-col justify-between bg-secondary/50">
+                  <div>
+                    <CheckSquare className="w-8 h-8 mb-4 text-primary" />
+                    <CardTitle className="text-xl font-bold font-headline">
+                      Task Management
+                    </CardTitle>
+                    <CardDescription className="mt-2">
+                      Keep track of your to-dos with priorities and due dates.
+                    </CardDescription>
+                  </div>
+                  <div className="space-y-2 mt-4">
+                    <div className="flex items-center gap-2 p-3 rounded-lg bg-background">
+                        <div className="w-5 h-5 rounded-sm border border-primary"></div>
+                        <p className="flex-1 line-through text-muted-foreground">Finish project proposal</p>
+                    </div>
+                    <div className="flex items-center gap-2 p-3 rounded-lg bg-background ring-2 ring-primary">
+                        <div className="w-5 h-5 rounded-sm border border-primary bg-primary"></div>
+                        <p className="flex-1 font-medium">Follow up with design team</p>
+                    </div>
+                     <div className="flex items-center gap-2 p-3 rounded-lg bg-background">
+                        <div className="w-5 h-5 rounded-sm border border-primary"></div>
+                        <p className="flex-1">Book flight for conference</p>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Notes Card */}
+                <Card className="p-6 flex flex-col bg-secondary/50">
+                  <StickyNote className="w-8 h-8 mb-4 text-primary" />
+                  <CardTitle className="text-xl font-bold font-headline">
+                    Rich Note-Taking
+                  </CardTitle>
+                  <CardDescription className="mt-2">
+                    Capture your ideas in a powerful editor that supports rich text,
+                    images, and even AI-generated charts.
+                  </CardDescription>
+                </Card>
+
+                {/* Expenses Card */}
+                <Card className="p-6 flex flex-col justify-between bg-secondary/50">
+                   <div>
+                    <DollarSign className="w-8 h-8 mb-4 text-primary" />
+                    <CardTitle className="text-xl font-bold font-headline">
+                      Expense Tracking
+                    </CardTitle>
+                    <CardDescription className="mt-2">
+                      Log spending on the fly and let Reva categorize it for you.
+                    </CardDescription>
+                  </div>
+                  <div className="flex gap-2 items-end mt-4 h-24">
+                      <div className="flex-1 bg-primary/50 rounded-t-md h-[40%]"></div>
+                      <div className="flex-1 bg-primary/50 rounded-t-md h-[70%]"></div>
+                      <div className="flex-1 bg-primary rounded-t-md h-full"></div>
+                      <div className="flex-1 bg-primary/50 rounded-t-md h-[60%]"></div>
+                      <div className="flex-1 bg-primary/50 rounded-t-md h-[30%]"></div>
+                  </div>
+                </Card>
+
+                {/* AI Card */}
+                <Card className="p-6 bg-secondary/50">
+                  <BrainCircuit className="w-8 h-8 mb-4 text-primary" />
+                  <CardTitle className="text-xl font-bold font-headline">AI at the Core</CardTitle>
+                  <CardDescription className="mt-2">
+                    Powered by Google's latest models to understand your requests,
+                    find what you need, and help you get things done faster.
+                  </CardDescription>
+                </Card>
+
+                {/* Goals Card */}
+                <Card className="p-6 bg-secondary/50">
+                  <Target className="w-8 h-8 mb-4 text-primary" />
+                  <CardTitle className="text-xl font-bold font-headline">Goals & Journal</CardTitle>
+                  <CardDescription className="mt-2">
+                    Track your long-term ambitions and reflect on your progress
+                    with an integrated journal.
+                  </CardDescription>
+                </Card>
               </div>
             </div>
           </section>
