@@ -6,7 +6,7 @@ import RevaLogo from '@/components/reva-logo';
 import ScrollAnimator from '@/components/scroll-animator';
 import { Button } from '@/components/ui/button';
 import {
-  BrainCircuit,
+  Bell,
   Check,
   MessageSquare,
   CheckSquare,
@@ -34,7 +34,7 @@ export default function HomePage() {
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       setLoggedIn(!!session);
       if (event === 'SIGNED_IN' && window.location.pathname === '/') {
-        router.push('/chat');
+        // No longer redirecting from home page
       }
     });
     return () => {
@@ -72,7 +72,7 @@ export default function HomePage() {
                     <div className="mt-8 flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4">
                         <Button
                             size="lg"
-                            className="w-full sm:w-auto bg-black text-white hover:bg-gray-800 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90"
+                            className="w-full sm:w-auto"
                             onClick={handleGetStarted}
                         >
                             Get Started for Free
@@ -108,54 +108,120 @@ export default function HomePage() {
         <ScrollAnimator>
            <section id="features" className="py-20 md:py-32">
             <div className="container mx-auto px-4">
-              <div className="grid md:grid-cols-2 gap-12 lg:gap-24 items-center">
-                <div className="relative mx-auto w-full max-w-md">
-                   <Image
+               <div className="text-center mb-12 md:mb-16">
+                <h2 className="text-4xl md:text-5xl font-headline font-bold tracking-tight">
+                  All Your Tools in One Place
+                </h2>
+                <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">
+                  Stop juggling apps. Reva brings everything together with a single, smart, conversational interface, beautifully organized.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 auto-rows-[280px] max-w-7xl mx-auto">
+                <Card className="lg:col-span-2 p-6 flex flex-col">
+                  <CardHeader className="p-0">
+                    <div className="flex items-center gap-3">
+                      <MessageSquare className="w-7 h-7 text-primary" />
+                      <CardTitle className="text-2xl">AI-Powered Chat</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-0 pt-4 flex-1">
+                    <p className="text-muted-foreground">Just talk to Reva. Create tasks, log expenses, or set reminders using natural language.</p>
+                  </CardContent>
+                   <CardFooter className="p-0 mt-4">
+                     <div className="w-full space-y-2 text-sm">
+                        <div className="bg-secondary p-2.5 rounded-lg rounded-br-none ml-auto max-w-[80%]">
+                          "Remind me to call the vet tomorrow at 10am"
+                        </div>
+                        <div className="bg-primary text-primary-foreground p-2.5 rounded-lg rounded-bl-none mr-auto max-w-[80%]">
+                          "Reminder set! I'll ping you tomorrow."
+                        </div>
+                      </div>
+                  </CardFooter>
+                </Card>
+
+                <Card className="p-6 flex flex-col">
+                  <CardHeader className="p-0">
+                    <div className="flex items-center gap-3">
+                      <CheckSquare className="w-7 h-7 text-primary" />
+                      <CardTitle className="text-2xl">Tasks</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-0 pt-4 flex-1">
+                     <ul className="space-y-2 text-sm">
+                        <li className="flex items-center gap-2"><div className="w-4 h-4 rounded-sm border-2 border-primary bg-primary flex items-center justify-center shrink-0"><Check className="w-3 h-3 text-primary-foreground" /></div><span className="flex-1 line-through text-muted-foreground">Book flight to NYC</span></li>
+                        <li className="flex items-center gap-2"><div className="w-4 h-4 rounded-sm border-2 border-primary shrink-0"></div><span className="flex-1">Finish design proposal</span></li>
+                        <li className="flex items-center gap-2"><div className="w-4 h-4 rounded-sm border-2 border-primary shrink-0"></div><span className="flex-1">Send weekly report</span></li>
+                      </ul>
+                  </CardContent>
+                </Card>
+                
+                <Card className="p-6 flex flex-col">
+                   <CardHeader className="p-0">
+                    <div className="flex items-center gap-3">
+                      <Bell className="w-7 h-7 text-primary" />
+                      <CardTitle className="text-2xl">Reminders</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-0 pt-4 flex-1">
+                    <p className="text-muted-foreground">Set smart reminders that ensure you never miss an important deadline or event again.</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="lg:col-span-2 lg:row-span-2 relative overflow-hidden rounded-2xl shadow-lg min-h-[300px]">
+                  <Image
                       src="/assets/women.png"
                       alt="A woman happily using the Reva productivity app on her phone"
-                      width={500}
-                      height={500}
-                      className="w-full h-auto"
+                      layout="fill"
+                      objectFit="cover"
+                      className="w-full h-full"
                       data-ai-hint="woman using phone"
                     />
-                </div>
-                <div className="text-center md:text-left">
-                  <h2 className="text-4xl md:text-5xl font-headline font-bold tracking-tight">
-                    All Your Tools in One Place
-                  </h2>
-                  <p className="mt-4 text-lg text-muted-foreground">
-                    Stop juggling apps. Reva brings everything together with a single, smart, conversational interface.
-                  </p>
-                  <ul className="mt-8 space-y-6 text-left">
-                    <li className="flex items-start gap-4">
-                      <div className="flex-shrink-0 bg-primary/10 text-primary rounded-full h-10 w-10 flex items-center justify-center">
-                          <MessageSquare className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-lg">AI-Powered Chat</h3>
-                        <p className="text-muted-foreground mt-1">Just talk to Reva. Create tasks, log expenses, or set reminders using natural language.</p>
-                      </div>
-                    </li>
-                    <li className="flex items-start gap-4">
-                       <div className="flex-shrink-0 bg-primary/10 text-primary rounded-full h-10 w-10 flex items-center justify-center">
-                          <CheckSquare className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-lg">Task Management</h3>
-                        <p className="text-muted-foreground mt-1">Keep track of your to-dos with priorities and due dates, all in one place.</p>
-                      </div>
-                    </li>
-                    <li className="flex items-start gap-4">
-                       <div className="flex-shrink-0 bg-primary/10 text-primary rounded-full h-10 w-10 flex items-center justify-center">
-                          <DollarSign className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-lg">Intelligent Expense Tracking</h3>
-                        <p className="text-muted-foreground mt-1">Log your spending on the fly and let our AI automatically categorize it for you.</p>
-                      </div>
-                    </li>
-                  </ul>
-                </div>
+                </Card>
+
+                <Card className="p-6 flex flex-col">
+                  <CardHeader className="p-0">
+                    <div className="flex items-center gap-3">
+                      <DollarSign className="w-7 h-7 text-primary" />
+                      <CardTitle className="text-2xl">Expenses</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-0 pt-4 flex-1">
+                    <ul className="space-y-3 text-sm">
+                      <li className="flex justify-between items-center"><span>Morning Coffee</span><span className="font-semibold">$4.50</span></li>
+                      <li className="flex justify-between items-center"><span>Team Lunch</span><span className="font-semibold">$32.00</span></li>
+                      <li className="flex justify-between items-center"><span>Train Ticket</span><span className="font-semibold">$5.75</span></li>
+                    </ul>
+                  </CardContent>
+                </Card>
+
+                <Card className="p-6 flex flex-col">
+                  <CardHeader className="p-0">
+                    <div className="flex items-center gap-3">
+                      <Target className="w-7 h-7 text-primary" />
+                      <CardTitle className="text-2xl">Goals</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-0 pt-4 flex-1">
+                    <p className="font-semibold text-sm">Launch new website</p>
+                    <div className="w-full bg-secondary rounded-full h-2.5 mt-2">
+                      <div className="bg-primary h-2.5 rounded-full" style={{width: "75%"}}></div>
+                    </div>
+                    <p className="text-right text-sm text-muted-foreground mt-1">75%</p>
+                  </CardContent>
+                </Card>
+                
+                <Card className="lg:col-span-2 p-6 flex flex-col justify-center">
+                  <CardHeader className="p-0">
+                    <div className="flex items-center gap-3">
+                      <StickyNote className="w-7 h-7 text-primary" />
+                      <CardTitle className="text-2xl">Notes & Journal</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-0 pt-4">
+                    <p className="text-muted-foreground">Capture everything from meeting minutes to brilliant ideas. Reva's rich text editor keeps it all organized and accessible.</p>
+                  </CardContent>
+                </Card>
               </div>
             </div>
           </section>
@@ -165,7 +231,7 @@ export default function HomePage() {
         <ScrollAnimator>
           <section id="pricing" className="py-20 md:py-32">
             <div className="container mx-auto px-4">
-              <div className="bg-black text-white rounded-2xl p-8 md:p-12 lg:p-16">
+              <div className="bg-foreground text-background rounded-2xl p-8 md:p-12 lg:p-16">
                 <div className="grid md:grid-cols-2 gap-12 items-center">
                   <div className="space-y-6">
                     <h2 className="text-4xl md:text-5xl font-headline font-bold leading-tight">
@@ -173,22 +239,22 @@ export default function HomePage() {
                       <br />
                       Today
                     </h2>
-                    <p className="text-lg text-gray-300 max-w-md">
+                    <p className="text-lg text-muted-foreground max-w-md">
                       Simple, transparent pricing. Get started for free, no credit card
                       required. Unlock a more organized life in minutes.
                     </p>
                   </div>
                   
                   <div className="w-full">
-                    <Card className="bg-white text-black p-6 md:p-8 rounded-2xl shadow-2xl">
+                    <Card className="bg-card text-card-foreground p-6 md:p-8 rounded-2xl shadow-2xl">
                       <CardHeader className="p-0 pb-6">
                         <CardTitle className="text-2xl font-bold">Free Plan</CardTitle>
-                        <CardDescription className="text-gray-600 pt-1">For individuals getting started.</CardDescription>
+                        <CardDescription className="text-muted-foreground pt-1">For individuals getting started.</CardDescription>
                       </CardHeader>
                       <CardContent className="p-0 pt-6">
                         <div className="mb-6">
                           <span className="text-5xl font-bold">$0</span>
-                          <span className="text-xl text-gray-500">/mo</span>
+                          <span className="text-xl text-muted-foreground">/mo</span>
                         </div>
                         <ul className="space-y-3 text-sm">
                           <li className="flex items-center gap-3">
@@ -210,7 +276,7 @@ export default function HomePage() {
                         </ul>
                       </CardContent>
                       <CardFooter className="p-0 pt-8">
-                        <Button size="lg" asChild className="w-full bg-black text-white hover:bg-gray-800 rounded-full py-6 text-base font-semibold">
+                        <Button size="lg" asChild className="w-full rounded-full py-6 text-base font-semibold">
                           <Link href="/signup">Get Started</Link>
                         </Button>
                       </CardFooter>
@@ -244,5 +310,3 @@ export default function HomePage() {
     </div>
   );
 }
-
-    
