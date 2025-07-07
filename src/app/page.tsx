@@ -117,8 +117,9 @@ export default function HomePage() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 auto-rows-[280px] max-w-7xl mx-auto">
-                <Card className="lg:col-span-2 p-6 flex flex-col">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+                {/* Row 1 */}
+                <Card className="p-6 flex flex-col">
                   <CardHeader className="p-0">
                     <div className="flex items-center gap-3">
                       <MessageSquare className="w-7 h-7 text-primary" />
@@ -128,16 +129,6 @@ export default function HomePage() {
                   <CardContent className="p-0 pt-4 flex-1">
                     <p className="text-muted-foreground">Just talk to Reva. Create tasks, log expenses, or set reminders using natural language.</p>
                   </CardContent>
-                   <CardFooter className="p-0 mt-4">
-                     <div className="w-full space-y-2 text-sm">
-                        <div className="bg-secondary p-2.5 rounded-lg rounded-br-none ml-auto max-w-[80%]">
-                          "Remind me to call the vet tomorrow at 10am"
-                        </div>
-                        <div className="bg-primary text-primary-foreground p-2.5 rounded-lg rounded-bl-none mr-auto max-w-[80%]">
-                          "Reminder set! I'll ping you tomorrow."
-                        </div>
-                      </div>
-                  </CardFooter>
                 </Card>
 
                 <Card className="p-6 flex flex-col">
@@ -168,7 +159,24 @@ export default function HomePage() {
                   </CardContent>
                 </Card>
 
-                <Card className="lg:col-span-2 lg:row-span-2 relative overflow-hidden rounded-2xl shadow-lg">
+                {/* Row 2 */}
+                <Card className="p-6 flex flex-col">
+                  <CardHeader className="p-0">
+                    <div className="flex items-center gap-3">
+                      <Target className="w-7 h-7 text-primary" />
+                      <CardTitle className="text-2xl">Goals</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-0 pt-4 flex-1">
+                    <p className="font-semibold text-sm">Launch new website</p>
+                    <div className="w-full bg-secondary rounded-full h-2.5 mt-2">
+                      <div className="bg-primary h-2.5 rounded-full" style={{width: "75%"}}></div>
+                    </div>
+                    <p className="text-right text-sm text-muted-foreground mt-1">75%</p>
+                  </CardContent>
+                </Card>
+                
+                <Card className="relative overflow-hidden rounded-2xl shadow-lg h-full min-h-[280px]">
                   <Image
                       src="/assets/women.png"
                       alt="A woman happily using the Reva productivity app on her phone"
@@ -197,23 +205,8 @@ export default function HomePage() {
                   </CardContent>
                 </Card>
 
-                <Card className="p-6 flex flex-col">
-                  <CardHeader className="p-0">
-                    <div className="flex items-center gap-3">
-                      <Target className="w-7 h-7 text-primary" />
-                      <CardTitle className="text-2xl">Goals</CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="p-0 pt-4 flex-1">
-                    <p className="font-semibold text-sm">Launch new website</p>
-                    <div className="w-full bg-secondary rounded-full h-2.5 mt-2">
-                      <div className="bg-primary h-2.5 rounded-full" style={{width: "75%"}}></div>
-                    </div>
-                    <p className="text-right text-sm text-muted-foreground mt-1">75%</p>
-                  </CardContent>
-                </Card>
-                
-                <Card className="lg:col-span-2 p-6 flex flex-col justify-center">
+                {/* Row 3 */}
+                <Card className="lg:col-span-3 p-6 flex flex-col justify-center">
                   <CardHeader className="p-0">
                     <div className="flex items-center gap-3">
                       <StickyNote className="w-7 h-7 text-primary" />
