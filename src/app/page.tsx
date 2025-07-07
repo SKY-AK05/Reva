@@ -13,6 +13,7 @@ import {
   DollarSign,
   StickyNote,
   Target,
+  BookText,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -118,7 +119,6 @@ export default function HomePage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
-                {/* Row 1 */}
                 <Card className="p-6 flex flex-col">
                   <CardHeader className="p-0">
                     <div className="flex items-center gap-3">
@@ -159,7 +159,6 @@ export default function HomePage() {
                   </CardContent>
                 </Card>
 
-                {/* Row 2 */}
                 <Card className="p-6 flex flex-col">
                   <CardHeader className="p-0">
                     <div className="flex items-center gap-3">
@@ -176,7 +175,7 @@ export default function HomePage() {
                   </CardContent>
                 </Card>
                 
-                <Card className="relative overflow-hidden rounded-2xl shadow-lg h-full min-h-[280px]">
+                <Card className="relative overflow-hidden rounded-2xl shadow-lg h-full min-h-[280px] lg:row-span-2">
                   <Image
                       src="/assets/women.png"
                       alt="A woman happily using the Reva productivity app on her phone"
@@ -205,16 +204,27 @@ export default function HomePage() {
                   </CardContent>
                 </Card>
 
-                {/* Row 3 */}
-                <Card className="lg:col-span-3 p-6 flex flex-col justify-center">
+                <Card className="p-6 flex flex-col">
                   <CardHeader className="p-0">
                     <div className="flex items-center gap-3">
                       <StickyNote className="w-7 h-7 text-primary" />
-                      <CardTitle className="text-2xl">Notes & Journal</CardTitle>
+                      <CardTitle className="text-2xl">Notes</CardTitle>
                     </div>
                   </CardHeader>
-                  <CardContent className="p-0 pt-4">
-                    <p className="text-muted-foreground">Capture everything from meeting minutes to brilliant ideas. Reva's rich text editor keeps it all organized and accessible.</p>
+                  <CardContent className="p-0 pt-4 flex-1">
+                    <p className="text-muted-foreground">Capture meeting minutes and brilliant ideas with a rich text editor.</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="p-6 flex flex-col">
+                  <CardHeader className="p-0">
+                    <div className="flex items-center gap-3">
+                      <BookText className="w-7 h-7 text-primary" />
+                      <CardTitle className="text-2xl">Journal</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-0 pt-4 flex-1">
+                    <p className="text-muted-foreground">Record your thoughts, feelings, and memories in a private space.</p>
                   </CardContent>
                 </Card>
               </div>
