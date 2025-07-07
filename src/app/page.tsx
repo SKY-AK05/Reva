@@ -1,4 +1,3 @@
-
 'use client';
 import Image from 'next/image';
 import PublicHeader from '@/components/public-header';
@@ -176,6 +175,8 @@ export default function HomePage() {
                       objectFit="cover"
                       className="w-full h-full"
                       data-ai-hint="woman using phone"
+                      quality={100}
+                      priority
                     />
                 </Card>
 
