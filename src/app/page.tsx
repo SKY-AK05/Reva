@@ -1,3 +1,4 @@
+
 'use client';
 import Image from 'next/image';
 import PublicHeader from '@/components/public-header';
@@ -175,14 +176,14 @@ export default function HomePage() {
                 </Card>
                 
                 <Card className="relative rounded-2xl shadow-lg h-full min-h-[280px] lg:col-span-2 lg:row-span-2 overflow-visible">
-                  <Image
-                      src="/assets/women.png"
-                      alt="A woman happily using the Reva productivity app on her phone"
-                      layout="fill"
-                      objectFit="cover"
-                      className="scale-125 lg:-translate-y-12"
-                      data-ai-hint="woman using phone"
-                      quality={100}
+                    <Image
+                        src="/assets/women.png"
+                        alt="A woman happily using the Reva productivity app on her phone"
+                        layout="fill"
+                        objectFit="contain"
+                        className="scale-[1.25] lg:-translate-y-6"
+                        data-ai-hint="woman using phone"
+                        quality={100}
                     />
                 </Card>
 
