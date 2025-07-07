@@ -168,13 +168,13 @@ export default function HomePage() {
                   </CardContent>
                 </Card>
 
-                <Card className="lg:col-span-2 lg:row-span-2 relative overflow-hidden rounded-2xl shadow-lg min-h-[300px]">
+                <Card className="lg:col-span-2 lg:row-span-2 relative overflow-hidden rounded-2xl shadow-lg">
                   <Image
                       src="/assets/women.png"
                       alt="A woman happily using the Reva productivity app on her phone"
                       layout="fill"
                       objectFit="cover"
-                      className="object-top"
+                      className="object-bottom"
                       data-ai-hint="woman using phone"
                       quality={100}
                       priority
