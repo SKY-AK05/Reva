@@ -15,29 +15,10 @@ import {
   Target,
 } from 'lucide-react';
 import Link from 'next/link';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-
-const testimonials = [
-  {
-    quote: "Reva has completely changed how I manage my daily tasks. It's so intuitive, I just talk to it like a person!",
-    name: 'Alex Johnson',
-    title: 'Freelance Designer',
-    avatar: 'https://placehold.co/40x40.png',
-    avatarHint: 'smiling person'
-  },
-  {
-    quote: "I've tried every budget app out there. Reva is the first one that has stuck because it's just so easy to log expenses on the fly.",
-    name: 'Samantha Lee',
-    title: 'Product Manager',
-    avatar: 'https://placehold.co/40x40.png',
-    avatarHint: 'happy woman'
-  }
-];
 
 export default function HomePage() {
   const [loading, setLoading] = useState(true);
@@ -123,164 +104,63 @@ export default function HomePage() {
           </section>
         </ScrollAnimator>
 
-        {/* Bento Grid Features Section */}
+        {/* Features Section */}
         <ScrollAnimator>
-          <section id="features" className="py-20 md:py-32">
+           <section id="features" className="py-20 md:py-32">
             <div className="container mx-auto px-4">
-              <div className="text-center max-w-3xl mx-auto">
-                <h2 className="text-4xl md:text-5xl font-headline font-bold tracking-tight">
-                  A Smarter Way to Organize Your Life
-                </h2>
-                <p className="mt-4 text-lg text-muted-foreground">
-                  Reva integrates all your productivity tools into one intelligent,
-                  conversational interface. Here's how it all comes together.
-                </p>
-              </div>
-              <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 auto-rows-[22rem]">
-                {/* Chat Card */}
-                <Card className="md:col-span-2 md:row-span-2 p-6 flex flex-col justify-between overflow-hidden bg-secondary/50">
-                  <div>
-                    <MessageSquare className="w-8 h-8 mb-4 text-primary" />
-                    <CardTitle className="text-2xl font-bold font-headline">
-                      Converse, Don't Command
-                    </CardTitle>
-                    <CardDescription className="mt-2 text-base">
-                      Interact with Reva using natural language. Create tasks, log
-                      expenses, or set reminders just by talking. It's that simple.
-                    </CardDescription>
-                  </div>
-                  <div className="mt-4 -mb-12 -mr-8">
-                    <Image
-                      src="https://placehold.co/800x500.png"
-                      alt="Chat interface screenshot"
-                      width={800}
+              <div className="grid md:grid-cols-2 gap-12 lg:gap-24 items-center">
+                <div className="relative mx-auto w-full max-w-md">
+                   <Image
+                      src="/assets/women.png"
+                      alt="A woman happily using the Reva productivity app on her phone"
+                      width={500}
                       height={500}
-                      className="w-full h-auto rounded-tl-lg shadow-2xl"
-                      data-ai-hint="app chat interface"
+                      className="w-full h-auto"
+                      data-ai-hint="woman using phone"
                     />
-                  </div>
-                </Card>
-
-                {/* Tasks Card */}
-                <Card className="p-6 flex flex-col justify-between bg-secondary/50">
-                  <div>
-                    <CheckSquare className="w-8 h-8 mb-4 text-primary" />
-                    <CardTitle className="text-xl font-bold font-headline">
-                      Task Management
-                    </CardTitle>
-                    <CardDescription className="mt-2">
-                      Keep track of your to-dos with priorities and due dates.
-                    </CardDescription>
-                  </div>
-                  <div className="space-y-2 mt-4">
-                    <div className="flex items-center gap-2 p-3 rounded-lg bg-background">
-                        <div className="w-5 h-5 rounded-sm border border-primary"></div>
-                        <p className="flex-1 line-through text-muted-foreground">Finish project proposal</p>
-                    </div>
-                    <div className="flex items-center gap-2 p-3 rounded-lg bg-background ring-2 ring-primary">
-                        <div className="w-5 h-5 rounded-sm border border-primary bg-primary"></div>
-                        <p className="flex-1 font-medium">Follow up with design team</p>
-                    </div>
-                     <div className="flex items-center gap-2 p-3 rounded-lg bg-background">
-                        <div className="w-5 h-5 rounded-sm border border-primary"></div>
-                        <p className="flex-1">Book flight for conference</p>
-                    </div>
-                  </div>
-                </Card>
-
-                {/* Notes Card */}
-                <Card className="p-6 flex flex-col bg-secondary/50">
-                  <StickyNote className="w-8 h-8 mb-4 text-primary" />
-                  <CardTitle className="text-xl font-bold font-headline">
-                    Rich Note-Taking
-                  </CardTitle>
-                  <CardDescription className="mt-2">
-                    Capture your ideas in a powerful editor that supports rich text,
-                    images, and even AI-generated charts.
-                  </CardDescription>
-                </Card>
-
-                {/* Expenses Card */}
-                <Card className="p-6 flex flex-col justify-between bg-secondary/50">
-                   <div>
-                    <DollarSign className="w-8 h-8 mb-4 text-primary" />
-                    <CardTitle className="text-xl font-bold font-headline">
-                      Expense Tracking
-                    </CardTitle>
-                    <CardDescription className="mt-2">
-                      Log spending on the fly and let Reva categorize it for you.
-                    </CardDescription>
-                  </div>
-                  <div className="flex gap-2 items-end mt-4 h-24">
-                      <div className="flex-1 bg-primary/50 rounded-t-md h-[40%]"></div>
-                      <div className="flex-1 bg-primary/50 rounded-t-md h-[70%]"></div>
-                      <div className="flex-1 bg-primary rounded-t-md h-full"></div>
-                      <div className="flex-1 bg-primary/50 rounded-t-md h-[60%]"></div>
-                      <div className="flex-1 bg-primary/50 rounded-t-md h-[30%]"></div>
-                  </div>
-                </Card>
-
-                {/* AI Card */}
-                <Card className="p-6 bg-secondary/50">
-                  <BrainCircuit className="w-8 h-8 mb-4 text-primary" />
-                  <CardTitle className="text-xl font-bold font-headline">AI at the Core</CardTitle>
-                  <CardDescription className="mt-2">
-                    Powered by Google's latest models to understand your requests,
-                    find what you need, and help you get things done faster.
-                  </CardDescription>
-                </Card>
-
-                {/* Goals Card */}
-                <Card className="p-6 bg-secondary/50">
-                  <Target className="w-8 h-8 mb-4 text-primary" />
-                  <CardTitle className="text-xl font-bold font-headline">Goals & Journal</CardTitle>
-                  <CardDescription className="mt-2">
-                    Track your long-term ambitions and reflect on your progress
-                    with an integrated journal.
-                  </CardDescription>
-                </Card>
-              </div>
-            </div>
-          </section>
-        </ScrollAnimator>
-
-        {/* Testimonials Section */}
-        <ScrollAnimator>
-          <section className="py-20 md:py-32 bg-secondary">
-             <div className="container mx-auto px-4">
-              <div className="text-center">
-                <h2 className="text-3xl md:text-4xl font-headline font-bold">
-                  Loved by People Like You
-                </h2>
-                <p className="mt-4 max-w-2xl mx-auto text-muted-foreground">
-                  See what our users are saying about their newfound productivity.
-                </p>
-              </div>
-              <div className="mt-12 grid gap-8 md:grid-cols-2">
-                {testimonials.map((testimonial) => (
-                  <Card key={testimonial.name} className="p-6">
-                    <CardContent className="p-0">
-                      <blockquote className="text-lg font-semibold leading-snug">
-                        “{testimonial.quote}”
-                      </blockquote>
-                    </CardContent>
-                    <CardFooter className="p-0 mt-4 flex items-center gap-4">
-                       <Avatar>
-                        <AvatarImage src={testimonial.avatar} alt={testimonial.name} data-ai-hint={testimonial.avatarHint} />
-                        <AvatarFallback>{testimonial.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-semibold">{testimonial.name}</p>
-                        <p className="text-sm text-muted-foreground">{testimonial.title}</p>
+                </div>
+                <div className="text-center md:text-left">
+                  <h2 className="text-4xl md:text-5xl font-headline font-bold tracking-tight">
+                    All Your Tools in One Place
+                  </h2>
+                  <p className="mt-4 text-lg text-muted-foreground">
+                    Stop juggling apps. Reva brings everything together with a single, smart, conversational interface.
+                  </p>
+                  <ul className="mt-8 space-y-6 text-left">
+                    <li className="flex items-start gap-4">
+                      <div className="flex-shrink-0 bg-primary/10 text-primary rounded-full h-10 w-10 flex items-center justify-center">
+                          <MessageSquare className="w-5 h-5" />
                       </div>
-                    </CardFooter>
-                  </Card>
-                ))}
+                      <div>
+                        <h3 className="font-semibold text-lg">AI-Powered Chat</h3>
+                        <p className="text-muted-foreground mt-1">Just talk to Reva. Create tasks, log expenses, or set reminders using natural language.</p>
+                      </div>
+                    </li>
+                    <li className="flex items-start gap-4">
+                       <div className="flex-shrink-0 bg-primary/10 text-primary rounded-full h-10 w-10 flex items-center justify-center">
+                          <CheckSquare className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-lg">Task Management</h3>
+                        <p className="text-muted-foreground mt-1">Keep track of your to-dos with priorities and due dates, all in one place.</p>
+                      </div>
+                    </li>
+                    <li className="flex items-start gap-4">
+                       <div className="flex-shrink-0 bg-primary/10 text-primary rounded-full h-10 w-10 flex items-center justify-center">
+                          <DollarSign className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-lg">Intelligent Expense Tracking</h3>
+                        <p className="text-muted-foreground mt-1">Log your spending on the fly and let our AI automatically categorize it for you.</p>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
           </section>
         </ScrollAnimator>
-        
+
         {/* Pricing Section */}
         <ScrollAnimator>
           <section id="pricing" className="py-20 md:py-32">
@@ -364,3 +244,5 @@ export default function HomePage() {
     </div>
   );
 }
+
+    
