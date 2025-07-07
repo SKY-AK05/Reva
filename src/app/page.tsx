@@ -181,7 +181,7 @@ export default function HomePage() {
                       alt="A woman happily using the Reva productivity app on her phone"
                       layout="fill"
                       objectFit="cover"
-                      className="object-bottom"
+                      className="object-bottom scale-125"
                       data-ai-hint="woman using phone"
                       quality={100}
                       priority
@@ -282,7 +282,7 @@ export default function HomePage() {
                       </CardContent>
                       <CardFooter className="p-0 pt-8">
                         <Button size="lg" asChild className="w-full rounded-full py-6 text-base font-semibold">
-                          <Link href="/signup">Get Started</Link>
+                          <Link href="/signup">Sign Up</Link>
                         </Button>
                       </CardFooter>
                     </Card>
