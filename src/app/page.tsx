@@ -1,4 +1,3 @@
-
 'use client';
 import Image from 'next/image';
 import PublicHeader from '@/components/public-header';
@@ -175,7 +174,7 @@ export default function HomePage() {
                   </CardContent>
                 </Card>
                 
-                <Card className="relative overflow-hidden rounded-2xl shadow-lg h-full min-h-[280px] lg:row-span-2">
+                <Card className="relative rounded-2xl shadow-lg h-full min-h-[280px] lg:row-span-2">
                   <Image
                       src="/assets/women.png"
                       alt="A woman happily using the Reva productivity app on her phone"
