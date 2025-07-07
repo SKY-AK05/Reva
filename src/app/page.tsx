@@ -117,8 +117,8 @@ export default function HomePage() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
-                <Card className="p-6 flex flex-col">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+                <Card className="p-6 flex flex-col lg:col-span-2">
                   <CardHeader className="p-0">
                     <div className="flex items-center gap-3">
                       <MessageSquare className="w-7 h-7 text-primary" />
@@ -174,7 +174,7 @@ export default function HomePage() {
                   </CardContent>
                 </Card>
                 
-                <Card className="relative rounded-2xl shadow-lg h-full min-h-[280px] lg:row-span-2">
+                <Card className="relative rounded-2xl shadow-lg h-full min-h-[280px] lg:col-span-2 lg:row-span-2 overflow-visible">
                   <Image
                       src="/assets/women.png"
                       alt="A woman happily using the Reva productivity app on her phone"
@@ -183,7 +183,6 @@ export default function HomePage() {
                       className="object-bottom scale-125"
                       data-ai-hint="woman using phone"
                       quality={100}
-                      priority
                     />
                 </Card>
 
@@ -203,27 +202,15 @@ export default function HomePage() {
                   </CardContent>
                 </Card>
 
-                <Card className="p-6 flex flex-col">
+                <Card className="p-6 flex flex-col lg:col-span-2">
                   <CardHeader className="p-0">
                     <div className="flex items-center gap-3">
                       <StickyNote className="w-7 h-7 text-primary" />
-                      <CardTitle className="text-2xl">Notes</CardTitle>
+                      <CardTitle className="text-2xl">Notes & Journal</CardTitle>
                     </div>
                   </CardHeader>
                   <CardContent className="p-0 pt-4 flex-1">
-                    <p className="text-muted-foreground">Capture meeting minutes and brilliant ideas with a rich text editor.</p>
-                  </CardContent>
-                </Card>
-
-                <Card className="p-6 flex flex-col">
-                  <CardHeader className="p-0">
-                    <div className="flex items-center gap-3">
-                      <BookText className="w-7 h-7 text-primary" />
-                      <CardTitle className="text-2xl">Journal</CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="p-0 pt-4 flex-1">
-                    <p className="text-muted-foreground">Record your thoughts, feelings, and memories in a private space.</p>
+                    <p className="text-muted-foreground">Capture meeting minutes and brilliant ideas, or record your thoughts and feelings in a private space.</p>
                   </CardContent>
                 </Card>
               </div>
