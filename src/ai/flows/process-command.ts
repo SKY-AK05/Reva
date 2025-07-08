@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview The central AI command processing flow for Reva.
@@ -21,6 +20,7 @@ import { addGoal, updateGoal as updateGoalInDb, getGoals } from '@/services/goal
 import { addJournalEntry } from '@/services/journal';
 import { generateChatResponse } from './generate-chat-response';
 import { createServerClient } from '@/lib/supabase/server';
+import type { Goal } from '@/context/goals-context';
 
 const ToneSchema = z.enum(['Neutral', 'GenZ', 'Sarcastic', 'Poetic']);
 type Tone = z.infer<typeof ToneSchema>;
@@ -73,6 +73,14 @@ const GoalInputSchema = z.object({
 const JournalEntryInputSchema = z.object({
     content: z.string().describe("The user's thoughts or entry content for the journal."),
     title: z.string().optional().describe("The title of the journal entry. If not provided by the user, generate a concise one based on the content."),
+});
+
+const GoalOutputSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  description: z.string().nullable(),
+  progress: z.number(),
+  status: z.string().nullable(),
 });
 
 
@@ -197,10 +205,7 @@ const createGoal = ai.defineTool({
     name: 'createGoal',
     description: "Use when a user wants to set a new goal that is not in their existing goal list.",
     inputSchema: GoalInputSchema,
-    outputSchema: z.object({
-        id: z.string(),
-        title: z.string(),
-    })
+    outputSchema: GoalOutputSchema
 }, async (input) => {
     const supabase = createServerClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -213,7 +218,7 @@ const createGoal = ai.defineTool({
         status: input.status || 'Not Started'
     });
     if (!createdGoal) throw new Error('Failed to create goal in database.');
-    return { id: createdGoal.id, title: createdGoal.title };
+    return createdGoal;
 });
 
 const updateGoal = ai.defineTool({
@@ -223,11 +228,11 @@ const updateGoal = ai.defineTool({
         id: z.string().describe("The ID of the goal to update."),
         updates: GoalInputSchema.partial().describe("The fields to update."),
     }),
-    outputSchema: z.object({ id: z.string() }),
+    outputSchema: GoalOutputSchema,
 }, async ({ id, updates }) => {
     const updatedGoal = await updateGoalInDb(id, updates);
     if (!updatedGoal) throw new Error('Failed to update goal.');
-    return { id: updatedGoal.id };
+    return updatedGoal;
 });
 
 const createJournalEntry = ai.defineTool({
@@ -301,6 +306,7 @@ export type ProcessCommandOutput = {
     type: 'task' | 'reminder' | 'expense' | 'goal' | 'journalEntry';
   };
   updatedItemType?: 'task' | 'reminder' | 'expense' | 'goal';
+  goal?: Goal;
 };
 
 const prompt = ai.definePrompt({
@@ -451,10 +457,13 @@ export async function processCommand(input: ProcessCommandInput): Promise<Proces
   } else if (action === 'updateReminder') {
     output.updatedItemType = 'reminder';
   } else if (action === 'createGoal') {
-    const goalData = toolOutput as z.infer<typeof createGoal.outputSchema>;
+    const goalData = toolOutput as Goal;
     output.newItemContext = { id: goalData.id, type: 'goal' };
+    output.goal = goalData;
   } else if (action === 'updateGoal') {
+    const goalData = toolOutput as Goal;
     output.updatedItemType = 'goal';
+    output.goal = goalData;
   } else if (action === 'createJournalEntry') {
     const journalData = toolOutput as z.infer<typeof createJournalEntry.outputSchema>;
     output.newItemContext = { id: journalData.id, type: 'journalEntry' };

@@ -1,6 +1,7 @@
 'use server';
 
 // Chat is now ephemeral. All database persistence functions have been removed.
+import type { Goal } from '@/context/goals-context';
 
 export interface ChatMessage {
   id: string;
@@ -8,4 +9,5 @@ export interface ChatMessage {
   sender: 'user' | 'bot';
   text: string;
   created_at: string;
+  goal?: Goal;
 }

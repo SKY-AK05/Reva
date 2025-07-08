@@ -8,18 +8,34 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { SendHorizonal, Bot, CheckSquare, DollarSign, Bell, Target, User } from 'lucide-react';
 import { processUserChat } from '@/app/(app)/chat/actions';
-import type { ProcessCommandInput } from '@/ai/flows/process-command';
 import type { ChatMessage } from '@/services/chat';
 import { useChatContext } from '@/context/chat-context';
 import { useTasksContext } from '@/context/tasks-context';
 import { useExpensesContext } from '@/context/expenses-context';
 import { useRemindersContext } from '@/context/reminders-context';
-import { useGoalsContext } from '@/context/goals-context';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useGoalsContext, type Goal } from '@/context/goals-context';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import BotTypingMessage from './bot-typing-message';
 import { useToneContext } from '@/context/tone-context';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import { Progress } from '@/components/ui/progress';
+
+function GoalCard({ goal }: { goal: Goal }) {
+  return (
+    <Card className="mt-2 animate-fade-in-up bg-background/50">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-base">{goal.title}</CardTitle>
+        {goal.description && <CardDescription>{goal.description}</CardDescription>}
+      </CardHeader>
+      <CardContent>
+        <div className="flex items-center gap-4">
+          <Progress value={goal.progress} className="h-2 flex-1" />
+          <span className="text-sm font-semibold text-muted-foreground">{goal.progress}%</span>
+        </div>
+        {goal.status && <p className="text-xs text-muted-foreground mt-2">Status: {goal.status}</p>}
+      </CardContent>
+    </Card>
+  )
+}
 
 export default function ChatInterface() {
   const { messages, setMessages, lastItemContext, setLastItemContext, loading: isFetchingHistory } = useChatContext();
@@ -81,6 +97,7 @@ export default function ChatInterface() {
         text: result.botResponse,
         created_at: new Date().toISOString(),
         user_id: '',
+        goal: result.goal
       };
       
       setIsLoading(false); // Hide "thinking..." message
@@ -186,17 +203,20 @@ export default function ChatInterface() {
                 {message.sender === 'bot' && (
                   <>
                     <Bot className="h-6 w-6 text-primary flex-shrink-0" />
-                    <BotTypingMessage
-                      content={message.text}
-                      animate={index === messages.length - 1 && isAnimating}
-                      onAnimationComplete={() => setIsAnimating(false)}
-                    />
+                    <div className="flex-1 space-y-2">
+                      <BotTypingMessage
+                        content={message.text}
+                        animate={index === messages.length - 1 && isAnimating}
+                        onAnimationComplete={() => setIsAnimating(false)}
+                      />
+                      {message.goal && <GoalCard goal={message.goal} />}
+                    </div>
                   </>
                 )}
                 {message.sender === 'user' && (
                   <>
                     <div className="max-w-xl p-4 rounded-2xl bg-primary text-primary-foreground">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.text}</ReactMarkdown>
+                        {message.text}
                     </div>
                     <User className="h-6 w-6 text-primary flex-shrink-0" />
                   </>
