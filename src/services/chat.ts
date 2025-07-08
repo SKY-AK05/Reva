@@ -10,4 +10,5 @@ export interface ChatMessage {
   text: string;
   created_at: string;
   goal?: Goal;
+  actionIcon?: 'task' | 'reminder' | 'expense' | 'goal' | 'journalEntry';
 }

@@ -1,12 +1,12 @@
 
 "use client";
 
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { SendHorizonal, Bot, CheckSquare, DollarSign, Bell, Target, User } from 'lucide-react';
+import { SendHorizonal, CheckSquare, DollarSign, Bell, Target, User, BookText } from 'lucide-react';
 import { processUserChat } from '@/app/(app)/chat/actions';
 import type { ChatMessage } from '@/services/chat';
 import { useChatContext } from '@/context/chat-context';
@@ -18,6 +18,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import BotTypingMessage from './bot-typing-message';
 import { useToneContext } from '@/context/tone-context';
 import { Progress } from '@/components/ui/progress';
+import RevaLogo from './reva-logo';
 
 function GoalCard({ goal }: { goal: Goal }) {
   return (
@@ -55,6 +56,14 @@ export default function ChatInterface() {
   const totalExpenses = expenses.reduce((sum, expense) => sum + Number(expense.amount), 0);
   const upcomingReminders = reminders.length;
   const goalsInProgress = goals.filter(g => g.progress < 100).length;
+
+  const iconMap = {
+    task: CheckSquare,
+    reminder: Bell,
+    expense: DollarSign,
+    goal: Target,
+    journalEntry: BookText,
+  };
 
   useEffect(() => {
     // Scroll to the bottom of the chat on new messages
@@ -97,7 +106,8 @@ export default function ChatInterface() {
         text: result.botResponse,
         created_at: new Date().toISOString(),
         user_id: '',
-        goal: result.goal
+        goal: result.goal,
+        actionIcon: result.actionIcon
       };
       
       setIsLoading(false); // Hide "thinking..." message
@@ -202,7 +212,13 @@ export default function ChatInterface() {
               >
                 {message.sender === 'bot' && (
                   <>
-                    <Bot className="h-6 w-6 text-primary flex-shrink-0" />
+                    {message.actionIcon && iconMap[message.actionIcon] ? (
+                      React.createElement(iconMap[message.actionIcon], { className: "h-6 w-6 text-primary flex-shrink-0" })
+                    ) : (
+                      <div className="h-8 w-8 flex items-center justify-center flex-shrink-0">
+                        <RevaLogo size="xs" />
+                      </div>
+                    )}
                     <div className="flex-1 space-y-2">
                       <BotTypingMessage
                         content={message.text}
@@ -225,7 +241,9 @@ export default function ChatInterface() {
             ))}
             {isLoading && (
               <div className="w-full flex items-start gap-4">
-                 <Bot className="h-6 w-6 text-primary flex-shrink-0" />
+                 <div className="h-8 w-8 flex items-center justify-center flex-shrink-0">
+                    <RevaLogo size="xs" />
+                  </div>
                  <p className="text-sm text-muted-foreground animate-pulse pt-1">Reva is thinking...</p>
               </div>
             )}

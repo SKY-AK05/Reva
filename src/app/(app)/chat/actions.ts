@@ -69,7 +69,7 @@ export async function processUserChat(
         revalidatePath('/overview');
     };
 
-    if (result.newItemContext || result.updatedItemType) {
+    if (result.newItemContext || result.updatedItemType || result.actionIcon === 'expense') {
         revalidateAll();
     }
 

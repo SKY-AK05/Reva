@@ -301,6 +301,7 @@ export type ProcessCommandInput = z.infer<typeof ProcessCommandInputSchema>;
 
 export type ProcessCommandOutput = {
   botResponse: string;
+  actionIcon?: 'task' | 'reminder' | 'expense' | 'goal' | 'journalEntry';
   newItemContext?: {
     id: string;
     type: 'task' | 'reminder' | 'expense' | 'goal' | 'journalEntry';
@@ -445,28 +446,37 @@ export async function processCommand(input: ProcessCommandInput): Promise<Proces
   const botResponse = generateToneResponse(action, toolOutput, input.tone);
   const output: ProcessCommandOutput = { botResponse };
 
-  // Set context based on action
+  // Set context and icon based on action
   if (action === 'createTask') {
     const taskData = toolOutput as z.infer<typeof createTask.outputSchema>;
     output.newItemContext = { id: taskData.id, type: 'task' };
+    output.actionIcon = 'task';
   } else if (action === 'updateTask') {
     output.updatedItemType = 'task';
+    output.actionIcon = 'task';
   } else if (action === 'createReminder') {
     const reminderData = toolOutput as z.infer<typeof createReminder.outputSchema>;
     output.newItemContext = { id: reminderData.id, type: 'reminder' };
+    output.actionIcon = 'reminder';
   } else if (action === 'updateReminder') {
     output.updatedItemType = 'reminder';
+    output.actionIcon = 'reminder';
   } else if (action === 'createGoal') {
     const goalData = toolOutput as Goal;
     output.newItemContext = { id: goalData.id, type: 'goal' };
     output.goal = goalData;
+    output.actionIcon = 'goal';
   } else if (action === 'updateGoal') {
     const goalData = toolOutput as Goal;
     output.updatedItemType = 'goal';
     output.goal = goalData;
+    output.actionIcon = 'goal';
   } else if (action === 'createJournalEntry') {
     const journalData = toolOutput as z.infer<typeof createJournalEntry.outputSchema>;
     output.newItemContext = { id: journalData.id, type: 'journalEntry' };
+    output.actionIcon = 'journalEntry';
+  } else if (action === 'trackExpenses') {
+    output.actionIcon = 'expense';
   }
   
   return output;

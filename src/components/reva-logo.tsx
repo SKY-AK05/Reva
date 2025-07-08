@@ -1,11 +1,12 @@
 import Image from 'next/image';
 
 type RevaLogoProps = {
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'xs' | 'sm' | 'md' | 'lg';
 };
 
 export default function RevaLogo({ size = 'lg' }: RevaLogoProps) {
   const sizeMap = {
+    xs: 24,
     sm: 32,
     md: 64,
     lg: 96,
