@@ -15,8 +15,7 @@ export async function processUserChat(
     chatInput: string,
     contextItem: { id: string, type: 'task' | 'reminder' | 'expense' | 'goal' | 'journalEntry' } | null,
     chatHistory: { sender: 'user' | 'bot'; text: string }[],
-    tone: z.infer<typeof ToneSchema>,
-    pendingAction: ProcessCommandInput['pendingAction']
+    tone: z.infer<typeof ToneSchema>
 ): Promise<ProcessCommandOutput> {
     const supabase = createServerClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -46,7 +45,6 @@ export async function processUserChat(
             contextItem: contextItem || undefined,
             chatHistory: formattedHistory,
             tone,
-            pendingAction: pendingAction || undefined,
         });
 
     } catch (e: any) {

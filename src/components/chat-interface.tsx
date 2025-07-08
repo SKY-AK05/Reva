@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { SendHorizonal, Bot, CheckSquare, DollarSign, Bell, Target } from 'lucide-react';
+import { SendHorizonal, Bot, CheckSquare, DollarSign, Bell, Target, User } from 'lucide-react';
 import { processUserChat } from '@/app/(app)/chat/actions';
 import type { ProcessCommandInput } from '@/ai/flows/process-command';
 import type { ChatMessage } from '@/services/chat';
@@ -26,7 +26,6 @@ export default function ChatInterface() {
   const { tone } = useToneContext();
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [pendingAction, setPendingAction] = useState<ProcessCommandInput['pendingAction']>(null);
   const scrollViewportRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -73,7 +72,7 @@ export default function ChatInterface() {
     setIsLoading(true);
 
     try {
-      const result = await processUserChat(messageText, lastItemContext, formattedHistory, tone, pendingAction);
+      const result = await processUserChat(messageText, lastItemContext, formattedHistory, tone);
       
       const botMessage: ChatMessage = {
         id: crypto.randomUUID(),
@@ -87,12 +86,9 @@ export default function ChatInterface() {
       // Update context for the next turn
       if (result.newItemContext) {
         setLastItemContext(result.newItemContext);
-      } else if (!result.pendingAction) { // Don't clear context if we're in a follow-up action
+      } else if (!result.updatedItemType) {
         setLastItemContext(null); 
       }
-
-      // Handle pending actions for the next turn
-      setPendingAction(result.pendingAction || null);
 
 
     } catch (error) {
@@ -180,27 +176,32 @@ export default function ChatInterface() {
             {messages.map((message, index) => (
               <div
                 key={message.id}
-                className={cn('w-full flex', {
+                className={cn('w-full flex gap-4', {
                   'justify-end': message.sender === 'user',
                   'items-start': message.sender === 'bot',
                 })}
               >
-                {message.sender === 'user' ? (
-                  <div className="max-w-xl p-4 rounded-2xl bg-primary text-primary-foreground">
-                    <div className="leading-relaxed text-base">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.text}</ReactMarkdown>
-                    </div>
-                  </div>
-                ) : (
-                  <BotTypingMessage
-                    content={message.text}
-                    animate={index === messages.length - 1}
-                  />
-                )}
+                {message.sender === 'bot' && <Bot className="h-6 w-6 text-primary flex-shrink-0" />}
+                <div className={cn("max-w-xl p-4 rounded-2xl", {
+                    "bg-primary text-primary-foreground": message.sender === 'user',
+                })}>
+                  {message.sender === 'user' ? (
+                      <div className="leading-relaxed text-base">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.text}</ReactMarkdown>
+                      </div>
+                  ) : (
+                    <BotTypingMessage
+                      content={message.text}
+                      animate={index === messages.length - 1 && isLoading}
+                    />
+                  )}
+                </div>
+                 {message.sender === 'user' && <User className="h-6 w-6 text-primary flex-shrink-0" />}
               </div>
             ))}
             {isLoading && (
-              <div className="w-full flex items-start">
+              <div className="w-full flex items-start gap-4">
+                 <Bot className="h-6 w-6 text-primary flex-shrink-0" />
                  <p className="text-sm text-muted-foreground animate-pulse pt-1">Reva is thinking...</p>
               </div>
             )}

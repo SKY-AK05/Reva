@@ -17,7 +17,7 @@ import {
   updateReminder as updateReminderInDb,
 } from '@/services/reminders';
 import { addExpense, addExpenses } from '@/services/expenses';
-import { addGoal, updateGoal as updateGoalInDb, findSimilarGoal } from '@/services/goals';
+import { addGoal, updateGoal as updateGoalInDb, getGoals } from '@/services/goals';
 import { addJournalEntry } from '@/services/journal';
 import { generateChatResponse } from './generate-chat-response';
 import { createServerClient } from '@/lib/supabase/server';
@@ -195,34 +195,16 @@ const trackExpenses = ai.defineTool({
 
 const createGoal = ai.defineTool({
     name: 'createGoal',
-    description: "Use when a user wants to set a new goal. This tool detects potential duplicates. If a similar goal exists, it will return a conflict.",
+    description: "Use when a user wants to set a new goal that is not in their existing goal list.",
     inputSchema: GoalInputSchema,
     outputSchema: z.object({
-        status: z.enum(['created', 'conflict']),
-        goal: z.object({
-            id: z.string(),
-            title: z.string(),
-        }).optional(),
-        existingGoal: z.object({
-            id: z.string(),
-            title: z.string(),
-        }).optional(),
-        proposedGoal: GoalInputSchema.optional(),
+        id: z.string(),
+        title: z.string(),
     })
 }, async (input) => {
     const supabase = createServerClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
-
-    const similarGoal = await findSimilarGoal(input.title);
-
-    if (similarGoal) {
-        return {
-            status: 'conflict',
-            existingGoal: { id: similarGoal.id, title: similarGoal.title },
-            proposedGoal: input,
-        };
-    }
 
     const createdGoal = await addGoal({
         ...input,
@@ -231,7 +213,7 @@ const createGoal = ai.defineTool({
         status: input.status || 'Not Started'
     });
     if (!createdGoal) throw new Error('Failed to create goal in database.');
-    return { status: 'created', goal: { id: createdGoal.id, title: createdGoal.title } };
+    return { id: createdGoal.id, title: createdGoal.title };
 });
 
 const updateGoal = ai.defineTool({
@@ -295,18 +277,20 @@ const ChatHistoryItemSchema = z.object({
   content: z.string(),
 });
 
-const PendingActionSchema = z.object({
-    type: z.literal('goal_creation_conflict'),
-    existingGoalId: z.string(),
-    proposedGoalData: GoalInputSchema,
-}).optional();
+const GoalSchema = z.object({
+    id: z.string(),
+    title: z.string(),
+    description: z.string().nullable(),
+    progress: z.number(),
+    status: z.string().nullable(),
+});
 
 const ProcessCommandInputSchema = z.object({
   chatInput: z.string(),
   contextItem: z.object({ id: z.string(), type: z.enum(['task', 'reminder', 'expense', 'goal', 'journalEntry']) }).optional(),
   chatHistory: z.array(ChatHistoryItemSchema).optional().describe('The last few turns of the conversation.'),
   tone: ToneSchema.default('Neutral').describe('The desired personality for the response.'),
-  pendingAction: PendingActionSchema,
+  existingGoals: z.array(GoalSchema).optional().describe("The user's current list of goals."),
 });
 export type ProcessCommandInput = z.infer<typeof ProcessCommandInputSchema>;
 
@@ -317,14 +301,13 @@ export type ProcessCommandOutput = {
     type: 'task' | 'reminder' | 'expense' | 'goal' | 'journalEntry';
   };
   updatedItemType?: 'task' | 'reminder' | 'expense' | 'goal';
-  pendingAction?: z.infer<typeof PendingActionSchema>;
 };
 
 const prompt = ai.definePrompt({
   name: 'commandProcessor',
   tools: [createTask, updateTask, createReminder, updateReminder, trackExpenses, createGoal, updateGoal, createJournalEntry, generalChat],
   input: { schema: ProcessCommandInputSchema.extend({ currentDate: z.string() }) },
-  prompt: `You are Reva, a friendly and intelligent personal assistant. Your goal is to understand the user's NEWEST request by using the context from the conversation history.
+  prompt: `You are Reva, a friendly and intelligent personal assistant. Your goal is to understand the user's NEWEST request by using the context from the conversation history and the user's existing data.
 
 Current date and time for reference: {{{currentDate}}}.
 The user wants you to speak in a '{{{tone}}}' tone. When using the 'generalChat' tool, you MUST pass this tone along.
@@ -341,32 +324,37 @@ The user wants you to speak in a '{{{tone}}}' tone. When using the 'generalChat'
 ---
 
 **CONTEXT & SPECIAL INSTRUCTIONS:**
-{{#if pendingAction}}
-**IMPORTANT**: You have a pending action to resolve! The user's new message is their answer to your previous question.
-- Pending Action Type: {{pendingAction.type}}
-- The user's new input is '{{{chatInput}}}'.
-- If the user says "update", "update it", or similar, use the 'updateGoal' tool with ID {{pendingAction.existingGoalId}} and the data from 'proposedGoalData'.
-- If the user says "create new", "new one", or similar, use the 'createGoal' tool again, but this time, you must create it without checking for duplicates. Just create it.
-- If the user cancels, just have a simple chat response.
-- DO NOT ask the same question again. You must resolve the conflict now by choosing a tool.
-{{else if contextItem}}
+
+{{#if contextItem}}
 **CRITICAL CONTEXT**: The user's previous turn was about a {{contextItem.type}} with ID '{{contextItem.id}}'. Their new message ('{{{chatInput}}}') is a direct follow-up.
 - **Your primary assumption must be to UPDATE the existing item.**
 - If the user's message contains any change (e.g., "change it to...", "update progress to 50%", "actually, set the time to 8pm"), you MUST use the corresponding 'update' tool (e.g., 'updateGoal', 'updateTask') with the ID '{{contextItem.id}}'.
-- Do NOT use a 'create' tool unless the user explicitly says "create a new...", "add another...", or a similar phrase that clearly indicates a separate item. A simple statement like "My goal is to run a marathon" is NOT an explicit request for a new item if a goal context already exists; it should be treated as an update to the existing goal's title or description.
+- Do NOT use a 'create' tool unless the user explicitly says "create a new...", "add another...", or a similar phrase that clearly indicates a separate item.
+{{/if}}
+
+{{#if existingGoals}}
+**USER'S CURRENT GOALS:**
+You have the user's list of current goals. Use this list to decide whether to update an existing goal or create a new one.
+{{#each existingGoals}}
+- **{{this.title}}** (ID: {{this.id}}, Progress: {{this.progress}}%, Status: {{this.status}})
+{{/each}}
+
+**Goal-Related Instructions:**
+- When the user mentions a goal, first check if their intent matches one of the goals in the list above.
+- If it's a match, you MUST use the \`updateGoal\` tool with the correct ID. For example, if they say "my goal is to finish the book", and a goal "Read 'The Great Gatsby'" exists, you should interpret this as an update to that goal's title or description.
+- Only use the \`createGoal\` tool if the user's request is clearly about a brand new goal that is NOT on their list.
 {{/if}}
 
 **User's NEW Request:** {{{chatInput}}}
 
-Analyze the NEW request based on the history and context, then choose the best tool.
-- **Updates vs. Creations:** If you have an item ID from the context, your default action should be to UPDATE it. Do not use a 'create' tool if the user is likely modifying the context item.
+Analyze the NEW request based on the history and available context, then choose the best tool.
+- **Updates vs. Creations:** If you have an item ID from the \`contextItem\` OR the user's request clearly refers to one of their \`existingGoals\`, your default action should be to UPDATE it.
 - **Goals & Journaling:** Actively listen for phrases like "I want to achieve...", "My goal is...", or "I want to write down that..." to use the createGoal or createJournalEntry tools, but ONLY if there is no context suggesting an update.
 - **Updates:** When updating an item, look for specific changes. For goals, this often involves updating the 'progress' percentage.
 - **Title/Description:** If a 'title' for a reminder/goal or 'description' for a task is not explicitly stated, create a short, sensible one from the user's request. For a journal entry without a title, create one from the content.
 - **Categories:** If the user logs an expense without a category, you MUST infer a logical one (e.g., 'Food & Drink', 'Transport', 'Shopping').
 - **Dates/Times:** Always use the current date ({{{currentDate}}}) as a reference to resolve relative times like "tomorrow" or "in 2 hours."
 - **Clarification:** Only use the 'generalChat' tool to ask for clarification if the user's intent is completely unclear.
-- For updates, use the provided context ID.
 - For simple greetings or conversation, use the 'generalChat' tool.`,
 });
 
@@ -423,8 +411,11 @@ function generateToneResponse(action: Action, data: any, tone: Tone): string {
 
 
 export async function processCommand(input: ProcessCommandInput): Promise<ProcessCommandOutput> {
+  const goals = await getGoals();
+  
   const llmResponse = await prompt({
     ...input,
+    existingGoals: goals,
     currentDate: new Date().toISOString(),
   });
 
@@ -444,22 +435,8 @@ export async function processCommand(input: ProcessCommandInput): Promise<Proces
     return { botResponse: toolOutput as string };
   }
 
-  // Handle the special case for goal creation conflict
-  if (call.tool === 'createGoal' && toolOutput.status === 'conflict') {
-    const { existingGoal, proposedGoal } = toolOutput;
-    const botResponse = `You already have a similar goal: "${existingGoal.title}". Would you like me to update this goal or create a new one?`;
-    const pendingAction: z.infer<typeof PendingActionSchema> = {
-        type: 'goal_creation_conflict',
-        existingGoalId: existingGoal.id,
-        proposedGoalData: proposedGoal as any, // Zod/type inference quirk
-    };
-    return { botResponse, pendingAction };
-  }
-
   const action = call.tool as Action;
-  // Adjust data for response generation if it came from createGoal 'created' status
-  const responseData = (action === 'createGoal' && toolOutput.status === 'created') ? toolOutput.goal : toolOutput;
-  const botResponse = generateToneResponse(action, responseData, input.tone);
+  const botResponse = generateToneResponse(action, toolOutput, input.tone);
   const output: ProcessCommandOutput = { botResponse };
 
   // Set context based on action
@@ -473,8 +450,8 @@ export async function processCommand(input: ProcessCommandInput): Promise<Proces
     output.newItemContext = { id: reminderData.id, type: 'reminder' };
   } else if (action === 'updateReminder') {
     output.updatedItemType = 'reminder';
-  } else if (action === 'createGoal' && toolOutput.status === 'created') {
-    const goalData = toolOutput.goal as z.infer<typeof createGoal.outputSchema>['goal'];
+  } else if (action === 'createGoal') {
+    const goalData = toolOutput as z.infer<typeof createGoal.outputSchema>;
     output.newItemContext = { id: goalData.id, type: 'goal' };
   } else if (action === 'updateGoal') {
     output.updatedItemType = 'goal';
