@@ -8,9 +8,10 @@ import remarkGfm from 'remark-gfm';
 interface BotTypingMessageProps {
     content: string;
     animate: boolean;
+    onAnimationComplete: () => void;
 }
 
-const BotTypingMessage = ({ content, animate }: BotTypingMessageProps) => {
+const BotTypingMessage = ({ content, animate, onAnimationComplete }: BotTypingMessageProps) => {
   const [displayedContent, setDisplayedContent] = useState('');
 
   useEffect(() => {
@@ -23,6 +24,7 @@ const BotTypingMessage = ({ content, animate }: BotTypingMessageProps) => {
           i++;
         } else {
           clearInterval(typingInterval);
+          onAnimationComplete();
         }
       }, 15);
 
@@ -31,7 +33,7 @@ const BotTypingMessage = ({ content, animate }: BotTypingMessageProps) => {
       // If not animating, just show the full content immediately.
       setDisplayedContent(content);
     }
-  }, [content, animate]);
+  }, [content, animate, onAnimationComplete]);
 
   return (
     <div className="flex-1 prose dark:prose-invert leading-relaxed text-base pt-1">

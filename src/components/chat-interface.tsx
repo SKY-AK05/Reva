@@ -26,6 +26,7 @@ export default function ChatInterface() {
   const { tone } = useToneContext();
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
   const scrollViewportRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -60,8 +61,7 @@ export default function ChatInterface() {
       user_id: '',
     };
     
-    // The history is the state of messages *before* adding the new one.
-    const historyForAi = messages.slice(-10); // last 5 turns (10 messages)
+    const historyForAi = messages.slice(-10);
     const formattedHistory = historyForAi.map(msg => ({
         sender: msg.sender,
         text: msg.text,
@@ -70,6 +70,7 @@ export default function ChatInterface() {
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
+    setIsAnimating(false);
 
     try {
       const result = await processUserChat(messageText, lastItemContext, formattedHistory, tone);
@@ -81,15 +82,16 @@ export default function ChatInterface() {
         created_at: new Date().toISOString(),
         user_id: '',
       };
+      
+      setIsLoading(false); // Hide "thinking..." message
       setMessages(prev => [...prev, botMessage]);
+      setIsAnimating(true); // Start animation for the new message
 
-      // Update context for the next turn
       if (result.newItemContext) {
         setLastItemContext(result.newItemContext);
       } else if (!result.updatedItemType) {
         setLastItemContext(null); 
       }
-
 
     } catch (error) {
       console.error(error);
@@ -100,9 +102,9 @@ export default function ChatInterface() {
         created_at: new Date().toISOString(),
         user_id: '',
       };
+      setIsLoading(false);
       setMessages(prev => [...prev, errorMessage]);
-    } finally {
-        setIsLoading(false);
+      setIsAnimating(true);
     }
   };
 
@@ -181,22 +183,24 @@ export default function ChatInterface() {
                   'items-start': message.sender === 'bot',
                 })}
               >
-                {message.sender === 'bot' && <Bot className="h-6 w-6 text-primary flex-shrink-0" />}
-                <div className={cn("max-w-xl p-4 rounded-2xl", {
-                    "bg-primary text-primary-foreground": message.sender === 'user',
-                })}>
-                  {message.sender === 'user' ? (
-                      <div className="leading-relaxed text-base">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.text}</ReactMarkdown>
-                      </div>
-                  ) : (
+                {message.sender === 'bot' && (
+                  <>
+                    <Bot className="h-6 w-6 text-primary flex-shrink-0" />
                     <BotTypingMessage
                       content={message.text}
-                      animate={index === messages.length - 1 && isLoading}
+                      animate={index === messages.length - 1 && isAnimating}
+                      onAnimationComplete={() => setIsAnimating(false)}
                     />
-                  )}
-                </div>
-                 {message.sender === 'user' && <User className="h-6 w-6 text-primary flex-shrink-0" />}
+                  </>
+                )}
+                {message.sender === 'user' && (
+                  <>
+                    <div className="max-w-xl p-4 rounded-2xl bg-primary text-primary-foreground">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.text}</ReactMarkdown>
+                    </div>
+                    <User className="h-6 w-6 text-primary flex-shrink-0" />
+                  </>
+                )}
               </div>
             ))}
             {isLoading && (
