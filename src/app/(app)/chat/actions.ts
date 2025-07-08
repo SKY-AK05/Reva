@@ -7,13 +7,12 @@ import { processCommand, type ProcessCommandOutput, type ProcessCommandInput } f
 // import { addChatMessage } from "@/services/chat";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { simpleResponses } from "@/lib/chat-responses";
 
 const ToneSchema = z.enum(['Neutral', 'GenZ', 'Sarcastic', 'Poetic']);
 
 export async function processUserChat(
     chatInput: string,
-    contextItem: { id: string, type: 'task' | 'reminder' | 'expense' | 'goal' | 'journalEntry' } | null,
+    contextItem: { id: string; type: 'task' | 'reminder' | 'expense' | 'goal' | 'journalEntry' } | null,
     chatHistory: { sender: 'user' | 'bot'; text: string }[],
     tone: z.infer<typeof ToneSchema>
 ): Promise<ProcessCommandOutput> {
@@ -24,14 +23,7 @@ export async function processUserChat(
         return { botResponse: "Please log in to continue." };
     }
 
-    const cleanedInput = chatInput.trim().toLowerCase();
-    if (simpleResponses[cleanedInput]) {
-        return { botResponse: simpleResponses[cleanedInput] };
-    }
-
-    // Chat messages are no longer persisted to the database.
-    // await addChatMessage({ userId: user.id, sender: 'user', text: chatInput });
-
+    // All chat inputs now go through the AI to ensure tone is always applied.
     let result: ProcessCommandOutput;
     
     const formattedHistory = chatHistory.map(msg => ({
