@@ -350,9 +350,10 @@ The user wants you to speak in a '{{{tone}}}' tone. When using the 'generalChat'
 - If the user cancels, just have a simple chat response.
 - DO NOT ask the same question again. You must resolve the conflict now by choosing a tool.
 {{else if contextItem}}
-**IMPORTANT CONTEXT**: The user's previous action was related to a {{contextItem.type}} with ID '{{contextItem.id}}'. Their new message, '{{{chatInput}}}', is MOST LIKELY a follow-up to modify this item.
-- If the message suggests ANY modification (e.g., changing progress, status, title, time, etc.), you MUST prioritize using the appropriate 'update' tool (like 'updateGoal' or 'updateTask') with the provided ID.
-- ONLY if the message is clearly and explicitly asking to create a completely new and different item should you use a 'create' tool.
+**CRITICAL CONTEXT**: The user's previous turn was about a {{contextItem.type}} with ID '{{contextItem.id}}'. Their new message ('{{{chatInput}}}') is a direct follow-up.
+- **Your primary assumption must be to UPDATE the existing item.**
+- If the user's message contains any change (e.g., "change it to...", "update progress to 50%", "actually, set the time to 8pm"), you MUST use the corresponding 'update' tool (e.g., 'updateGoal', 'updateTask') with the ID '{{contextItem.id}}'.
+- Do NOT use a 'create' tool unless the user explicitly says "create a new...", "add another...", or a similar phrase that clearly indicates a separate item. A simple statement like "My goal is to run a marathon" is NOT an explicit request for a new item if a goal context already exists; it should be treated as an update to the existing goal's title or description.
 {{/if}}
 
 **User's NEW Request:** {{{chatInput}}}

@@ -11,11 +11,11 @@ interface BotTypingMessageProps {
 }
 
 const BotTypingMessage = ({ content, animate }: BotTypingMessageProps) => {
-  const [displayedContent, setDisplayedContent] = useState(animate ? '' : content);
+  const [displayedContent, setDisplayedContent] = useState('');
 
   useEffect(() => {
     if (animate) {
-      setDisplayedContent('');
+      setDisplayedContent(''); // Reset on new animated message
       let i = 0;
       const typingInterval = setInterval(() => {
         if (i < content.length) {
@@ -28,7 +28,8 @@ const BotTypingMessage = ({ content, animate }: BotTypingMessageProps) => {
 
       return () => clearInterval(typingInterval);
     } else {
-        setDisplayedContent(content);
+      // If not animating, just show the full content immediately.
+      setDisplayedContent(content);
     }
   }, [content, animate]);
 
