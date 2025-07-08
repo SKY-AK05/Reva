@@ -1,28 +1,36 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
-const BotTypingMessage = ({ content }: { content: string }) => {
-  const [displayedContent, setDisplayedContent] = useState('');
+interface BotTypingMessageProps {
+    content: string;
+    animate: boolean;
+}
+
+const BotTypingMessage = ({ content, animate }: BotTypingMessageProps) => {
+  const [displayedContent, setDisplayedContent] = useState(animate ? '' : content);
 
   useEffect(() => {
-    setDisplayedContent('');
-    if (content) {
+    if (animate) {
+      setDisplayedContent('');
       let i = 0;
       const typingInterval = setInterval(() => {
         if (i < content.length) {
-          setDisplayedContent((prev) => prev + content.charAt(i));
+          setDisplayedContent(content.substring(0, i + 1));
           i++;
         } else {
           clearInterval(typingInterval);
         }
-      }, 15); // Typing speed in ms
+      }, 15);
 
       return () => clearInterval(typingInterval);
+    } else {
+        setDisplayedContent(content);
     }
-  }, [content]);
+  }, [content, animate]);
 
   return (
     <div className="flex-1 prose dark:prose-invert leading-relaxed text-base pt-1">

@@ -9,8 +9,6 @@ import { cn } from '@/lib/utils';
 import { SendHorizonal, Bot, CheckSquare, DollarSign, Bell, Target } from 'lucide-react';
 import { processUserChat } from '@/app/(app)/chat/actions';
 import type { ProcessCommandInput } from '@/ai/flows/process-command';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import type { ChatMessage } from '@/services/chat';
 import { useChatContext } from '@/context/chat-context';
 import { useTasksContext } from '@/context/tasks-context';
@@ -20,6 +18,8 @@ import { useGoalsContext } from '@/context/goals-context';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import BotTypingMessage from './bot-typing-message';
 import { useToneContext } from '@/context/tone-context';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 export default function ChatInterface() {
   const { messages, setMessages, lastItemContext, setLastItemContext, loading: isFetchingHistory } = useChatContext();
@@ -192,15 +192,10 @@ export default function ChatInterface() {
                     </div>
                   </div>
                 ) : (
-                  <>
-                    {index === messages.length - 1 && !isLoading ? (
-                      <BotTypingMessage content={message.text} />
-                    ) : (
-                      <div className="flex-1 prose dark:prose-invert leading-relaxed text-base pt-1">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.text}</ReactMarkdown>
-                      </div>
-                    )}
-                  </>
+                  <BotTypingMessage
+                    content={message.text}
+                    animate={index === messages.length - 1}
+                  />
                 )}
               </div>
             ))}
