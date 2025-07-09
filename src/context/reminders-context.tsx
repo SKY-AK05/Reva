@@ -74,7 +74,11 @@ export const RemindersContextProvider = ({ children }: { children: ReactNode }) 
   }, [supabase]);
 
   const handleUpdateReminder = useCallback(async (id: string, updates: Partial<Omit<Reminder, 'id'>>) => {
-    // The realtime listener will handle the UI update.
+    setReminders(prevReminders =>
+        prevReminders.map(reminder =>
+            reminder.id === id ? { ...reminder, ...updates } as Reminder : reminder
+        )
+    );
     await updateReminderInDb(id, updates);
   }, []);
 

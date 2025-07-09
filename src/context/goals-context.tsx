@@ -80,7 +80,11 @@ export const GoalsContextProvider = ({ children }: { children: ReactNode }) => {
   }, [supabase]);
 
   const handleUpdateGoal = useCallback(async (id: string, updates: Partial<Omit<Goal, 'id'>>) => {
-    // The realtime listener will handle the UI update.
+    setGoals(prevGoals =>
+        prevGoals.map(goal =>
+            goal.id === id ? { ...goal, ...updates } as Goal : goal
+        )
+    );
     await updateGoalInDb(id, updates);
   }, []);
 

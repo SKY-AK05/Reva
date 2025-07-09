@@ -84,7 +84,11 @@ export const TasksContextProvider = ({ children }: { children: ReactNode }) => {
   }, [supabase]);
 
   const handleUpdateTask = useCallback(async (id: string, updates: Partial<Omit<Task, 'id' | 'completed'>>) => {
-    // The realtime listener will handle the UI update after this call succeeds.
+    setTasks(prevTasks =>
+        prevTasks.map(task =>
+            task.id === id ? { ...task, ...updates } as Task : task
+        )
+    );
     await updateTaskInDb(id, updates);
   }, []);
 

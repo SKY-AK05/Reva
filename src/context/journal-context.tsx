@@ -73,7 +73,11 @@ export const JournalContextProvider = ({ children }: { children: ReactNode }) =>
   }, [supabase]);
 
   const handleUpdateEntry = useCallback(async (id: string, updates: Partial<Omit<JournalEntry, 'id'>>) => {
-     // The realtime listener will handle the UI update.
+    setEntries(prevEntries =>
+        prevEntries.map(entry =>
+            entry.id === id ? { ...entry, ...updates } as JournalEntry : entry
+        )
+    );
     await updateEntryInDb(id, updates);
   }, []);
 

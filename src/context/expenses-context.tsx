@@ -77,7 +77,11 @@ export const ExpensesContextProvider = ({ children }: { children: ReactNode }) =
   }, [supabase]);
 
   const handleUpdateExpense = useCallback(async (id: string, updates: Partial<Omit<Expense, 'id'>>) => {
-    // The realtime listener will handle the UI update after this call succeeds.
+    setExpenses(prevExpenses =>
+        prevExpenses.map(expense =>
+            expense.id === id ? { ...expense, ...updates } as Expense : expense
+        )
+    );
     await updateExpenseInDb(id, updates);
   }, []);
 
