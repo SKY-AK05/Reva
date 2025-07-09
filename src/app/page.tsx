@@ -230,7 +230,7 @@ export default function HomePage() {
         <ScrollAnimator>
           <section id="pricing" className="py-20 md:py-32">
             <div className="container mx-auto px-4">
-              <div className="bg-foreground text-background rounded-2xl p-8 md:p-12 lg:p-16">
+              <div className="bg-slate-100 text-slate-900 rounded-2xl p-8 md:p-12 lg:p-16">
                 <div className="grid md:grid-cols-2 gap-12 items-center">
                   <div className="space-y-6">
                     <h2 className="text-4xl md:text-5xl font-headline font-bold leading-tight">
@@ -238,22 +238,22 @@ export default function HomePage() {
                       <br />
                       Today
                     </h2>
-                    <p className="text-lg text-muted-foreground max-w-md">
+                    <p className="text-lg text-slate-600 max-w-md">
                       Simple, transparent pricing. Get started for free, no credit card
                       required. Unlock a more organized life in minutes.
                     </p>
                   </div>
                   
                   <div className="w-full">
-                    <Card className="bg-card text-card-foreground p-6 md:p-8 rounded-2xl shadow-2xl">
+                    <Card className="bg-slate-900 text-slate-100 p-6 md:p-8 rounded-2xl shadow-2xl">
                       <CardHeader className="p-0 pb-6">
                         <CardTitle className="text-2xl font-bold">Free Plan</CardTitle>
-                        <CardDescription className="text-muted-foreground pt-1">For individuals getting started.</CardDescription>
+                        <CardDescription className="text-slate-400 pt-1">For individuals getting started.</CardDescription>
                       </CardHeader>
                       <CardContent className="p-0 pt-6">
                         <div className="mb-6">
                           <span className="text-5xl font-bold">$0</span>
-                          <span className="text-xl text-muted-foreground">/mo</span>
+                          <span className="text-xl text-slate-400">/mo</span>
                         </div>
                         <ul className="space-y-3 text-sm">
                           <li className="flex items-center gap-3">
@@ -275,7 +275,7 @@ export default function HomePage() {
                         </ul>
                       </CardContent>
                       <CardFooter className="p-0 pt-8">
-                        <Button size="lg" asChild className="w-full rounded-full py-6 text-base font-semibold">
+                        <Button size="lg" asChild className="w-full rounded-full py-6 text-base font-semibold bg-primary text-zinc-900 hover:bg-primary/90">
                           <Link href="/signup">Sign Up</Link>
                         </Button>
                       </CardFooter>
