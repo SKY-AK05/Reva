@@ -2,9 +2,10 @@
 'use client';
 
 import { useState } from 'react';
-import { CheckSquare } from 'lucide-react';
+import { CheckSquare, Trash2 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
@@ -13,6 +14,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useTasksContext, type Task } from '@/context/tasks-context';
@@ -25,7 +37,7 @@ const priorityVariant = {
 };
 
 export default function TasksPage() {
-  const { tasks, updateTask, toggleTaskCompletion, loading } = useTasksContext();
+  const { tasks, updateTask, toggleTaskCompletion, deleteTask, loading } = useTasksContext();
   const [editingCell, setEditingCell] = useState<{ id: string; column: keyof Omit<Task, 'completed'> } | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, id: string, column: 'description' | 'dueDate') => {
@@ -70,7 +82,8 @@ export default function TasksPage() {
               <TableHead className="w-[50px]"></TableHead>
               <TableHead>Task</TableHead>
               <TableHead className="w-[150px]">Due</TableHead>
-              <TableHead className="w-[120px] text-right">Priority</TableHead>
+              <TableHead className="w-[120px]">Priority</TableHead>
+              <TableHead className="w-[50px] text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -80,7 +93,8 @@ export default function TasksPage() {
                   <TableCell><Skeleton className="h-5 w-5" /></TableCell>
                   <TableCell><Skeleton className="h-5 w-full" /></TableCell>
                   <TableCell><Skeleton className="h-5 w-24" /></TableCell>
-                  <TableCell className="flex justify-end"><Skeleton className="h-6 w-16" /></TableCell>
+                  <TableCell><Skeleton className="h-6 w-16" /></TableCell>
+                  <TableCell><Skeleton className="h-8 w-8 rounded-md" /></TableCell>
                 </TableRow>
               ))
             ) : tasks.length > 0 ? (
@@ -116,7 +130,7 @@ export default function TasksPage() {
                       task.dueDate
                     )}
                   </TableCell>
-                  <TableCell className="text-right cursor-pointer" onClick={() => setEditingCell({ id: task.id, column: 'priority' })}>
+                  <TableCell className="cursor-pointer" onClick={() => setEditingCell({ id: task.id, column: 'priority' })}>
                     {editingCell?.id === task.id && editingCell?.column === 'priority' ? (
                       <Select 
                           defaultValue={task.priority}
@@ -138,11 +152,34 @@ export default function TasksPage() {
                       </Badge>
                     )}
                   </TableCell>
+                  <TableCell className="text-right">
+                     <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete this task.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => deleteTask(task.id)}>
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={4} className="h-48 text-center text-muted-foreground">
+                <TableCell colSpan={5} className="h-48 text-center text-muted-foreground">
                   <div className="flex flex-col items-center gap-2">
                     <CheckSquare className="h-12 w-12" />
                     <h3 className="font-semibold">No tasks found</h3>

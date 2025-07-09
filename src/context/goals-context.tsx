@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
-import { getGoals, updateGoal as updateGoalInDb } from '@/services/goals';
+import { getGoals, updateGoal as updateGoalInDb, deleteGoal as deleteGoalInDb } from '@/services/goals';
 import { createClient } from '@/lib/supabase/client';
 
 export interface Goal {
@@ -15,6 +15,7 @@ export interface Goal {
 interface GoalsContextType {
   goals: Goal[];
   updateGoal: (id: string, updates: Partial<Omit<Goal, 'id'>>) => Promise<void>;
+  deleteGoal: (id: string) => Promise<void>;
   loading: boolean;
 }
 
@@ -66,10 +67,15 @@ export const GoalsContextProvider = ({ children }: { children: ReactNode }) => {
     // The realtime listener will handle the UI update.
     await updateGoalInDb(id, updates);
   }, []);
+
+  const handleDeleteGoal = useCallback(async (id: string) => {
+    await deleteGoalInDb(id);
+  }, []);
   
   const value = {
     goals,
     updateGoal: handleUpdateGoal,
+    deleteGoal: handleDeleteGoal,
     loading,
   };
 

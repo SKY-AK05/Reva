@@ -104,3 +104,20 @@ export async function toggleTask(id: string, completed: boolean): Promise<Task |
         completed: data.completed,
     };
 }
+
+export async function deleteTask(id: string): Promise<{ id: string } | null> {
+    const supabase = createServerClient();
+    const { data, error } = await supabase
+        .from('tasks')
+        .delete()
+        .eq('id', id)
+        .select('id')
+        .single();
+    
+    if (error) {
+        console.error('Error deleting task:', error);
+        return null;
+    }
+
+    return data ? { id: data.id } : null;
+}

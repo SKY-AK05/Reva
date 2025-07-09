@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
-import { getJournalEntries, updateJournalEntry as updateEntryInDb } from '@/services/journal';
+import { getJournalEntries, updateJournalEntry as updateEntryInDb, deleteJournalEntry as deleteEntryInDb } from '@/services/journal';
 import { createClient } from '@/lib/supabase/client';
 
 export interface JournalEntry {
@@ -14,6 +14,7 @@ export interface JournalEntry {
 interface JournalContextType {
   entries: JournalEntry[];
   updateEntry: (id: string, updates: Partial<Omit<JournalEntry, 'id'>>) => Promise<void>;
+  deleteEntry: (id: string) => Promise<void>;
   loading: boolean;
 }
 
@@ -65,10 +66,15 @@ export const JournalContextProvider = ({ children }: { children: ReactNode }) =>
      // The realtime listener will handle the UI update.
     await updateEntryInDb(id, updates);
   }, []);
+
+  const handleDeleteEntry = useCallback(async (id: string) => {
+    await deleteEntryInDb(id);
+  }, []);
   
   const value = {
     entries,
     updateEntry: handleUpdateEntry,
+    deleteEntry: handleDeleteEntry,
     loading,
   };
 

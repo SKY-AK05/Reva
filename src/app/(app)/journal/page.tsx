@@ -2,15 +2,27 @@
 'use client';
 
 import { useState } from 'react';
-import { BookText } from 'lucide-react';
+import { BookText, Trash2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Textarea } from '@/components/ui/textarea';
 import { useJournalContext, type JournalEntry } from '@/context/journal-context';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function JournalPage() {
-  const { entries, updateEntry, loading } = useJournalContext();
+  const { entries, updateEntry, deleteEntry, loading } = useJournalContext();
   const [editingField, setEditingField] = useState<{ id: string; field: keyof JournalEntry } | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, id: string, field: keyof JournalEntry) => {
@@ -49,41 +61,65 @@ export default function JournalPage() {
           ))
         ) : entries.length > 0 ? (
           entries.map((entry, index) => (
-            <article key={entry.id}>
-              {editingField?.id === entry.id && editingField?.field === 'title' ? (
-                  <Input
-                    defaultValue={entry.title}
-                    onBlur={(e) => { handleInputChange(e, entry.id, 'title'); handleInputBlur(); }}
-                    onKeyDown={(e) => { if(e.key === 'Enter') { handleInputChange(e as any, entry.id, 'title'); handleInputBlur(); } }}
-                    autoFocus
-                    className="text-2xl font-semibold tracking-tight h-auto mb-1 bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0"
-                  />
-                ) : (
-                  <h2 
-                    className="text-2xl font-semibold tracking-tight cursor-pointer" 
-                    onClick={() => setEditingField({ id: entry.id, field: 'title' })}
-                  >
-                    {entry.title}
-                  </h2>
-                )}
+            <article key={entry.id} className="group relative">
+                <div className="flex justify-between items-start">
+                    <div>
+                        {editingField?.id === entry.id && editingField?.field === 'title' ? (
+                          <Input
+                            defaultValue={entry.title}
+                            onBlur={(e) => { handleInputChange(e, entry.id, 'title'); handleInputBlur(); }}
+                            onKeyDown={(e) => { if(e.key === 'Enter') { handleInputChange(e as any, entry.id, 'title'); handleInputBlur(); } }}
+                            autoFocus
+                            className="text-2xl font-semibold tracking-tight h-auto mb-1 bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0"
+                          />
+                        ) : (
+                          <h2 
+                            className="text-2xl font-semibold tracking-tight cursor-pointer" 
+                            onClick={() => setEditingField({ id: entry.id, field: 'title' })}
+                          >
+                            {entry.title}
+                          </h2>
+                        )}
 
-              {editingField?.id === entry.id && editingField?.field === 'date' ? (
-                <Input
-                    type="date"
-                    defaultValue={entry.date}
-                    onBlur={(e) => { handleInputChange(e, entry.id, 'date'); handleInputBlur(); }}
-                    onKeyDown={(e) => { if(e.key === 'Enter') { handleInputChange(e as any, entry.id, 'date'); handleInputBlur(); } }}
-                    autoFocus
-                    className="text-sm text-muted-foreground h-auto mb-4 bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0"
-                  />
-              ) : (
-                <p 
-                  className="text-sm text-muted-foreground mb-4 cursor-pointer" 
-                  onClick={() => setEditingField({ id: entry.id, field: 'date' })}
-                >
-                  {new Date(entry.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}
-                </p>
-              )}
+                      {editingField?.id === entry.id && editingField?.field === 'date' ? (
+                        <Input
+                            type="date"
+                            defaultValue={entry.date}
+                            onBlur={(e) => { handleInputChange(e, entry.id, 'date'); handleInputBlur(); }}
+                            onKeyDown={(e) => { if(e.key === 'Enter') { handleInputChange(e as any, entry.id, 'date'); handleInputBlur(); } }}
+                            autoFocus
+                            className="text-sm text-muted-foreground h-auto mb-4 bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0"
+                          />
+                      ) : (
+                        <p 
+                          className="text-sm text-muted-foreground mb-4 cursor-pointer" 
+                          onClick={() => setEditingField({ id: entry.id, field: 'date' })}
+                        >
+                          {new Date(entry.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}
+                        </p>
+                      )}
+                    </div>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                         <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                This will permanently delete your journal entry: "{entry.title}".
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => deleteEntry(entry.id)}>Delete</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                </div>
+
 
               {editingField?.id === entry.id && editingField?.field === 'content' ? (
                   <Textarea

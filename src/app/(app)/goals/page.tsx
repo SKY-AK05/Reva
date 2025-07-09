@@ -2,16 +2,28 @@
 'use client';
 
 import { useState } from 'react';
-import { Target } from 'lucide-react';
+import { Target, Trash2 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Textarea } from '@/components/ui/textarea';
 import { Slider } from '@/components/ui/slider';
 import { useGoalsContext, type Goal } from '@/context/goals-context';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function GoalsPage() {
-  const { goals, updateGoal, loading } = useGoalsContext();
+  const { goals, updateGoal, deleteGoal, loading } = useGoalsContext();
   const [editingField, setEditingField] = useState<{ id: string; field: keyof Goal | 'progress' } | null>(null);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, id: string, field: 'title' | 'description' | 'status') => {
@@ -54,19 +66,40 @@ export default function GoalsPage() {
             ))
         ) : goals.length > 0 ? (
           goals.map((goal) => (
-            <div key={goal.id} className="">
+            <div key={goal.id} className="group relative">
               <div className="mb-2">
-                <h3 className="font-semibold text-lg cursor-pointer" onClick={() => setEditingField({ id: goal.id, field: 'title' })}>
-                  {editingField?.id === goal.id && editingField?.field === 'title' ? (
-                     <Input
-                        defaultValue={goal.title}
-                        onBlur={(e) => { handleInputChange(e, goal.id, 'title'); handleInputBlur(); }}
-                        onKeyDown={(e) => { if(e.key === 'Enter') { handleInputChange(e as any, goal.id, 'title'); handleInputBlur(); } }}
-                        autoFocus
-                        className="h-auto p-0 bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-lg font-semibold"
-                      />
-                  ) : goal.title}
-                </h3>
+                <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-lg cursor-pointer" onClick={() => setEditingField({ id: goal.id, field: 'title' })}>
+                      {editingField?.id === goal.id && editingField?.field === 'title' ? (
+                         <Input
+                            defaultValue={goal.title}
+                            onBlur={(e) => { handleInputChange(e, goal.id, 'title'); handleInputBlur(); }}
+                            onKeyDown={(e) => { if(e.key === 'Enter') { handleInputChange(e as any, goal.id, 'title'); handleInputBlur(); } }}
+                            autoFocus
+                            className="h-auto p-0 bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-lg font-semibold"
+                          />
+                      ) : goal.title}
+                    </h3>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                This will permanently delete your goal: "{goal.title}".
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => deleteGoal(goal.id)}>Delete</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                </div>
                 <p className="text-sm text-muted-foreground cursor-pointer" onClick={() => setEditingField({ id: goal.id, field: 'description' })}>
                   {editingField?.id === goal.id && editingField?.field === 'description' ? (
                      <Textarea

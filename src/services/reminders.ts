@@ -56,3 +56,20 @@ export async function updateReminder(id: string, updates: Partial<Omit<Reminder,
     }
     return data as Reminder;
 }
+
+export async function deleteReminder(id: string): Promise<{ id: string } | null> {
+    const supabase = createServerClient();
+    const { data, error } = await supabase
+        .from('reminders')
+        .delete()
+        .eq('id', id)
+        .select('id')
+        .single();
+    
+    if (error) {
+        console.error('Error deleting reminder:', error);
+        return null;
+    }
+
+    return data ? { id: data.id } : null;
+}

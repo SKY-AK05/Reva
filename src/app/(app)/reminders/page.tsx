@@ -2,14 +2,26 @@
 'use client';
 
 import { useState } from 'react';
-import { Bell } from 'lucide-react';
+import { Bell, Trash2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Textarea } from '@/components/ui/textarea';
 import { useRemindersContext, type Reminder } from '@/context/reminders-context';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function RemindersPage() {
-  const { reminders, updateReminder, loading } = useRemindersContext();
+  const { reminders, updateReminder, deleteReminder, loading } = useRemindersContext();
   const [editingField, setEditingField] = useState<{ id: string; field: keyof Reminder } | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, id: string, field: keyof Reminder) => {
@@ -66,7 +78,7 @@ export default function RemindersPage() {
              ))
           ) : reminders.length > 0 ? (
             reminders.map((reminder) => (
-              <div key={reminder.id} className="flex items-start gap-4 p-4 -mx-4 rounded-lg hover:bg-secondary/50 transition-colors">
+              <div key={reminder.id} className="flex items-start gap-4 p-4 -mx-4 rounded-lg hover:bg-secondary/50 transition-colors group">
                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 shrink-0 mt-1">
                   <Bell className="h-5 w-5 text-primary" />
                 </div>
@@ -116,6 +128,27 @@ export default function RemindersPage() {
                     )}
                   </div>
                 </div>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will permanently delete your reminder for "{reminder.title}".
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => deleteReminder(reminder.id)}>
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             ))
           ) : (

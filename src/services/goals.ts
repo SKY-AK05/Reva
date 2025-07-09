@@ -57,3 +57,20 @@ export async function updateGoal(id: string, updates: Partial<Omit<Goal, 'id'>>)
     }
     return data as Goal;
 }
+
+export async function deleteGoal(id: string): Promise<{ id: string } | null> {
+    const supabase = createServerClient();
+    const { data, error } = await supabase
+        .from('goals')
+        .delete()
+        .eq('id', id)
+        .select('id')
+        .single();
+    
+    if (error) {
+        console.error('Error deleting goal:', error);
+        return null;
+    }
+
+    return data ? { id: data.id } : null;
+}

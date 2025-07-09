@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
-import { getReminders, updateReminder as updateReminderInDb } from '@/services/reminders';
+import { getReminders, updateReminder as updateReminderInDb, deleteReminder as deleteReminderInDb } from '@/services/reminders';
 import { createClient } from '@/lib/supabase/client';
 
 export interface Reminder {
@@ -14,6 +14,7 @@ export interface Reminder {
 interface RemindersContextType {
   reminders: Reminder[];
   updateReminder: (id: string, updates: Partial<Omit<Reminder, 'id'>>) => Promise<void>;
+  deleteReminder: (id: string) => Promise<void>;
   loading: boolean;
 }
 
@@ -67,10 +68,15 @@ export const RemindersContextProvider = ({ children }: { children: ReactNode }) 
     // The realtime listener will handle the UI update.
     await updateReminderInDb(id, updates);
   }, []);
+
+  const handleDeleteReminder = useCallback(async (id: string) => {
+    await deleteReminderInDb(id);
+  }, []);
   
   const value = {
     reminders,
     updateReminder: handleUpdateReminder,
+    deleteReminder: handleDeleteReminder,
     loading,
   };
 

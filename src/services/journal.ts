@@ -56,3 +56,20 @@ export async function updateJournalEntry(id: string, updates: Partial<Omit<Journ
     }
     return data as JournalEntry;
 }
+
+export async function deleteJournalEntry(id: string): Promise<{ id: string } | null> {
+    const supabase = createServerClient();
+    const { data, error } = await supabase
+        .from('journal_entries')
+        .delete()
+        .eq('id', id)
+        .select('id')
+        .single();
+    
+    if (error) {
+        console.error('Error deleting journal entry:', error);
+        return null;
+    }
+
+    return data ? { id: data.id } : null;
+}
