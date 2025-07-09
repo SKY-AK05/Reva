@@ -39,7 +39,7 @@
     "@supabase/ssr": "^0.5.1",
     "@supabase/supabase-js": "^2.50.2",
     "@tiptap/extension-dropcursor": "^2.5.7",
-    "@tiptap/extension-image": "^2.5.7",
+    "@tiptap/extension-image": "^2.24.1",
     "@tiptap/pm": "^2.5.7",
     "@tiptap/react": "^2.5.7",
     "@tiptap/starter-kit": "^2.5.7",
