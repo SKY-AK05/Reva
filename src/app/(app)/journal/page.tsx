@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { BookText, Trash2 } from 'lucide-react';
+import { BookText, Trash2, Plus } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -18,12 +18,39 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Textarea } from '@/components/ui/textarea';
-import { useJournalContext, type JournalEntry } from '@/context/journal-context';
+import { useJournalContext, type JournalEntry, type NewJournalEntry } from '@/context/journal-context';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+
+const journalFormSchema = z.object({
+  title: z.string().min(1, 'Title is required.'),
+  content: z.string().min(1, 'Content is required.'),
+  date: z.string().min(1, 'Date is required.'),
+});
 
 export default function JournalPage() {
-  const { entries, updateEntry, deleteEntry, loading } = useJournalContext();
+  const { entries, addEntry, updateEntry, deleteEntry, loading } = useJournalContext();
   const [editingField, setEditingField] = useState<{ id: string; field: keyof JournalEntry } | null>(null);
+  const [isAdding, setIsAdding] = useState(false);
+
+  const form = useForm<z.infer<typeof journalFormSchema>>({
+    resolver: zodResolver(journalFormSchema),
+    defaultValues: {
+      title: '',
+      content: '',
+      date: new Date().toISOString().split('T')[0],
+    },
+  });
+
+  async function onSubmit(values: z.infer<typeof journalFormSchema>) {
+    await addEntry(values as NewJournalEntry);
+    form.reset({ date: new Date().toISOString().split('T')[0], title: '', content: '' });
+    setIsAdding(false);
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, id: string, field: keyof JournalEntry) => {
     updateEntry(id, { [field]: e.target.value });
@@ -47,7 +74,57 @@ export default function JournalPage() {
           <h1 className="text-3xl font-bold tracking-tight">Journal</h1>
           <p className="text-muted-foreground">Your private space for thoughts and ideas.</p>
         </div>
+        <div className="ml-auto">
+            <Button onClick={() => setIsAdding(!isAdding)} variant={isAdding ? 'outline' : 'default'}>
+                <Plus className="mr-2 h-4 w-4" />
+                {isAdding ? 'Cancel' : 'New Entry'}
+            </Button>
+        </div>
       </header>
+
+      {isAdding && (
+         <Card className="my-6 animate-fade-in-up">
+            <CardHeader>
+                <CardTitle>New Journal Entry</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        <FormField control={form.control} name="title" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Title</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="e.g., A Day to Remember" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={form.control} name="date" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Date</FormLabel>
+                                <FormControl>
+                                    <Input type="date" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={form.control} name="content" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Content</FormLabel>
+                                <FormControl>
+                                    <Textarea placeholder="Write your thoughts here..." {...field} rows={5} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <div className="flex justify-end gap-2">
+                           <Button type="submit">Add Entry</Button>
+                        </div>
+                    </form>
+                </Form>
+            </CardContent>
+         </Card>
+      )}
 
       <div className="space-y-8 mt-7">
         {loading ? (

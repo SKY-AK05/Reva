@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Target, Trash2 } from 'lucide-react';
+import { Target, Trash2, Plus } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -19,12 +19,37 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Textarea } from '@/components/ui/textarea';
 import { Slider } from '@/components/ui/slider';
-import { useGoalsContext, type Goal } from '@/context/goals-context';
+import { useGoalsContext, type Goal, type NewGoal } from '@/context/goals-context';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+
+const goalFormSchema = z.object({
+  title: z.string().min(1, 'Title is required.'),
+  description: z.string().optional(),
+});
 
 export default function GoalsPage() {
-  const { goals, updateGoal, deleteGoal, loading } = useGoalsContext();
+  const { goals, addGoal, updateGoal, deleteGoal, loading } = useGoalsContext();
   const [editingField, setEditingField] = useState<{ id: string; field: keyof Goal | 'progress' } | null>(null);
+  const [isAdding, setIsAdding] = useState(false);
+
+  const form = useForm<z.infer<typeof goalFormSchema>>({
+    resolver: zodResolver(goalFormSchema),
+    defaultValues: {
+      title: '',
+      description: '',
+    },
+  });
+
+  async function onSubmit(values: z.infer<typeof goalFormSchema>) {
+    await addGoal(values as NewGoal);
+    form.reset();
+    setIsAdding(false);
+  }
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, id: string, field: 'title' | 'description' | 'status') => {
     updateGoal(id, { [field]: e.target.value });
@@ -52,7 +77,48 @@ export default function GoalsPage() {
           <h1 className="text-3xl font-bold tracking-tight">Goals</h1>
           <p className="text-muted-foreground">Your ambitions, tracked and realized.</p>
         </div>
+        <div className="ml-auto">
+            <Button onClick={() => setIsAdding(!isAdding)} variant={isAdding ? 'outline' : 'default'}>
+                <Plus className="mr-2 h-4 w-4" />
+                {isAdding ? 'Cancel' : 'New Goal'}
+            </Button>
+        </div>
       </header>
+
+      {isAdding && (
+         <Card className="my-6 animate-fade-in-up">
+            <CardHeader>
+                <CardTitle>Set a New Goal</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        <FormField control={form.control} name="title" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Goal Title</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="e.g., Run a marathon" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={form.control} name="description" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Description (Optional)</FormLabel>
+                                <FormControl>
+                                    <Textarea placeholder="e.g., Train 4 times a week and complete a 42km race." {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <div className="flex justify-end gap-2">
+                           <Button type="submit">Add Goal</Button>
+                        </div>
+                    </form>
+                </Form>
+            </CardContent>
+         </Card>
+      )}
       
       <div className="space-y-8 mt-7">
         {loading ? (
@@ -137,7 +203,7 @@ export default function GoalsPage() {
                             className="h-auto p-0 bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-sm"
                         />
                     ) : (
-                       <span className="text-sm text-muted-foreground">{goal.status}</span>
+                       <span className="text-sm text-muted-foreground">{goal.status} ({goal.progress}%)</span>
                     )}
                 </div>
               </div>

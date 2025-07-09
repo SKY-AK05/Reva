@@ -1,7 +1,8 @@
+
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
-import { getGoals, updateGoal as updateGoalInDb, deleteGoal as deleteGoalInDb } from '@/services/goals';
+import { getGoals, addGoal as addGoalToDb, updateGoal as updateGoalInDb, deleteGoal as deleteGoalInDb } from '@/services/goals';
 import { createClient } from '@/lib/supabase/client';
 
 export interface Goal {
@@ -12,8 +13,11 @@ export interface Goal {
   status: string | null;
 }
 
+export type NewGoal = Omit<Goal, 'id' | 'progress' | 'status'>;
+
 interface GoalsContextType {
   goals: Goal[];
+  addGoal: (goal: NewGoal) => Promise<void>;
   updateGoal: (id: string, updates: Partial<Omit<Goal, 'id'>>) => Promise<void>;
   deleteGoal: (id: string) => Promise<void>;
   loading: boolean;
@@ -63,6 +67,18 @@ export const GoalsContextProvider = ({ children }: { children: ReactNode }) => {
     };
   }, [supabase]);
 
+  const handleAddGoal = useCallback(async (goal: NewGoal) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const goalWithDefaults = {
+      ...goal,
+      progress: 0,
+      status: 'Not Started',
+      userId: user.id,
+    };
+    await addGoalToDb(goalWithDefaults);
+  }, [supabase]);
+
   const handleUpdateGoal = useCallback(async (id: string, updates: Partial<Omit<Goal, 'id'>>) => {
     // The realtime listener will handle the UI update.
     await updateGoalInDb(id, updates);
@@ -74,6 +90,7 @@ export const GoalsContextProvider = ({ children }: { children: ReactNode }) => {
   
   const value = {
     goals,
+    addGoal: handleAddGoal,
     updateGoal: handleUpdateGoal,
     deleteGoal: handleDeleteGoal,
     loading,

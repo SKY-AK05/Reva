@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { HandCoins, Trash2 } from 'lucide-react';
+import { HandCoins, Trash2, Plus } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -23,15 +23,53 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useExpensesContext, type Expense } from '@/context/expenses-context';
+import { useExpensesContext, type Expense, type NewExpense } from '@/context/expenses-context';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+
+const expenseFormSchema = z.object({
+  item: z.string().min(1, 'Item name is required.'),
+  amount: z.coerce.number().min(0.01, 'Amount must be greater than 0.'),
+  category: z.string().optional(),
+  date: z.string().min(1, 'Date is required.'),
+});
+
 
 export default function ExpensesPage() {
-  const { expenses, updateExpense, deleteExpense, loading } = useExpensesContext();
+  const { expenses, updateExpense, deleteExpense, loading, addExpense } = useExpensesContext();
   const [editingCell, setEditingCell] = useState<{ id: string; column: keyof Expense } | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const form = useForm<z.infer<typeof expenseFormSchema>>({
+    resolver: zodResolver(expenseFormSchema),
+    defaultValues: {
+      item: '',
+      amount: 0,
+      category: '',
+      date: new Date().toISOString().split('T')[0],
+    },
+  });
+
+  async function onSubmit(values: z.infer<typeof expenseFormSchema>) {
+    await addExpense(values as NewExpense);
+    form.reset();
+    setIsDialogOpen(false);
+  }
 
   const groupedExpenses = useMemo(() => {
     if (loading || !expenses) return {};
@@ -97,6 +135,67 @@ export default function ExpensesPage() {
             <p className="text-muted-foreground">Track and manage your spending.</p>
           </div>
         </header>
+        <div className="ml-auto">
+           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+                <Button>
+                    <Plus className="mr-2 h-4 w-4" />
+                    New Expense
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>Add New Expense</DialogTitle>
+                    <DialogDescription>
+                        Enter the details of your new expense here.
+                    </DialogDescription>
+                </DialogHeader>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4 py-4">
+                        <FormField control={form.control} name="item" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Item</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="e.g., Coffee" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={form.control} name="amount" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Amount</FormLabel>
+                                <FormControl>
+                                    <Input type="number" placeholder="e.g., 4.50" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={form.control} name="category" render={({ field }) => (
+                             <FormItem>
+                                <FormLabel>Category</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="e.g., Food & Drink" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={form.control} name="date" render={({ field }) => (
+                             <FormItem>
+                                <FormLabel>Date</FormLabel>
+                                <FormControl>
+                                    <Input type="date" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <DialogFooter className="pt-4">
+                            <Button type="submit">Add Expense</Button>
+                        </DialogFooter>
+                    </form>
+                </Form>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
       
       <div className="space-y-8 mt-11">

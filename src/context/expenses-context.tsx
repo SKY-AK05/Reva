@@ -2,7 +2,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
-import { getExpenses, updateExpense as updateExpenseInDb, deleteExpense as deleteExpenseFromDb } from '@/services/expenses';
+import { getExpenses, addExpense as addExpenseToDb, updateExpense as updateExpenseInDb, deleteExpense as deleteExpenseFromDb } from '@/services/expenses';
 import { createClient } from '@/lib/supabase/client';
 
 export interface Expense {
@@ -13,8 +13,11 @@ export interface Expense {
   amount: number;
 }
 
+export type NewExpense = Omit<Expense, 'id'>;
+
 interface ExpensesContextType {
   expenses: Expense[];
+  addExpense: (expense: NewExpense) => Promise<void>;
   updateExpense: (id: string, updates: Partial<Omit<Expense, 'id'>>) => Promise<void>;
   deleteExpense: (id: string) => Promise<void>;
   loading: boolean;
@@ -67,6 +70,12 @@ export const ExpensesContextProvider = ({ children }: { children: ReactNode }) =
     };
   }, [supabase]);
 
+  const handleAddExpense = useCallback(async (expense: NewExpense) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await addExpenseToDb({ ...expense, userId: user.id });
+  }, [supabase]);
+
   const handleUpdateExpense = useCallback(async (id: string, updates: Partial<Omit<Expense, 'id'>>) => {
     // The realtime listener will handle the UI update after this call succeeds.
     await updateExpenseInDb(id, updates);
@@ -79,6 +88,7 @@ export const ExpensesContextProvider = ({ children }: { children: ReactNode }) =
   
   const value = {
     expenses,
+    addExpense: handleAddExpense,
     updateExpense: handleUpdateExpense,
     deleteExpense: handleDeleteExpense,
     loading,

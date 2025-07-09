@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CheckSquare, Trash2 } from 'lucide-react';
+import { CheckSquare, Trash2, Plus } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -27,8 +27,13 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useTasksContext, type Task } from '@/context/tasks-context';
+import { useTasksContext, type Task, type NewTask } from '@/context/tasks-context';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 
 const priorityVariant = {
   high: 'destructive',
@@ -36,9 +41,31 @@ const priorityVariant = {
   low: 'outline',
 };
 
+const taskFormSchema = z.object({
+  description: z.string().min(1, 'Description is required.'),
+  dueDate: z.string().optional(),
+  priority: z.enum(['high', 'medium', 'low']).default('medium'),
+});
+
 export default function TasksPage() {
-  const { tasks, updateTask, toggleTaskCompletion, deleteTask, loading } = useTasksContext();
+  const { tasks, addTask, updateTask, toggleTaskCompletion, deleteTask, loading } = useTasksContext();
   const [editingCell, setEditingCell] = useState<{ id: string; column: keyof Omit<Task, 'completed'> } | null>(null);
+  const [isAdding, setIsAdding] = useState(false);
+
+  const form = useForm<z.infer<typeof taskFormSchema>>({
+    resolver: zodResolver(taskFormSchema),
+    defaultValues: {
+      description: '',
+      dueDate: '',
+      priority: 'medium',
+    },
+  });
+
+  async function onSubmit(values: z.infer<typeof taskFormSchema>) {
+    await addTask(values as NewTask);
+    form.reset();
+    setIsAdding(false);
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, id: string, column: 'description' | 'dueDate') => {
     updateTask(id, { [column]: e.target.value });
@@ -73,7 +100,66 @@ export default function TasksPage() {
             <p className="text-muted-foreground">Everything you need to get done.</p>
           </div>
         </header>
+        <div className="ml-auto">
+            <Button onClick={() => setIsAdding(!isAdding)} variant={isAdding ? 'outline' : 'default'}>
+                <Plus className="mr-2 h-4 w-4" />
+                {isAdding ? 'Cancel' : 'New Task'}
+            </Button>
+        </div>
       </div>
+
+      {isAdding && (
+         <Card className="my-6 animate-fade-in-up">
+            <CardHeader>
+                <CardTitle>Create a New Task</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 sm:grid-cols-6 gap-4">
+                        <FormField control={form.control} name="description" render={({ field }) => (
+                            <FormItem className="sm:col-span-3">
+                                <FormLabel>Description</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="e.g., Finish the report" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={form.control} name="dueDate" render={({ field }) => (
+                            <FormItem className="sm:col-span-1">
+                                <FormLabel>Due Date</FormLabel>
+                                <FormControl>
+                                    <Input type="date" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={form.control} name="priority" render={({ field }) => (
+                            <FormItem className="sm:col-span-1">
+                                <FormLabel>Priority</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Priority" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="low">Low</SelectItem>
+                                        <SelectItem value="medium">Medium</SelectItem>
+                                        <SelectItem value="high">High</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <div className="sm:col-span-1 flex items-end justify-end gap-2">
+                           <Button type="submit" className="w-full">Add Task</Button>
+                        </div>
+                    </form>
+                </Form>
+            </CardContent>
+         </Card>
+      )}
       
       <div className="border border-primary rounded-lg mt-11">
         <Table>
@@ -183,7 +269,7 @@ export default function TasksPage() {
                   <div className="flex flex-col items-center gap-2">
                     <CheckSquare className="h-12 w-12" />
                     <h3 className="font-semibold">No tasks found</h3>
-                    <p className="text-sm">Create your first task from the chat.</p>
+                    <p className="text-sm">Create your first task from the chat or the "New Task" button.</p>
                   </div>
                 </TableCell>
               </TableRow>

@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Bell, Trash2 } from 'lucide-react';
+import { Bell, Trash2, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,12 +17,40 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Textarea } from '@/components/ui/textarea';
-import { useRemindersContext, type Reminder } from '@/context/reminders-context';
+import { useRemindersContext, type Reminder, type NewReminder } from '@/context/reminders-context';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+
+const reminderFormSchema = z.object({
+  title: z.string().min(1, 'Title is required.'),
+  time: z.string().min(1, 'Time is required.'),
+  notes: z.string().optional(),
+});
+
 
 export default function RemindersPage() {
-  const { reminders, updateReminder, deleteReminder, loading } = useRemindersContext();
+  const { reminders, addReminder, updateReminder, deleteReminder, loading } = useRemindersContext();
   const [editingField, setEditingField] = useState<{ id: string; field: keyof Reminder } | null>(null);
+  const [isAdding, setIsAdding] = useState(false);
+
+  const form = useForm<z.infer<typeof reminderFormSchema>>({
+    resolver: zodResolver(reminderFormSchema),
+    defaultValues: {
+      title: '',
+      notes: '',
+      time: '',
+    },
+  });
+
+  async function onSubmit(values: z.infer<typeof reminderFormSchema>) {
+    await addReminder(values as NewReminder);
+    form.reset();
+    setIsAdding(false);
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, id: string, field: keyof Reminder) => {
     updateReminder(id, { [field]: e.target.value });
@@ -60,7 +88,57 @@ export default function RemindersPage() {
           <h1 className="text-3xl font-bold tracking-tight">Reminders</h1>
           <p className="text-muted-foreground">Stay on top of everything important.</p>
         </div>
+        <div className="ml-auto">
+            <Button onClick={() => setIsAdding(!isAdding)} variant={isAdding ? 'outline' : 'default'}>
+                <Plus className="mr-2 h-4 w-4" />
+                {isAdding ? 'Cancel' : 'New Reminder'}
+            </Button>
+        </div>
       </header>
+      
+      {isAdding && (
+        <Card className="my-6 animate-fade-in-up">
+            <CardHeader>
+                <CardTitle>Create a New Reminder</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        <FormField control={form.control} name="title" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Title</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="e.g., Call mom" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={form.control} name="time" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Time</FormLabel>
+                                <FormControl>
+                                    <Input type="datetime-local" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={form.control} name="notes" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Notes (Optional)</FormLabel>
+                                <FormControl>
+                                    <Textarea placeholder="e.g., Discuss vacation plans" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <div className="flex justify-end gap-2">
+                           <Button type="submit">Add Reminder</Button>
+                        </div>
+                    </form>
+                </Form>
+            </CardContent>
+        </Card>
+      )}
 
       <div className="space-y-6 mt-7">
         <h2 className="text-xl font-semibold">Upcoming</h2>

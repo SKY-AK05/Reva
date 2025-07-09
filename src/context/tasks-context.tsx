@@ -1,7 +1,8 @@
+
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
-import { getTasks, updateTask as updateTaskInDb, toggleTask as toggleTaskInDb, deleteTask as deleteTaskInDb } from '@/services/tasks';
+import { getTasks, addTask as addTaskToDb, updateTask as updateTaskInDb, toggleTask as toggleTaskInDb, deleteTask as deleteTaskInDb } from '@/services/tasks';
 import { createClient } from '@/lib/supabase/client';
 
 export interface Task {
@@ -12,8 +13,11 @@ export interface Task {
   completed: boolean;
 }
 
+export type NewTask = Partial<Omit<Task, 'id' | 'completed'>> & { description: string };
+
 interface TasksContextType {
   tasks: Task[];
+  addTask: (task: NewTask) => Promise<void>;
   updateTask: (id: string, updates: Partial<Omit<Task, 'id' | 'completed'>>) => Promise<void>;
   toggleTaskCompletion: (id: string, completed: boolean) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
@@ -73,6 +77,12 @@ export const TasksContextProvider = ({ children }: { children: ReactNode }) => {
     };
   }, [supabase]);
 
+  const handleAddTask = useCallback(async (task: NewTask) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await addTaskToDb({ ...task, userId: user.id });
+  }, [supabase]);
+
   const handleUpdateTask = useCallback(async (id: string, updates: Partial<Omit<Task, 'id' | 'completed'>>) => {
     // The realtime listener will handle the UI update after this call succeeds.
     await updateTaskInDb(id, updates);
@@ -89,6 +99,7 @@ export const TasksContextProvider = ({ children }: { children: ReactNode }) => {
   
   const value = {
     tasks,
+    addTask: handleAddTask,
     updateTask: handleUpdateTask,
     toggleTaskCompletion: handleToggleTaskCompletion,
     deleteTask: handleDeleteTask,
