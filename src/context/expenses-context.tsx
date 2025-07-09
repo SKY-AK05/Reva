@@ -1,7 +1,8 @@
+
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
-import { getExpenses, updateExpense as updateExpenseInDb } from '@/services/expenses';
+import { getExpenses, updateExpense as updateExpenseInDb, deleteExpense as deleteExpenseFromDb } from '@/services/expenses';
 import { createClient } from '@/lib/supabase/client';
 
 export interface Expense {
@@ -15,6 +16,7 @@ export interface Expense {
 interface ExpensesContextType {
   expenses: Expense[];
   updateExpense: (id: string, updates: Partial<Omit<Expense, 'id'>>) => Promise<void>;
+  deleteExpense: (id: string) => Promise<void>;
   loading: boolean;
 }
 
@@ -69,10 +71,16 @@ export const ExpensesContextProvider = ({ children }: { children: ReactNode }) =
     // The realtime listener will handle the UI update after this call succeeds.
     await updateExpenseInDb(id, updates);
   }, []);
+
+  const handleDeleteExpense = useCallback(async (id: string) => {
+    // The realtime listener will handle the UI update after this call succeeds.
+    await deleteExpenseFromDb(id);
+  }, []);
   
   const value = {
     expenses,
     updateExpense: handleUpdateExpense,
+    deleteExpense: handleDeleteExpense,
     loading,
   };
 

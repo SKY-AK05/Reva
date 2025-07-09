@@ -1,8 +1,8 @@
 
 'use client';
 
-import { useState } from 'react';
-import { HandCoins } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { HandCoins, Trash2 } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -10,14 +10,43 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  TableFooter,
 } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { useExpensesContext, type Expense } from '@/context/expenses-context';
 import { Skeleton } from '@/components/ui/skeleton';
+import { format } from 'date-fns';
 
 export default function ExpensesPage() {
-  const { expenses, updateExpense, loading } = useExpensesContext();
+  const { expenses, updateExpense, deleteExpense, loading } = useExpensesContext();
   const [editingCell, setEditingCell] = useState<{ id: string; column: keyof Expense } | null>(null);
+
+  const groupedExpenses = useMemo(() => {
+    if (loading || !expenses) return {};
+    
+    // The expenses from the context are already sorted by date descending.
+    return expenses.reduce((acc, expense) => {
+        const month = format(new Date(expense.date), 'MMMM yyyy');
+        if (!acc[month]) {
+            acc[month] = { expenses: [], total: 0 };
+        }
+        acc[month].expenses.push(expense);
+        acc[month].total += Number(expense.amount);
+        return acc;
+    }, {} as Record<string, { expenses: Expense[], total: number }>);
+  }, [expenses, loading]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, id: string, column: keyof Expense) => {
     const value = column === 'amount' ? parseFloat(e.target.value) || 0 : e.target.value;
@@ -51,6 +80,10 @@ export default function ExpensesPage() {
     if (column === 'amount') {
       return `$${Number(expense.amount).toFixed(2)}`;
     }
+    if (column === 'date') {
+      // Format the date for better readability
+      return format(new Date(expense.date), 'MMM dd, yyyy');
+    }
     return expense[column];
   };
 
@@ -66,56 +99,97 @@ export default function ExpensesPage() {
         </header>
       </div>
       
-      <div className="border border-primary rounded-lg mt-11">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Item</TableHead>
-              <TableHead className="hidden sm:table-cell">Category</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead className="text-right">Amount</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              [...Array(5)].map((_, i) => (
-                <TableRow key={i}>
-                  <TableCell><Skeleton className="h-5 w-32" /></TableCell>
-                  <TableCell className="hidden sm:table-cell"><Skeleton className="h-5 w-24" /></TableCell>
-                  <TableCell><Skeleton className="h-5 w-24" /></TableCell>
-                  <TableCell className="text-right"><Skeleton className="h-5 w-16 ml-auto" /></TableCell>
-                </TableRow>
-              ))
-            ) : expenses.length > 0 ? (
-              expenses.map((expense) => (
-                <TableRow key={expense.id}>
-                  <TableCell className="font-medium cursor-pointer" onClick={() => setEditingCell({ id: expense.id, column: 'item' })}>
-                    {renderCell(expense, 'item')}
-                  </TableCell>
-                  <TableCell className="hidden sm:table-cell cursor-pointer" onClick={() => setEditingCell({ id: expense.id, column: 'category' })}>
-                    {renderCell(expense, 'category')}
-                  </TableCell>
-                  <TableCell className="cursor-pointer" onClick={() => setEditingCell({ id: expense.id, column: 'date' })}>
-                    {renderCell(expense, 'date')}
-                  </TableCell>
-                  <TableCell className="text-right font-semibold cursor-pointer" onClick={() => setEditingCell({ id: expense.id, column: 'amount' })}>
-                    {renderCell(expense, 'amount')}
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={4} className="h-48 text-center text-muted-foreground">
-                  <div className="flex flex-col items-center gap-2">
-                    <HandCoins className="h-12 w-12" />
-                    <h3 className="font-semibold">No expenses found</h3>
-                    <p className="text-sm">Track your first expense from the chat.</p>
+      <div className="space-y-8 mt-11">
+        {loading ? (
+          [...Array(2)].map((_, i) => (
+            <div key={i} className="space-y-4">
+              <Skeleton className="h-6 w-32" />
+              <div className="border border-primary rounded-lg p-2">
+                {[...Array(3)].map((_, j) => (
+                  <div key={j} className="flex items-center justify-between p-2">
+                    <Skeleton className="h-5 w-32" />
+                    <Skeleton className="h-5 w-24" />
+                    <Skeleton className="h-5 w-24" />
+                    <Skeleton className="h-5 w-16" />
                   </div>
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+                ))}
+              </div>
+            </div>
+          ))
+        ) : Object.keys(groupedExpenses).length > 0 ? (
+          Object.entries(groupedExpenses).map(([month, { expenses: monthExpenses, total }]) => (
+            <div key={month}>
+              <h2 className="text-xl font-semibold mb-3">{month}</h2>
+              <div className="border border-primary rounded-lg">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Item</TableHead>
+                      <TableHead className="hidden sm:table-cell">Category</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead className="text-right">Amount</TableHead>
+                      <TableHead className="w-[50px] text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {monthExpenses.map((expense) => (
+                      <TableRow key={expense.id}>
+                        <TableCell className="font-medium cursor-pointer" onClick={() => setEditingCell({ id: expense.id, column: 'item' })}>
+                          {renderCell(expense, 'item')}
+                        </TableCell>
+                        <TableCell className="hidden sm:table-cell cursor-pointer" onClick={() => setEditingCell({ id: expense.id, column: 'category' })}>
+                          {renderCell(expense, 'category')}
+                        </TableCell>
+                        <TableCell className="cursor-pointer" onClick={() => setEditingCell({ id: expense.id, column: 'date' })}>
+                          {renderCell(expense, 'date')}
+                        </TableCell>
+                        <TableCell className="text-right font-semibold cursor-pointer" onClick={() => setEditingCell({ id: expense.id, column: 'amount' })}>
+                          {renderCell(expense, 'amount')}
+                        </TableCell>
+                        <TableCell className="text-right">
+                           <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This action cannot be undone. This will permanently delete this expense.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => deleteExpense(expense.id)}>
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                  <TableFooter>
+                    <TableRow className="bg-secondary/50 hover:bg-secondary/50">
+                        <TableCell colSpan={3} className="text-right font-bold text-base">Month Total</TableCell>
+                        <TableCell className="text-right font-bold text-base">${total.toFixed(2)}</TableCell>
+                        <TableCell></TableCell>
+                    </TableRow>
+                  </TableFooter>
+                </Table>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="flex flex-col items-center justify-center text-center text-muted-foreground py-16">
+            <HandCoins className="mx-auto h-12 w-12" />
+            <h3 className="mt-4 text-lg font-semibold">No Expenses Found</h3>
+            <p className="mt-2 text-sm">Track your first expense from the chat.</p>
+          </div>
+        )}
       </div>
     </div>
   );

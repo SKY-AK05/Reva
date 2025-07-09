@@ -1,3 +1,4 @@
+
 // src/services/expenses.ts
 'use server';
 import { createServerClient } from "@/lib/supabase/server";
@@ -78,4 +79,21 @@ export async function updateExpense(id: string, updates: Partial<Omit<Expense, '
         return null;
     }
     return data as Expense;
+}
+
+export async function deleteExpense(id: string): Promise<{ id: string } | null> {
+    const supabase = createServerClient();
+    const { data, error } = await supabase
+        .from('expenses')
+        .delete()
+        .eq('id', id)
+        .select('id')
+        .single();
+    
+    if (error) {
+        console.error('Error deleting expense:', error);
+        return null;
+    }
+
+    return data ? { id: data.id } : null;
 }
