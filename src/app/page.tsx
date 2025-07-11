@@ -21,6 +21,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import ScrollAnimatorRight from '@/components/scroll-animator-right';
+import HeroAnimator from '@/components/hero-animator';
 
 export default function HomePage() {
   const [loading, setLoading] = useState(true);
@@ -58,20 +59,20 @@ export default function HomePage() {
       <PublicHeader />
       <main className="flex-1">
         {/* Hero Section */}
-        <ScrollAnimator>
+        <HeroAnimator>
           <section className="py-20 md:py-32">
             <div className="container mx-auto px-4">
               <div className="grid md:grid-cols-2 gap-12 items-center">
                 <div className="text-center md:text-left">
-                    <h1 className="text-4xl md:text-6xl font-headline font-bold tracking-tight">
+                    <h1 className="text-4xl md:text-6xl font-headline font-bold tracking-tight hero-headline">
                         Your Personal AI Assistant <br /> to Streamline Your Life
                     </h1>
-                    <p className="mt-6 max-w-xl mx-auto md:mx-0 text-lg text-muted-foreground">
+                    <p className="mt-6 max-w-xl mx-auto md:mx-0 text-lg text-muted-foreground hero-subheadline">
                         Reva helps you manage tasks, track expenses, and stay organized
                         with intelligent chat-based assistance. Focus on what matters, let
                         Reva handle the rest.
                     </p>
-                    <div className="mt-8 flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4">
+                    <div className="mt-8 flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4 hero-button">
                         <Button
                             size="lg"
                             className="w-full sm:w-auto"
@@ -81,7 +82,7 @@ export default function HomePage() {
                         </Button>
                     </div>
                 </div>
-                <div className="relative mx-auto w-full max-w-2xl h-auto shadow-2xl rounded-2xl">
+                <div className="relative mx-auto w-full max-w-2xl h-auto shadow-2xl rounded-2xl hero-image">
                     <Image
                         src="/assets/chat_Dark.png"
                         alt="Reva App Screenshot (Light Theme)"
@@ -104,7 +105,7 @@ export default function HomePage() {
               </div>
             </div>
           </section>
-        </ScrollAnimator>
+        </HeroAnimator>
 
         {/* Features Section */}
         <ScrollAnimatorRight>
