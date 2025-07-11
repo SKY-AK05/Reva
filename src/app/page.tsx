@@ -20,6 +20,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import ScrollAnimatorRight from '@/components/scroll-animator-right';
 
 export default function HomePage() {
   const [loading, setLoading] = useState(true);
@@ -106,7 +107,7 @@ export default function HomePage() {
         </ScrollAnimator>
 
         {/* Features Section */}
-        <ScrollAnimator>
+        <ScrollAnimatorRight>
            <section id="features" className="py-20 md:py-32">
             <div className="container mx-auto px-4">
                <div className="text-center mb-12 md:mb-16">
@@ -224,7 +225,7 @@ export default function HomePage() {
               </div>
             </div>
           </section>
-        </ScrollAnimator>
+        </ScrollAnimatorRight>
 
         {/* Pricing Section */}
         <ScrollAnimator>
