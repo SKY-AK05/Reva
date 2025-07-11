@@ -116,7 +116,7 @@ export default function ExpensesPage() {
       );
     }
     if (column === 'amount') {
-      return `$${Number(expense.amount).toFixed(2)}`;
+      return `₹${Number(expense.amount).toFixed(2)}`;
     }
     if (column === 'date') {
       // Format the date for better readability
@@ -165,7 +165,7 @@ export default function ExpensesPage() {
                             <FormItem>
                                 <FormLabel>Amount</FormLabel>
                                 <FormControl>
-                                    <Input type="number" placeholder="e.g., 4.50" {...field} />
+                                    <Input type="number" placeholder="e.g., 150.00" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -274,7 +274,7 @@ export default function ExpensesPage() {
                   <TableFooter>
                     <TableRow className="bg-secondary/50 hover:bg-secondary/50">
                         <TableCell colSpan={3} className="text-right font-bold text-base">Month Total</TableCell>
-                        <TableCell className="text-right font-bold text-base">${total.toFixed(2)}</TableCell>
+                        <TableCell className="text-right font-bold text-base">₹{total.toFixed(2)}</TableCell>
                         <TableCell></TableCell>
                     </TableRow>
                   </TableFooter>

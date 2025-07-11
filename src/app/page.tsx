@@ -202,9 +202,9 @@ export default function HomePage() {
                   </CardHeader>
                   <CardContent className="p-0 pt-4 flex-1">
                     <ul className="space-y-3 text-sm">
-                      <li className="flex justify-between items-center"><span>Morning Coffee</span><span className="font-semibold">$4.50</span></li>
-                      <li className="flex justify-between items-center"><span>Team Lunch</span><span className="font-semibold">$32.00</span></li>
-                      <li className="flex justify-between items-center"><span>Train Ticket</span><span className="font-semibold">$5.75</span></li>
+                      <li className="flex justify-between items-center"><span>Morning Coffee</span><span className="font-semibold">₹150</span></li>
+                      <li className="flex justify-between items-center"><span>Team Lunch</span><span className="font-semibold">₹1200</span></li>
+                      <li className="flex justify-between items-center"><span>Train Ticket</span><span className="font-semibold">₹50</span></li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -252,7 +252,7 @@ export default function HomePage() {
                       </CardHeader>
                       <CardContent className="p-0 pt-6">
                         <div className="mb-6">
-                          <span className="text-5xl font-bold">$0</span>
+                          <span className="text-5xl font-bold">₹0</span>
                           <span className="text-xl text-background/80">/mo</span>
                         </div>
                         <ul className="space-y-3 text-sm">

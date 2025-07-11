@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview The central AI command processing flow for Reva.
@@ -376,7 +377,7 @@ function generateToneResponse(action: Action, data: any, tone: Tone): string {
             updateTask: "OK, I've updated that task for you.",
             createReminder: `Reminder set for "${data.title}" at ${time}.`,
             updateReminder: "OK, I've updated that reminder.",
-            trackExpenses: `I've logged ${data.count} expense(s) totaling $${data.total.toFixed(2)}.`,
+            trackExpenses: `I've logged ${data.count} expense(s) totaling ₹${data.total.toFixed(2)}.`,
             createGoal: `New goal set: "${data.title}". You can do it!`,
             updateGoal: "Goal updated. Keep up the great work!",
             createJournalEntry: `Journal entry created: "${data.title}".`,
@@ -386,7 +387,7 @@ function generateToneResponse(action: Action, data: any, tone: Tone): string {
             updateTask: "Aight, task updated. We're vibing ✨",
             createReminder: `Yoo, reminder set for "${data.title}" at ${new Date(data.time).toLocaleString(undefined, { timeStyle: 'short' })}. Don't forget! 💀`,
             updateReminder: "Updated that reminder for ya. No cap.",
-            trackExpenses: `Got it. ${data.count} expense(s) logged. That's $${data.total.toFixed(2)} less for boba. 💅`,
+            trackExpenses: `Got it. ${data.count} expense(s) logged. That's ₹${data.total.toFixed(2)} less for boba. 💅`,
             createGoal: `New goal: "${data.title}". Slay! 💅`,
             updateGoal: "You're crushing it! 🔥",
             createJournalEntry: `Vibe check... journal entry "${data.title}" saved. ✨`,
@@ -396,7 +397,7 @@ function generateToneResponse(action: Action, data: any, tone: Tone): string {
             updateTask: "You changed your mind? Shocking. Fine, I've updated the task.",
             createReminder: `A reminder for "${data.title}" at ${time}. I'm sure you'll *totally* remember it this time.`,
             updateReminder: "Right, because the first time wasn't good enough. The reminder is updated.",
-            trackExpenses: `Great, ${data.count} more expense(s) totaling $${data.total.toFixed(2)}. Your wallet must be so proud.`,
+            trackExpenses: `Great, ${data.count} more expense(s) totaling ₹${data.total.toFixed(2)}. Your wallet must be so proud.`,
             createGoal: `A new goal, "${data.title}". How ambitious. I'll be here to watch you... not do it. Probably.`,
             updateGoal: "Oh, you actually made progress? Color me surprised. The goal is updated.",
             createJournalEntry: `Journal entry "${data.title}" is saved. I'll be sure not to read your secret thoughts. *wink*`,
@@ -406,7 +407,7 @@ function generateToneResponse(action: Action, data: any, tone: Tone): string {
             updateTask: "The path has shifted, and so the task transforms. It is done.",
             createReminder: `A gentle echo in time for "${data.title}", set for ${time}. May it find you well. 🌿`,
             updateReminder: "The echo's time has changed, a new moment to remember. The reminder is updated.",
-            trackExpenses: `The flow of coin, noted. ${data.count} item(s) totaling $${data.total.toFixed(2)}, a fleeting moment in your journey's ledger.`,
+            trackExpenses: `The flow of coin, noted. ${data.count} item(s) totaling ₹${data.total.toFixed(2)}, a fleeting moment in your journey's ledger.`,
             createGoal: `An ambition, "${data.title}", takes flight, a star to navigate your journey by. 🌟`,
             updateGoal: "A step is taken, the path unfolds. The goal breathes with new life.",
             createJournalEntry: `A whisper of thought, "${data.title}", captured now in quiet permanence. ✍️`,
