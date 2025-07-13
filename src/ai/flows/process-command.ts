@@ -335,7 +335,7 @@ The user wants you to speak in a '{{{tone}}}' tone. When using the 'generalChat'
 
 {{#if contextItem}}
 **CRITICAL CONTEXT**: The user's previous turn was about a {{contextItem.type}} with ID '{{contextItem.id}}'. Their new message ('{{{chatInput}}}') is a direct follow-up.
-- **Your primary assumption must be to UPDATE the existing item.**
+- **Your primary assumption must be to UPDATE the existing item.** Even if the message looks like a new command, if it contains details relevant to the previous item (like a time, a name, a detail), you should treat it as an update.
 - If the user's message contains any change (e.g., "change it to...", "update progress to 50%", "actually, set the time to 8pm"), you MUST use the corresponding 'update' tool (e.g., 'updateGoal', 'updateTask') with the ID '{{contextItem.id}}'.
 - Do NOT use a 'create' tool unless the user explicitly says "create a new...", "add another...", or a similar phrase that clearly indicates a separate item.
 {{/if}}
